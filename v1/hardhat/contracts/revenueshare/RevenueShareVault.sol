@@ -86,7 +86,7 @@ contract RevenueShareVault is
         uint256 assets,
         address receiver,
         address referral
-    ) public whenNotPaused returns (uint256) {
+    ) public virtual whenNotPaused returns (uint256) {
         require(assets > 0, "ZERO_ASSETS");
         require(
             receiver != address(0) && referral != address(0),
@@ -128,8 +128,11 @@ contract RevenueShareVault is
     function mint(
         uint256 shares,
         address receiver
-    ) public override whenNotPaused returns (uint256) {
-        require(shares <= maxMint(receiver), "ERC4626: mint more than max");
+    ) public virtual override whenNotPaused returns (uint256) {
+        require(
+            shares <= maxMint(receiver),
+            "RevenueShareVault: mint more than max"
+        );
         uint256 assets = previewMint(shares);
         depositWithReferral(assets, receiver, receiver);
         return assets;
@@ -168,7 +171,7 @@ contract RevenueShareVault is
         address receiver,
         address sharesOwner,
         address referral
-    ) public whenNotPaused returns (uint256) {
+    ) public virtual whenNotPaused returns (uint256) {
         require(shares > 0, "ZERO_SHARES");
         require(
             receiver != address(0) && referral != address(0),
@@ -223,7 +226,7 @@ contract RevenueShareVault is
         address receiver,
         address sharesOwner,
         address referral
-    ) public whenNotPaused returns (uint256) {
+    ) public virtual whenNotPaused returns (uint256) {
         uint256 shares = convertToShares(assets);
         return redeemWithReferral(shares, receiver, sharesOwner, referral);
     }
@@ -232,7 +235,7 @@ contract RevenueShareVault is
      * @dev See {IERC4626-totalAssets}
      * @return assets total amount of the underlying asset managed by this vault
      */
-    function totalAssets() public view override returns (uint256) {
+    function totalAssets() public view virtual override returns (uint256) {
         return assetBalanceAtYieldSource();
     }
 

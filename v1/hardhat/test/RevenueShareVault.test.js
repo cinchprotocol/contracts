@@ -79,7 +79,7 @@ describe("RevenueShareVault", function () {
             ).to.equal(depositAmount1.div(2));
         });
         it("should be able to mint", async function () {
-            await vault.connect(user1).deposit(depositAmount1.div(2), user1.address);
+            await vault.connect(user1).mint(depositAmount1.div(2), user1.address);
             expect(await vault.balanceOf(user1.address)).to.equal(depositAmount1);
             expect(await vault.totalSharesByReferral(user1.address)).to.equal(
                 depositAmount1
@@ -107,6 +107,12 @@ describe("RevenueShareVault", function () {
             expect(await vault.previewRedeem(depositAmount1)).to.equal(
                 depositAmount1
             );
+        });
+        it("maxWithdraw should return correct amount", async function () {
+            expect(await vault.maxWithdraw(user1.address)).to.equal(depositAmount1);
+        });
+        it("totalAssets should return correct amount", async function () {
+            expect(await vault.totalAssets()).to.equal(depositAmount1.add(depositAmount2));
         });
         it("non-share-owner should fail to redeem without approval", async function () {
             const tx = vault
