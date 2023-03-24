@@ -12,13 +12,16 @@ import "./interfaces/IYieldSourceContract.sol";
  * @title GeneralYieldSourceAdapter
  * @dev sub-contract of Revenue Share Vault, serving as the Yield Source Adapter template
  */
-contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
+abstract contract GeneralYieldSourceAdapter is
+    Initializable,
+    OwnableUpgradeable
+{
     using MathUpgradeable for uint256;
 
-    // Event when the yieldSourceVault address is updated
+    /// @dev Emitted when the yieldSourceVault address is updated.
     event YieldSourceVaultUpdated(address yieldSourceVault_);
 
-    // Yield source vault address
+    /// @dev Yield source vault address
     address public yieldSourceVault;
 
     /**
@@ -27,7 +30,13 @@ contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
      */
     function __GeneralYieldSourceAdapter_init(
         address yieldSourceVault_
-    ) internal virtual initializer {
+    ) internal onlyInitializing {
+        __GeneralYieldSourceAdapter_init_unchained(yieldSourceVault_);
+    }
+
+    function __GeneralYieldSourceAdapter_init_unchained(
+        address yieldSourceVault_
+    ) internal onlyInitializing {
         yieldSourceVault = yieldSourceVault_;
     }
 
@@ -114,22 +123,13 @@ contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
     }
 
     /**
+     * @param user target user address
      * @return shares yield source share balance of this vault
      */
-    function shareBalanceAtYieldSource() public view virtual returns (uint256) {
-        return IYieldSourceContract(yieldSourceVault).balanceOf(address(this));
-    }
-
-    /**
-     * @return assets yield source asset balance of this vault
-     */
-    function assetBalanceAtYieldSource() public view virtual returns (uint256) {
-        uint256 shares = shareBalanceAtYieldSource();
-        return
-            _convertYieldSourceSharesToAssets(
-                shares,
-                MathUpgradeable.Rounding.Down
-            );
+    function shareBalanceAtYieldSourceOf(
+        address user
+    ) public view virtual returns (uint256) {
+        return IYieldSourceContract(yieldSourceVault).balanceOf(user);
     }
 
     /**
@@ -144,4 +144,15 @@ contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
     {
         return IYieldSourceContract(yieldSourceVault).totalSupply();
     }
+
+    /**
+     * @dev abstruct function to be implemented by specific yield source vault
+     * @param user target user address
+     * @param referral target referral address
+     * @return assets amount of assets that the user has deposited to the vault
+     */
+    function assetBalanceAtYieldSourceOf(
+        address user,
+        address referral
+    ) public view virtual returns (uint256);
 }

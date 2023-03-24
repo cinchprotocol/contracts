@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
 import "./GeneralYieldSourceAdapter.sol";
 import "./GeneralRevenueShareLogic.sol";
+import "./security/DepositPausableUpgradeable.sol";
 
 /**
  * @title RevenueShareVault
@@ -22,12 +23,13 @@ contract RevenueShareVault is
     ERC4626Upgradeable,
     OwnableUpgradeable,
     PausableUpgradeable,
+    DepositPausableUpgradeable,
     GeneralYieldSourceAdapter,
     GeneralRevenueShareLogic
 {
     using MathUpgradeable for uint256;
 
-    // Total asset deposit processed
+    /// @dev Total asset deposit processed
     uint256 public totalAssetDepositProcessed;
 
     /**
@@ -45,6 +47,7 @@ contract RevenueShareVault is
     ) public initializer {
         __Ownable_init();
         __Pausable_init();
+        __DepositPausable_init();
         __ERC4626_init(IERC20Upgradeable(asset_));
         __ERC20_init(name, symbol);
 
@@ -58,7 +61,7 @@ contract RevenueShareVault is
     /**
      * @notice Deposit assets to the vault
      * @dev See {IERC4626-deposit}
-     * @dev whenNotPaused
+     * @dev whenNotPaused whenDepositNotPaused
      * @dev depositWithReferral(assets, receiver, receiver)
      * @param assets amount of assets to deposit
      * @param receiver address to receive the shares
@@ -66,16 +69,22 @@ contract RevenueShareVault is
     function deposit(
         uint256 assets,
         address receiver
-    ) public virtual override whenNotPaused returns (uint256) {
+    )
+        public
+        virtual
+        override
+        whenNotPaused
+        whenDepositNotPaused
+        returns (uint256)
+    {
         return depositWithReferral(assets, receiver, receiver);
     }
 
-    //TODO: add disable flag
     /**
      * @notice Deposit assets to the vault with referral
      * @dev Transfer assets to this contract, then deposit into yield source vault, and mint shares to receiver
      * @dev See {IERC4626-deposit}
-     * @dev whenNotPaused
+     * @dev whenNotPaused whenDepositNotPaused
      * @dev emit Deposit
      * @param assets amount of assets to deposit
      * @param receiver address to receive the shares
@@ -86,13 +95,16 @@ contract RevenueShareVault is
         uint256 assets,
         address receiver,
         address referral
-    ) public virtual whenNotPaused returns (uint256) {
+    ) public virtual whenNotPaused whenDepositNotPaused returns (uint256) {
         require(assets > 0, "ZERO_ASSETS");
         require(
             receiver != address(0) && referral != address(0),
             "ZERO_ADDRESS"
         );
-        require(assets <= maxDeposit(receiver), "MAX_DEPOSIT_EXCEEDED");
+        require(
+            assets <= maxDeposit(receiver),
+            "RevenueShareVault: max deposit exceeded"
+        );
 
         // Transfer assets to this vault first, assuming it was approved by the sender
         SafeERC20Upgradeable.safeTransferFrom(
@@ -119,7 +131,7 @@ contract RevenueShareVault is
      * @notice As opposed to {deposit}, minting is allowed even if the vault is in a state where the price of a share is zero.
      * @notice In this case, the shares will be minted without requiring any assets to be deposited.
      * @dev See {IERC4626-mint}
-     * @dev whenNotPaused
+     * @dev whenNotPaused whenDepositNotPaused
      * @dev depositWithReferral(assets, receiver, receiver)
      * @param shares amount of shares to mint
      * @param receiver address to receive the shares
@@ -128,7 +140,14 @@ contract RevenueShareVault is
     function mint(
         uint256 shares,
         address receiver
-    ) public virtual override whenNotPaused returns (uint256) {
+    )
+        public
+        virtual
+        override
+        whenNotPaused
+        whenDepositNotPaused
+        returns (uint256)
+    {
         require(
             shares <= maxMint(receiver),
             "RevenueShareVault: mint more than max"
@@ -177,11 +196,17 @@ contract RevenueShareVault is
             receiver != address(0) && referral != address(0),
             "ZERO_ADDRESS"
         );
-        require(shares <= maxRedeem(sharesOwner), "MAX_REDEEM_EXCEEDED");
-        require(shares <= balanceOf(sharesOwner), "INSUFFICIENT_SHARES");
+        require(
+            shares <= maxRedeem(sharesOwner),
+            "RevenueShareVault: max redeem exceeded"
+        );
+        require(
+            shares <= balanceOf(sharesOwner),
+            "RevenueShareVault: insufficient shares"
+        );
         require(
             shares <= totalSharesByUserReferral[sharesOwner][referral],
-            "INSUFFICIENT_SHARES_BY_REFERRAL"
+            "RevenueShareVault: insufficient shares by referral"
         );
 
         //remove the shares from the user first to avoid reentrancy attack
@@ -236,7 +261,12 @@ contract RevenueShareVault is
      * @return assets total amount of the underlying asset managed by this vault
      */
     function totalAssets() public view virtual override returns (uint256) {
-        return assetBalanceAtYieldSource();
+        uint256 shares = shareBalanceAtYieldSourceOf(address(this));
+        return
+            _convertYieldSourceSharesToAssets(
+                shares,
+                MathUpgradeable.Rounding.Down
+            );
     }
 
     /**
@@ -297,7 +327,7 @@ contract RevenueShareVault is
     function assetBalanceAtYieldSourceOf(
         address user,
         address referral
-    ) public view virtual returns (uint256) {
+    ) public view virtual override returns (uint256) {
         return
             _convertYieldSourceSharesToAssets(
                 totalSharesByUserReferral[user][referral],
@@ -324,4 +354,11 @@ contract RevenueShareVault is
     function unpause() external onlyOwner {
         _unpause();
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

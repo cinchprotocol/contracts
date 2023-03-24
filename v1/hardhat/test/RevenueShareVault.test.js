@@ -296,12 +296,14 @@ describe("RevenueShareVault", function () {
                 .to.emit(vault, "YieldSourceVaultUpdated")
                 .withArgs(mockProtocol.address);
         });
-        it("assetBalanceAtYieldSource should return the correct value", async function () {
-            expect(await vault.assetBalanceAtYieldSource()).equal(depositAmount3);
-        });
         it("getYieldSourceVaultTotalShares should return the correct value", async function () {
             expect(await vault.getYieldSourceVaultTotalShares()).equal(
                 depositAmount3
+            );
+        });
+        it("sharePriceOfYieldSource should return the correct value", async function () {
+            expect(await vault.sharePriceOfYieldSource()).equal(
+                1
             );
         });
     });
@@ -331,6 +333,34 @@ describe("RevenueShareVault", function () {
             const tx = await vault.connect(owner).unpause();
             expect(tx)
                 .to.emit(vault, "Unpaused")
+                .withArgs(owner.address);
+        });
+    });
+
+    describe("DepositPausableUpgradeable", function () {
+        it("only owner can pause deposit", async function () {
+            const tx = vault.connect(user1).pauseDeposit();
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+        it("should be able to pause deposit", async function () {
+            const tx = await vault.connect(owner).pauseDeposit();
+            expect(tx)
+                .to.emit(vault, "DepositPaused")
+                .withArgs(owner.address);
+        });
+        it("whenDepositNotPaused function should not work when paused", async function () {
+            const tx = vault
+                .connect(user3)
+                .deposit(
+                    depositAmount3,
+                    user3.address
+                );
+            await expect(tx).to.be.revertedWith("DepositPausable: paused");
+        });
+        it("should be able to unpause deposit", async function () {
+            const tx = await vault.connect(owner).unpauseDeposit();
+            expect(tx)
+                .to.emit(vault, "DepositUnpaused")
                 .withArgs(owner.address);
         });
     });
