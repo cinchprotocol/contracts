@@ -123,13 +123,13 @@ abstract contract GeneralYieldSourceAdapter is
     }
 
     /**
-     * @param user target user address
+     * @param account target account address
      * @return shares yield source share balance of this vault
      */
     function shareBalanceAtYieldSourceOf(
-        address user
+        address account
     ) public view virtual returns (uint256) {
-        return IYieldSourceContract(yieldSourceVault).balanceOf(user);
+        return IYieldSourceContract(yieldSourceVault).balanceOf(account);
     }
 
     /**
@@ -147,12 +147,12 @@ abstract contract GeneralYieldSourceAdapter is
 
     /**
      * @dev abstruct function to be implemented by specific yield source vault
-     * @param user target user address
+     * @param account target account address
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault
      */
     function assetBalanceAtYieldSourceOf(
-        address user,
+        address account,
         address referral
     ) public view virtual returns (uint256);
 }

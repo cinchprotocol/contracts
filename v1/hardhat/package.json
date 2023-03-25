@@ -1,12 +1,12 @@
 {
-  "name": "hardhat-project",
+  "name": "cinch-protocol-contracts",
   "version": "0.0.1",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test test/*.test.js --network hardhat",
     "coverage": "hardhat coverage --network hardhat",
     "chain": "hardhat node --network hardhat --no-deploy",
-    "deploy": "hardhat deploy --export-all ../next-app/src/contracts/hardhat_contracts.json"
+    "deploy": "hardhat deploy --export-all ./hardhat_contracts.json"
   },
   "license": "MIT",
   "devDependencies": {

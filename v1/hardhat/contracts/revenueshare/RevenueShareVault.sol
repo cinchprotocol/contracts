@@ -320,17 +320,17 @@ contract RevenueShareVault is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @param user target user address
+     * @param account target account address
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault
      */
     function assetBalanceAtYieldSourceOf(
-        address user,
+        address account,
         address referral
     ) public view virtual override returns (uint256) {
         return
             _convertYieldSourceSharesToAssets(
-                totalSharesByUserReferral[user][referral],
+                totalSharesByUserReferral[account][referral],
                 MathUpgradeable.Rounding.Down
             );
     }
