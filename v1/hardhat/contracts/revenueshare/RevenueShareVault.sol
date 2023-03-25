@@ -38,12 +38,14 @@ contract RevenueShareVault is
      * @param name ERC20 name of the vault shares token
      * @param symbol ERC20 symbol of the vault shares token
      * @param yieldSourceVault_ vault address of yield source
+     * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
      */
     function initialize(
         address asset_,
         string calldata name,
         string calldata symbol,
-        address yieldSourceVault_
+        address yieldSourceVault_,
+        uint256 cinchPerformanceFeePercentage_
     ) public initializer {
         __Ownable_init();
         __Pausable_init();
@@ -52,6 +54,7 @@ contract RevenueShareVault is
         __ERC20_init(name, symbol);
 
         __GeneralYieldSourceAdapter_init(yieldSourceVault_);
+        __GeneralRevenueShareLogic_init(cinchPerformanceFeePercentage_);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -360,5 +363,5 @@ contract RevenueShareVault is
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[49] private __gap;
+    uint256[46] private __gap;
 }

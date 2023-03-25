@@ -11,6 +11,9 @@ const depositAmount1 = ethers.utils.parseUnits("1000", mockERC20Decimals);
 const depositAmount2 = ethers.utils.parseUnits("1000", mockERC20Decimals);
 const depositAmount3 = ethers.utils.parseUnits("1000", mockERC20Decimals);
 const revenueShareAmount3 = ethers.utils.parseUnits("100", mockERC20Decimals);
+const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
+const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
+const cinchPerformanceFeePercentage100 = ethers.utils.parseUnits("100", 2);
 
 before(async function () {
     // get accounts from hardhat
@@ -47,6 +50,7 @@ describe("RevenueShareVaultDHedge", function () {
                 "CinchRevenueShare",
                 "CRS",
                 mockProtocol.address,
+                initCinchPerformanceFeePercentage,
             ]);
             expect(vault.address).to.not.be.undefined;
             console.log("vault", vault.address);
@@ -287,6 +291,13 @@ describe("RevenueShareVaultDHedge", function () {
                 revenueShareAmount3
             );
         });
+        it("should be able to addRevenueShareReferral again", async function () {
+            const tx03 = await vault.addRevenueShareReferral(user3.address);
+            expect(tx03)
+                .to.emit(vault, "RevenueShareReferralAdded")
+                .withArgs(user3.address);
+            expect((await vault.getRevenueShareReferralSet()).length).equal(3);
+        });
     });
 
     describe("GeneralYieldSourceAdapter", function () {
@@ -364,4 +375,48 @@ describe("RevenueShareVaultDHedge", function () {
                 .withArgs(owner.address);
         });
     });
+
+    describe("CinchPerformanceFee", function () {
+        it("setCinchPerformanceFeePercentage should update the value correctly", async function () {
+            const tx = await vault.setCinchPerformanceFeePercentage(
+                cinchPerformanceFeePercentage10
+            );
+            expect(tx)
+                .to.emit(vault, "CinchPerformanceFeePercentageUpdated")
+                .withArgs(cinchPerformanceFeePercentage10);
+        });
+        it("should extract the Cinch performance fee correctly", async function () {
+            const revenueShareBalanceByAssetReferral0 =
+                await vault.revenueShareBalanceByAssetReferral(
+                    mockERC20.address,
+                    owner.address
+                );
+            await mockERC20.faucet(user3.address, revenueShareAmount3);
+            await mockERC20
+                .connect(user3)
+                .approve(vault.address, revenueShareAmount3);
+            const tx01 = await vault
+                .connect(user3)
+                .depositToRevenueShare(
+                    user3.address,
+                    mockERC20.address,
+                    revenueShareAmount3
+                );
+            expect(tx01)
+                .to.emit(vault, "RevenueShareDeposited")
+                .withArgs(user3.address, mockERC20.address, revenueShareAmount3);
+
+            const revenueShareBalanceByAssetReferral1 =
+                await vault.revenueShareBalanceByAssetReferral(
+                    mockERC20.address,
+                    owner.address
+                );
+            expect(revenueShareBalanceByAssetReferral1 - revenueShareBalanceByAssetReferral0).equal(
+                revenueShareAmount3
+                    .mul(cinchPerformanceFeePercentage10)
+                    .div(cinchPerformanceFeePercentage100)
+            );
+        });
+    });
+
 });

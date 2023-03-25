@@ -19,6 +19,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     args: [mockERC20.address],
   });
 
+  const cinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
   const vault = await deploy('RevenueShareVaultDHedge', {
     from: deployer,
     proxy: {
@@ -32,6 +33,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             "CinchRevenueShare",
             "CRS",
             mockProtocol.address,
+            cinchPerformanceFeePercentage,
           ],
         }
       },
