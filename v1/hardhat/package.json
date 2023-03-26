@@ -35,6 +35,7 @@
     "typescript": ">=4.5.0"
   },
   "dependencies": {
+    "@eth-optimism/hardhat-ovm": "^0.2.4",
     "@openzeppelin/contracts": "^4.8.1",
     "@openzeppelin/contracts-upgradeable": "^4.8.2",
     "@openzeppelin/hardhat-upgrades": "^1.22.1"
