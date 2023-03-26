@@ -6,7 +6,8 @@
     "test": "hardhat test test/*.test.js --network hardhat",
     "coverage": "hardhat coverage --network hardhat",
     "chain": "hardhat node --network hardhat --no-deploy",
-    "deploy": "hardhat deploy --export-all ./hardhat_contracts.json"
+    "deploy": "hardhat deploy --export-all ./hardhat_contracts.json",
+    "copycontract": "cp ./hardhat_contracts.json ../../../cinch-dapp/packages/react-app/contracts/hardhat_contracts.json"
   },
   "license": "MIT",
   "devDependencies": {
