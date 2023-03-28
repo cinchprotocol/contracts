@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgrad
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import "./GeneralYieldSourceAdapter.sol";
 import "./GeneralRevenueShareLogic.sol";
@@ -24,6 +25,7 @@ contract RevenueShareVault is
     OwnableUpgradeable,
     PausableUpgradeable,
     DepositPausableUpgradeable,
+    ReentrancyGuardUpgradeable,
     GeneralYieldSourceAdapter,
     GeneralRevenueShareLogic
 {
@@ -181,6 +183,7 @@ contract RevenueShareVault is
      * @notice Redeem assets with vault shares and referral
      * @dev See {IERC4626-redeem}
      * @dev whenNotPaused
+     * @dev nonReentrant
      * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
      * @param shares amount of shares to burn and redeem assets
      * @param receiver address to receive the assets
@@ -193,7 +196,7 @@ contract RevenueShareVault is
         address receiver,
         address sharesOwner,
         address referral
-    ) public virtual whenNotPaused returns (uint256) {
+    ) public virtual whenNotPaused nonReentrant returns (uint256) {
         require(shares > 0, "ZERO_SHARES");
         require(
             receiver != address(0) && referral != address(0),

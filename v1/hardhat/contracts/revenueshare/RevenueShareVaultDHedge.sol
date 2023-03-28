@@ -20,6 +20,11 @@ interface IYieldSourceDHedge {
     /// @param _fundTokenAmount the fund token amount
     function withdrawTo(address _recipient, uint256 _fundTokenAmount) external;
 
+    /// @notice Withdraw a single asset with the fund token amount
+    /// @param fundTokenAmount_ the fund token amount
+    /// @param asset_ the asset address
+    function withdrawSingle(uint256 fundTokenAmount_, address asset_) external;
+
     /// @notice Get price of the asset adjusted for any unminted manager fees
     /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L584
     /// @dev price is in unit of USD with 18 decimals
@@ -57,6 +62,26 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     }
 
     /**
+     * @dev Redeem assets with vault shares from yield source vault
+     * @dev virtual, expected to be overridden with specific yield source vault
+     * @param shares amount of shares to burn and redeem assets
+     * @return assets amount of assets received
+     */
+    function _redeemFromYieldSourceVault(
+        uint256 shares
+    ) internal override returns (uint256) {
+        uint256 assetBalance0 = IERC20Upgradeable(asset()).balanceOf(
+            address(this)
+        );
+        // redeem the assets into this contract first
+        IYieldSourceDHedge(yieldSourceVault).withdrawSingle(shares, asset());
+        uint256 assetBalance1 = IERC20Upgradeable(asset()).balanceOf(
+            address(this)
+        );
+        return assetBalance1 - assetBalance0;
+    }
+
+    /**
      * @notice Redeem assets with vault shares and referral
      * @dev See {IERC4626-redeem}
      * @dev whenNotPaused
@@ -67,6 +92,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * @param referral address of the partner referral
      * @return assets amount of assets received
      */
+    /*
     function redeemWithReferral(
         uint256 shares,
         address receiver,
@@ -107,6 +133,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
 
         return 0;
     }
+    */
 
     /**
      * @return price share price of yield source vault
