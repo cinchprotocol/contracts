@@ -14,6 +14,7 @@ const revenueShareAmount3 = ethers.utils.parseUnits("100", mockERC20Decimals);
 const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
 const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
 const cinchPerformanceFeePercentage100 = ethers.utils.parseUnits("100", 2);
+const mockSwapperAddress = ethers.constants.AddressZero;
 
 before(async function () {
     // get accounts from hardhat
@@ -50,6 +51,7 @@ describe("RevenueShareVault", function () {
                 "CinchRevenueShare",
                 "CRS",
                 mockProtocol.address,
+                mockSwapperAddress,
                 initCinchPerformanceFeePercentage,
             ]);
             expect(vault.address).to.not.be.undefined;

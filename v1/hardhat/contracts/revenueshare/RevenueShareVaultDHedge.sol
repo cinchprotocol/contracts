@@ -1,42 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import "./RevenueShareVault.sol";
-
-interface IYieldSourceDHedge {
-    /// @notice Deposit funds into the pool
-    /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L275
-    /// @param _asset Address of the token
-    /// @param _amount Amount of tokens to deposit
-    /// @return liquidityMinted Amount of liquidity minted
-    function depositFor(
-        address _recipient,
-        address _asset,
-        uint256 _amount
-    ) external returns (uint256 liquidityMinted);
-
-    /// @notice Withdraw assets based on the fund token amount
-    /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L364
-    /// @param _fundTokenAmount the fund token amount
-    function withdrawTo(address _recipient, uint256 _fundTokenAmount) external;
-
-    /// @notice Withdraw a single asset with the fund token amount
-    /// @param fundTokenAmount_ the fund token amount
-    /// @param asset_ the asset address
-    function withdrawSingle(uint256 fundTokenAmount_, address asset_) external;
-
-    /// @notice Get price of the asset adjusted for any unminted manager fees
-    /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L584
-    /// @dev price is in unit of USD with 18 decimals
-    /// @param price A price of the asset i.e. 1289033757439016251 => 1.28 USD
-    function tokenPrice() external view returns (uint256 price);
-
-    /// @return total shares supply with 18 decimals i.e. 7454095482755680176243 => 7454.1 shares
-    function totalSupply() external view returns (uint256);
-
-    /// @return balance of shares of the account i.e. 999977130000000000 => 0.999977 shares
-    function balanceOf(address account) external view returns (uint256);
-}
+import "./interfaces/IYieldSourceDHedge.sol";
 
 contract RevenueShareVaultDHedge is RevenueShareVault {
     using MathUpgradeable for uint256;
@@ -70,70 +38,28 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     function _redeemFromYieldSourceVault(
         uint256 shares
     ) internal override returns (uint256) {
+        uint256 expectedAmountOut = _convertYieldSourceSharesToAssets(
+            shares,
+            MathUpgradeable.Rounding.Down
+        );
         uint256 assetBalance0 = IERC20Upgradeable(asset()).balanceOf(
             address(this)
         );
+
+        IERC20Upgradeable(yieldSourceVault).approve(yieldSourceSwapper, shares);
         // redeem the assets into this contract first
-        IYieldSourceDHedge(yieldSourceVault).withdrawSingle(shares, asset());
+        IYieldSourceDHedgeSwapper(yieldSourceSwapper).withdraw(
+            yieldSourceVault,
+            shares,
+            IERC20(asset()),
+            expectedAmountOut
+        );
+
         uint256 assetBalance1 = IERC20Upgradeable(asset()).balanceOf(
             address(this)
         );
         return assetBalance1 - assetBalance0;
     }
-
-    /**
-     * @notice Redeem assets with vault shares and referral
-     * @dev See {IERC4626-redeem}
-     * @dev whenNotPaused
-     * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
-     * @param shares amount of shares to burn and redeem assets
-     * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * @param referral address of the partner referral
-     * @return assets amount of assets received
-     */
-    /*
-    function redeemWithReferral(
-        uint256 shares,
-        address receiver,
-        address sharesOwner,
-        address referral
-    ) public override whenNotPaused returns (uint256) {
-        require(shares > 0, "ZERO_SHARES");
-        require(
-            receiver != address(0) && referral != address(0),
-            "ZERO_ADDRESS"
-        );
-        require(
-            shares <= maxRedeem(sharesOwner),
-            "RevenueShareVault: max redeem exceeded"
-        );
-        require(
-            shares <= balanceOf(sharesOwner),
-            "RevenueShareVault: insufficient shares"
-        );
-        require(
-            shares <= totalSharesByUserReferral[sharesOwner][referral],
-            "RevenueShareVault: insufficient shares by referral"
-        );
-
-        // remove the shares from the user first to avoid reentrancy attack
-        _trackSharesInReferralRemoved(sharesOwner, referral, shares);
-
-        //_withdraw(_msgSender(), receiver, sharesOwner, assets, shares);
-        if (_msgSender() != sharesOwner) {
-            _spendAllowance(sharesOwner, _msgSender(), shares);
-        }
-        _burn(sharesOwner, shares);
-
-        // this would withdraw multiple assets from the yield source vault
-        IYieldSourceDHedge(yieldSourceVault).withdrawTo(receiver, shares);
-
-        emit Withdraw(_msgSender(), receiver, sharesOwner, 0, shares);
-
-        return 0;
-    }
-    */
 
     /**
      * @return price share price of yield source vault
@@ -192,4 +118,11 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     {
         return IYieldSourceDHedge(yieldSourceVault).totalSupply();
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[20] private __gap;
 }

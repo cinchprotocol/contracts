@@ -23,21 +23,30 @@ abstract contract GeneralYieldSourceAdapter is
 
     /// @dev Yield source vault address
     address public yieldSourceVault;
+    /// @dev Yield source swapper address
+    address public yieldSourceSwapper;
 
     /**
      * @notice GeneralYieldSourceAdapter initializer
      * @param yieldSourceVault_ vault address of yield source
+     * @param yieldSourceSwapper_ swapper address of yield source
      */
     function __GeneralYieldSourceAdapter_init(
-        address yieldSourceVault_
+        address yieldSourceVault_,
+        address yieldSourceSwapper_
     ) internal onlyInitializing {
-        __GeneralYieldSourceAdapter_init_unchained(yieldSourceVault_);
+        __GeneralYieldSourceAdapter_init_unchained(
+            yieldSourceVault_,
+            yieldSourceSwapper_
+        );
     }
 
     function __GeneralYieldSourceAdapter_init_unchained(
-        address yieldSourceVault_
+        address yieldSourceVault_,
+        address yieldSourceSwapper_
     ) internal onlyInitializing {
         yieldSourceVault = yieldSourceVault_;
+        yieldSourceSwapper = yieldSourceSwapper_;
     }
 
     /**
@@ -155,4 +164,11 @@ abstract contract GeneralYieldSourceAdapter is
         address account,
         address referral
     ) public view virtual returns (uint256);
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[18] private __gap;
 }

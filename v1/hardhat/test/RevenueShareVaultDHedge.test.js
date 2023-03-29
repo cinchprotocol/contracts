@@ -3,7 +3,7 @@ const { upgrades } = require("hardhat");
 
 let accounts;
 let owner, user1, user2, user3;
-let mockERC20, mockProtocol, vault;
+let mockERC20, mockProtocol, mockSwapper, vault;
 let mockERC20Decimals = 6;
 let referral1, referral2, referral3;
 
@@ -43,6 +43,12 @@ describe("RevenueShareVaultDHedge", function () {
             expect(mockProtocol.address).to.not.be.undefined;
             console.log("mockProtocol", mockProtocol.address);
         });
+        it("Should deploy Swapper", async function () {
+            const MockSwapper = await ethers.getContractFactory("MockProtocolDHedgeSwapper");
+            mockSwapper = await MockSwapper.deploy();
+            expect(mockSwapper.address).to.not.be.undefined;
+            console.log("mockSwapper", mockSwapper.address);
+        });
         it("Should deploy and Initialize RevenueShareVaultDHedge", async function () {
             const Vault = await ethers.getContractFactory("RevenueShareVaultDHedge", owner);
             vault = await upgrades.deployProxy(Vault, [
@@ -50,6 +56,7 @@ describe("RevenueShareVaultDHedge", function () {
                 "CinchRevenueShare",
                 "CRS",
                 mockProtocol.address,
+                mockSwapper.address,
                 initCinchPerformanceFeePercentage,
             ]);
             expect(vault.address).to.not.be.undefined;
