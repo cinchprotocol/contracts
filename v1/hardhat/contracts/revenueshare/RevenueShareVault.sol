@@ -31,6 +31,24 @@ contract RevenueShareVault is
 {
     using MathUpgradeable for uint256;
 
+    /// @dev Emitted when user deposit with referral
+    event DepositWithReferral(
+        address caller,
+        address receiver,
+        uint256 assets,
+        uint256 shares,
+        address indexed referral
+    );
+    /// @dev Emitted when user redeem with referral
+    event RedeemWithReferral(
+        address caller,
+        address receiver,
+        address sharesOwner,
+        uint256 assets,
+        uint256 shares,
+        address indexed referral
+    );
+
     /// @dev Total asset deposit processed
     uint256 public totalAssetDepositProcessed;
 
@@ -131,7 +149,13 @@ contract RevenueShareVault is
         _mint(receiver, shares);
         _trackSharesInReferralAdded(receiver, referral, shares);
         totalAssetDepositProcessed += assets;
-        emit Deposit(_msgSender(), receiver, assets, shares);
+        emit DepositWithReferral(
+            _msgSender(),
+            receiver,
+            assets,
+            shares,
+            referral
+        );
 
         return shares;
     }
@@ -225,6 +249,14 @@ contract RevenueShareVault is
 
         uint256 assets = _redeemFromYieldSourceVault(shares);
         _withdraw(_msgSender(), receiver, sharesOwner, assets, shares);
+        emit RedeemWithReferral(
+            _msgSender(),
+            receiver,
+            sharesOwner,
+            assets,
+            shares,
+            referral
+        );
         return assets;
     }
 
