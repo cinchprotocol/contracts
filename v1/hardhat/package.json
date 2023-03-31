@@ -1,12 +1,13 @@
 {
-  "name": "hardhat-project",
+  "name": "cinch-protocol-contracts",
   "version": "0.0.1",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test test/*.test.js --network hardhat",
     "coverage": "hardhat coverage --network hardhat",
     "chain": "hardhat node --network hardhat --no-deploy",
-    "deploy": "hardhat deploy --export-all ../next-app/src/contracts/hardhat_contracts.json"
+    "deploy": "hardhat deploy --export-all ./hardhat_contracts.json",
+    "copycontract": "cp ./hardhat_contracts.json ../../../cinch-dapp/packages/react-app/contracts/hardhat_contracts.json"
   },
   "license": "MIT",
   "devDependencies": {
@@ -34,6 +35,7 @@
     "typescript": ">=4.5.0"
   },
   "dependencies": {
+    "@eth-optimism/hardhat-ovm": "^0.2.4",
     "@openzeppelin/contracts": "^4.8.1",
     "@openzeppelin/contracts-upgradeable": "^4.8.2",
     "@openzeppelin/hardhat-upgrades": "^1.22.1"

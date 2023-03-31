@@ -2,8 +2,9 @@ require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
 require("@nomiclabs/hardhat-ethers");
 require('@openzeppelin/hardhat-upgrades');
+//require("@eth-optimism/hardhat-ovm");
 
-const defaultNetwork = "localhost";
+const defaultNetwork = process.env.DEFAULT_WEB3_PROVIDER || "localhost";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -25,6 +26,11 @@ module.exports = {
     localhost: {
       url: "http://localhost:8545",
     },
+    optimismGoerli: {
+      url: process.env.OPTIMISM_GOERLI_URL,
+      accounts: [process.env.OPTIMISM_GOERLI_DEPLOYER_PRIVATE_KEY],
+      ovm:true,
+    }
   },
   namedAccounts: {
     deployer: {

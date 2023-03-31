@@ -3,7 +3,7 @@ const { upgrades } = require("hardhat");
 
 let accounts;
 let owner, user1, user2, user3;
-let mockERC20, mockProtocol, vault;
+let mockERC20, mockProtocol, mockSwapper, vault;
 let mockERC20Decimals = 6;
 let referral1, referral2, referral3;
 
@@ -14,7 +14,6 @@ const revenueShareAmount3 = ethers.utils.parseUnits("100", mockERC20Decimals);
 const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
 const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
 const cinchPerformanceFeePercentage100 = ethers.utils.parseUnits("100", 2);
-const mockSwapperAddress = ethers.constants.AddressZero;
 
 before(async function () {
     // get accounts from hardhat
@@ -28,7 +27,7 @@ before(async function () {
     referral3 = user3.address;
 });
 
-describe("RevenueShareVault", function () {
+describe("RevenueShareVaultDHedge", function () {
     describe("Deployment", function () {
         it("Should deploy MockERC20", async function () {
             const MockERC20 = await ethers.getContractFactory("MockERC20");
@@ -38,20 +37,26 @@ describe("RevenueShareVault", function () {
             expect(mockERC20Decimals).equal(6);
             console.log("mockERC20", mockERC20.address);
         });
-        it("Should deploy MockProtocol", async function () {
-            const MockProtocol = await ethers.getContractFactory("MockProtocol");
+        it("Should deploy MockProtocolDHedge", async function () {
+            const MockProtocol = await ethers.getContractFactory("MockProtocolDHedge");
             mockProtocol = await MockProtocol.deploy(mockERC20.address);
             expect(mockProtocol.address).to.not.be.undefined;
             console.log("mockProtocol", mockProtocol.address);
         });
-        it("Should deploy and Initialize RevenueShareVault", async function () {
-            const Vault = await ethers.getContractFactory("RevenueShareVault", owner);
+        it("Should deploy Swapper", async function () {
+            const MockSwapper = await ethers.getContractFactory("MockProtocolDHedgeSwapper");
+            mockSwapper = await MockSwapper.deploy();
+            expect(mockSwapper.address).to.not.be.undefined;
+            console.log("mockSwapper", mockSwapper.address);
+        });
+        it("Should deploy and Initialize RevenueShareVaultDHedge", async function () {
+            const Vault = await ethers.getContractFactory("RevenueShareVaultDHedge", owner);
             vault = await upgrades.deployProxy(Vault, [
                 mockERC20.address,
                 "CinchRevenueShare",
                 "CRS",
                 mockProtocol.address,
-                mockSwapperAddress,
+                mockSwapper.address,
                 initCinchPerformanceFeePercentage,
             ]);
             expect(vault.address).to.not.be.undefined;
@@ -420,4 +425,5 @@ describe("RevenueShareVault", function () {
             );
         });
     });
+
 });

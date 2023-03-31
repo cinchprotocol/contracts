@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgrad
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import "./GeneralYieldSourceAdapter.sol";
 import "./GeneralRevenueShareLogic.sol";
@@ -24,6 +25,7 @@ contract RevenueShareVault is
     OwnableUpgradeable,
     PausableUpgradeable,
     DepositPausableUpgradeable,
+    ReentrancyGuardUpgradeable,
     GeneralYieldSourceAdapter,
     GeneralRevenueShareLogic
 {
@@ -38,12 +40,16 @@ contract RevenueShareVault is
      * @param name ERC20 name of the vault shares token
      * @param symbol ERC20 symbol of the vault shares token
      * @param yieldSourceVault_ vault address of yield source
+     * @param yieldSourceSwapper_ swapper address of yield source
+     * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
      */
     function initialize(
         address asset_,
         string calldata name,
         string calldata symbol,
-        address yieldSourceVault_
+        address yieldSourceVault_,
+        address yieldSourceSwapper_,
+        uint256 cinchPerformanceFeePercentage_
     ) public initializer {
         __Ownable_init();
         __Pausable_init();
@@ -51,7 +57,11 @@ contract RevenueShareVault is
         __ERC4626_init(IERC20Upgradeable(asset_));
         __ERC20_init(name, symbol);
 
-        __GeneralYieldSourceAdapter_init(yieldSourceVault_);
+        __GeneralYieldSourceAdapter_init(
+            yieldSourceVault_,
+            yieldSourceSwapper_
+        );
+        __GeneralRevenueShareLogic_init(cinchPerformanceFeePercentage_);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -178,6 +188,7 @@ contract RevenueShareVault is
      * @notice Redeem assets with vault shares and referral
      * @dev See {IERC4626-redeem}
      * @dev whenNotPaused
+     * @dev nonReentrant
      * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
      * @param shares amount of shares to burn and redeem assets
      * @param receiver address to receive the assets
@@ -190,7 +201,7 @@ contract RevenueShareVault is
         address receiver,
         address sharesOwner,
         address referral
-    ) public virtual whenNotPaused returns (uint256) {
+    ) public virtual whenNotPaused nonReentrant returns (uint256) {
         require(shares > 0, "ZERO_SHARES");
         require(
             receiver != address(0) && referral != address(0),
@@ -320,17 +331,17 @@ contract RevenueShareVault is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @param user target user address
+     * @param account target account address
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault
      */
     function assetBalanceAtYieldSourceOf(
-        address user,
+        address account,
         address referral
     ) public view virtual override returns (uint256) {
         return
             _convertYieldSourceSharesToAssets(
-                totalSharesByUserReferral[user][referral],
+                totalSharesByUserReferral[account][referral],
                 MathUpgradeable.Rounding.Down
             );
     }
@@ -360,5 +371,5 @@ contract RevenueShareVault is
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[49] private __gap;
+    uint256[19] private __gap;
 }
