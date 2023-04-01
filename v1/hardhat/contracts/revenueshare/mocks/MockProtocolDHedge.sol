@@ -44,18 +44,4 @@ contract MockProtocolDHedge is ERC4626 {
             fundTokenAmount_
         );
     }
-
-    /// @notice Withdraw a single asset with the fund token amount
-    /// @param fundTokenAmount_ the fund token amount
-    /// @param asset_ the asset address
-    function withdrawSingle(uint256 fundTokenAmount_, address asset_) external {
-        require(asset_ == asset(), "asset_ not supported");
-        _withdraw(
-            _msgSender(),
-            _msgSender(),
-            _msgSender(),
-            fundTokenAmount_,
-            fundTokenAmount_
-        );
-    }
 }
