@@ -420,4 +420,28 @@ describe("RevenueShareVault", function () {
             );
         });
     });
+
+    describe("setTotalSharesByUserReferral", function () {
+        it("should be able to set total shares by user referral", async function () {
+            const tx01 = await vault.connect(owner).setTotalSharesByUserReferral(
+                user3.address,
+                referral3,
+                depositAmount3.mul(2)
+            );
+            expect(tx01)
+                .to.emit(vault, "TotalSharesByUserReferralUpdated")
+                .withArgs(user3.address, referral3, depositAmount3.mul(2));
+            expect(await vault.totalSharesByUserReferral(user3.address, referral3)).equal(depositAmount3.mul(2));
+
+            const tx02 = await vault.connect(owner).setTotalSharesByUserReferral(
+                user3.address,
+                referral3,
+                depositAmount3
+            );
+            expect(tx02)
+                .to.emit(vault, "TotalSharesByUserReferralUpdated")
+                .withArgs(user3.address, referral3, depositAmount3);
+            expect(await vault.totalSharesByUserReferral(user3.address, referral3)).equal(depositAmount3);
+        });
+    });
 });

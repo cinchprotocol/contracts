@@ -41,6 +41,12 @@ abstract contract GeneralRevenueShareLogic is
     );
     /// @dev Emitted when cinchPerformanceFeePercentage is updated
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
+    /// @dev Emitted upon setTotalSharesByUserReferral
+    event TotalSharesByUserReferralUpdated(
+        address indexed sharesOwner,
+        address indexed referral,
+        uint256 shares
+    );
 
     /// @dev Address set of all referrals
     EnumerableSetUpgradeable.AddressSet internal _referralSet;
@@ -181,6 +187,7 @@ abstract contract GeneralRevenueShareLogic is
                 shares - totalSharesByUserReferral[sharesOwner][referral]
             );
         }
+        emit TotalSharesByUserReferralUpdated(sharesOwner, referral, shares);
     }
 
     /**
