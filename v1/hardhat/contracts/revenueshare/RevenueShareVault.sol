@@ -244,7 +244,7 @@ contract RevenueShareVault is
             "RevenueShareVault: insufficient shares by referral"
         );
 
-        //remove the shares from the user first to avoid reentrancy attack
+        //remove the shares from the user record first to avoid reentrancy attack
         _trackSharesInReferralRemoved(sharesOwner, referral, shares);
 
         uint256 assets = _redeemFromYieldSourceVault(shares);
