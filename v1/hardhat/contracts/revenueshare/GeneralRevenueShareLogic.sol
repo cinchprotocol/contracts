@@ -158,6 +158,32 @@ abstract contract GeneralRevenueShareLogic is
     }
 
     /**
+     * @dev In case the integration does not have full control over the yield source withdrawal process, contract owner will be able to fix any discrepancy according to the off-chain tracking.
+     * @param sharesOwner The address of the shares owner
+     * @param referral The address of the referral
+     * @param shares The amount of shares decreased
+     */
+    function setTotalSharesByUserReferral(
+        address sharesOwner,
+        address referral,
+        uint256 shares
+    ) external virtual onlyOwner {
+        if (totalSharesByUserReferral[sharesOwner][referral] > shares) {
+            _trackSharesInReferralRemoved(
+                sharesOwner,
+                referral,
+                totalSharesByUserReferral[sharesOwner][referral] - shares
+            );
+        } else if (totalSharesByUserReferral[sharesOwner][referral] < shares) {
+            _trackSharesInReferralAdded(
+                sharesOwner,
+                referral,
+                shares - totalSharesByUserReferral[sharesOwner][referral]
+            );
+        }
+    }
+
+    /**
      * @notice Deposit asset as revenue share into this vault
      * @dev The amount will be splitted among referrals according to their shares ratio
      * @dev whenNotPaused
