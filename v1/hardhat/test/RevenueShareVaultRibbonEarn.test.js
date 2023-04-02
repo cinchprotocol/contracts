@@ -428,4 +428,9 @@ describe("RevenueShareVaultRibbonEarn", function () {
         });
     });
 
+    describe("totalShareBalanceAtYieldSourceInReferralSet", function () {
+        it("should be able to get total share balance at yield source in referral set", async function () {
+            expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(depositAmount3);
+        });
+    });
 });

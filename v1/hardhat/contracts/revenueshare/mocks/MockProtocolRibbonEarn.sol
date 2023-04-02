@@ -36,7 +36,7 @@ contract MockProtocolRibbonEarn is ERC4626 {
     /**
      * @notice The price of a unit of share denominated in the `asset`
      */
-    function pricePerShare() external view returns (uint256) {
+    function pricePerShare() external pure returns (uint256) {
         return 1;
     }
 
@@ -45,8 +45,8 @@ contract MockProtocolRibbonEarn is ERC4626 {
      */
     function _convertToShares(
         uint256 assets,
-        Math.Rounding rounding
-    ) internal view override returns (uint256) {
+        Math.Rounding
+    ) internal pure override returns (uint256) {
         return assets;
     }
 
@@ -54,9 +54,9 @@ contract MockProtocolRibbonEarn is ERC4626 {
      * @dev Internal conversion function (from shares to assets) with support for rounding direction.
      */
     function _convertToAssets(
-        uint256 shares,
-        Math.Rounding rounding
-    ) internal view override returns (uint256) {
-        return shares;
+        uint256 shares_,
+        Math.Rounding
+    ) internal pure override returns (uint256) {
+        return shares_;
     }
 }

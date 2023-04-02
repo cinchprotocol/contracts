@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./RevenueShareVault.sol";
 
@@ -35,6 +36,7 @@ interface IYieldSourceRibbonEarn {
 
 contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     using MathUpgradeable for uint256;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
     /**
      * @dev Deposit assets to yield source vault
@@ -189,6 +191,41 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
                 totalSharesInReferral,
                 MathUpgradeable.Rounding.Down
             );
+    }
+
+    function totalShareBalanceAtYieldSourceInReferralSet()
+        external
+        view
+        returns (uint256 shares_)
+    {
+        address[] memory referrals = _referralSet.values();
+        for (uint256 i = 0; i < referrals.length; i++) {
+            address referral = referrals[i];
+            address[] memory users = _userSetByReferral[referral].values();
+            for (uint256 j = 0; j < users.length; j++) {
+                address user = users[j];
+                shares_ += shareBalanceAtYieldSourceOf(user);
+            }
+        }
+    }
+
+    function setTotalSharesByUserReferralAccordingToYieldSource()
+        external
+        onlyOwner
+    {
+        address[] memory referrals = _referralSet.values();
+        for (uint256 i = 0; i < referrals.length; i++) {
+            address referral = referrals[i];
+            address[] memory users = _userSetByReferral[referral].values();
+            for (uint256 j = 0; j < users.length; j++) {
+                address user = users[j];
+                setTotalSharesByUserReferral(
+                    user,
+                    referral,
+                    shareBalanceAtYieldSourceOf(user)
+                );
+            }
+        }
     }
 
     /**

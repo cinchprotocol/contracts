@@ -12,8 +12,8 @@ contract MockProtocolDHedgeSwapper {
     function withdraw(
         address pool,
         uint256 fundTokenAmount,
-        IERC20 withdrawalAsset,
-        uint256 expectedAmountOut
+        IERC20, //withdrawalAsset
+        uint256 //expectedAmountOut
     ) external {
         IERC20(pool).safeTransferFrom(
             msg.sender,

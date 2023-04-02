@@ -9,7 +9,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./GeneralYieldSourceAdapter.sol";
 import "./GeneralRevenueShareLogic.sol";
@@ -31,7 +30,6 @@ contract RevenueShareVault is
     GeneralRevenueShareLogic
 {
     using MathUpgradeable for uint256;
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
     /// @dev Emitted when user deposit with referral
     event DepositWithReferral(
@@ -378,23 +376,6 @@ contract RevenueShareVault is
                 totalSharesByUserReferral[account][referral],
                 MathUpgradeable.Rounding.Down
             );
-    }
-
-    function totalUserShareBalanceAtYieldSourceInReferralSet()
-        external
-        view
-        virtual
-        returns (uint256 shares)
-    {
-        address[] memory referrals = _referralSet.values();
-        for (uint256 i = 0; i < referrals.length; i++) {
-            address referral = referrals[i];
-            address[] memory users = _userSetByReferral[referral].values();
-            for (uint256 j = 0; j < users.length; j++) {
-                address user = users[j];
-                shares += shareBalanceAtYieldSourceOf(user);
-            }
-        }
     }
 
     /*//////////////////////////////////////////////////////////////

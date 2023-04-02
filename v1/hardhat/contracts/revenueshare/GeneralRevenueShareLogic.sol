@@ -177,12 +177,17 @@ abstract contract GeneralRevenueShareLogic is
         address sharesOwner,
         address referral,
         uint256 shares
-    ) external virtual onlyOwner {
+    ) public virtual onlyOwner {
         if (totalSharesByUserReferral[sharesOwner][referral] > shares) {
             _trackSharesInReferralRemoved(
                 sharesOwner,
                 referral,
                 totalSharesByUserReferral[sharesOwner][referral] - shares
+            );
+            emit TotalSharesByUserReferralUpdated(
+                sharesOwner,
+                referral,
+                shares
             );
         } else if (totalSharesByUserReferral[sharesOwner][referral] < shares) {
             _trackSharesInReferralAdded(
@@ -190,8 +195,12 @@ abstract contract GeneralRevenueShareLogic is
                 referral,
                 shares - totalSharesByUserReferral[sharesOwner][referral]
             );
+            emit TotalSharesByUserReferralUpdated(
+                sharesOwner,
+                referral,
+                shares
+            );
         }
-        emit TotalSharesByUserReferralUpdated(sharesOwner, referral, shares);
     }
 
     /**
