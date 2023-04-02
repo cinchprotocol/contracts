@@ -30,6 +30,10 @@ module.exports = {
       url: process.env.OPTIMISM_GOERLI_URL,
       accounts: [process.env.OPTIMISM_GOERLI_DEPLOYER_PRIVATE_KEY],
       ovm:true,
+    },
+    goerli: {
+      url: process.env.GOERLI_URL,
+      accounts: [process.env.GOERLI_DEPLOYER_PRIVATE_KEY],
     }
   },
   namedAccounts: {
