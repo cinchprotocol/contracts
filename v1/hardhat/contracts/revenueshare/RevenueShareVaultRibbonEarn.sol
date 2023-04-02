@@ -74,53 +74,19 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev whenNotPaused
      * @dev nonReentrant
      * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
-     * @param shares amount of shares to burn and redeem assets
-     * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * @param referral address of the partner referral
+     * shares amount of shares to burn and redeem assets
+     * receiver address to receive the assets
+     * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
+     * referral address of the partner referral
      * @return assets amount of assets received
      */
     function redeemWithReferral(
-        uint256 shares,
-        address receiver,
-        address sharesOwner,
-        address referral
+        uint256, // shares,
+        address, // receiver,
+        address, // sharesOwner,
+        address // referral
     ) public override whenNotPaused nonReentrant returns (uint256) {
-        require(shares > 0, "ZERO_SHARES");
-        require(
-            receiver != address(0) && referral != address(0),
-            "ZERO_ADDRESS"
-        );
-        require(
-            shares <= maxRedeem(sharesOwner),
-            "RevenueShareVault: max redeem exceeded"
-        );
-        require(
-            shares <= balanceOf(sharesOwner),
-            "RevenueShareVault: insufficient shares"
-        );
-        require(
-            shares <= totalSharesByUserReferral[sharesOwner][referral],
-            "RevenueShareVault: insufficient shares by referral"
-        );
-
-        //remove the shares from the user record first to avoid reentrancy attack
-        _trackSharesInReferralRemoved(sharesOwner, referral, shares);
-
-        if (_msgSender() != sharesOwner) {
-            _spendAllowance(sharesOwner, _msgSender(), shares);
-        }
-        _burn(sharesOwner, shares);
-
-        emit RedeemWithReferral(
-            _msgSender(),
-            receiver,
-            sharesOwner,
-            0,
-            shares,
-            referral
-        );
-        return 0;
+        require(false, "RevenueShareVaultRibbonEarn: not supported");
     }
 
     /**
@@ -193,6 +159,10 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
             );
     }
 
+    /**
+     * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalShareBalanceAtYieldSourceInReferralSet
+     * @return shares_ total share balance at yield source in referral set
+     */
     function totalShareBalanceAtYieldSourceInReferralSet()
         external
         view
@@ -209,23 +179,30 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
         }
     }
 
-    function setTotalSharesByUserReferralAccordingToYieldSource()
+    /**
+     * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral
+     * @dev onlyOwner
+     */
+    function setTotalSharesInReferralAccordingToYieldSource()
         external
         onlyOwner
     {
+        uint256 totalSharesByReferral_;
+        uint256 totalSharesInReferral_ = 0;
         address[] memory referrals = _referralSet.values();
         for (uint256 i = 0; i < referrals.length; i++) {
+            totalSharesByReferral_ = 0;
             address referral = referrals[i];
             address[] memory users = _userSetByReferral[referral].values();
             for (uint256 j = 0; j < users.length; j++) {
                 address user = users[j];
-                setTotalSharesByUserReferral(
-                    user,
-                    referral,
-                    shareBalanceAtYieldSourceOf(user)
-                );
+                totalSharesByReferral_ += shareBalanceAtYieldSourceOf(user);
             }
+            totalSharesByReferral[referral] = totalSharesByReferral_;
+            totalSharesInReferral_ += totalSharesByReferral_;
         }
+        totalSharesInReferral = totalSharesInReferral_;
+        emit TotalSharesInReferralUpdated(totalSharesInReferral_);
     }
 
     /**

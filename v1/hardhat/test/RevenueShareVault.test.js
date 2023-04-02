@@ -421,27 +421,42 @@ describe("RevenueShareVault", function () {
         });
     });
 
-    describe("setTotalSharesByUserReferral", function () {
-        it("should be able to set total shares by user referral", async function () {
-            const tx01 = await vault.connect(owner).setTotalSharesByUserReferral(
-                user3.address,
+    describe("Fixing data by contract owner", function () {
+        it("should be able to setTotalSharesByReferral", async function () {
+            const tx01 = await vault.connect(owner).setTotalSharesByReferral(
                 referral3,
                 depositAmount3.mul(2)
             );
             expect(tx01)
-                .to.emit(vault, "TotalSharesByUserReferralUpdated")
-                .withArgs(user3.address, referral3, depositAmount3.mul(2));
-            expect(await vault.totalSharesByUserReferral(user3.address, referral3)).equal(depositAmount3.mul(2));
+                .to.emit(vault, "TotalSharesByReferralUpdated")
+                .withArgs(referral3, depositAmount3.mul(2));
+            expect(await vault.totalSharesByReferral(referral3)).equal(depositAmount3.mul(2));
 
-            const tx02 = await vault.connect(owner).setTotalSharesByUserReferral(
-                user3.address,
+            const tx02 = await vault.connect(owner).setTotalSharesByReferral(
                 referral3,
                 depositAmount3
             );
             expect(tx02)
-                .to.emit(vault, "TotalSharesByUserReferralUpdated")
-                .withArgs(user3.address, referral3, depositAmount3);
-            expect(await vault.totalSharesByUserReferral(user3.address, referral3)).equal(depositAmount3);
+                .to.emit(vault, "TotalSharesByReferralUpdated")
+                .withArgs(referral3, depositAmount3);
+            expect(await vault.totalSharesByReferral(referral3)).equal(depositAmount3);
+        });
+        it("should be able to setTotalSharesInReferral", async function () {
+            const tx01 = await vault.connect(owner).setTotalSharesInReferral(
+                depositAmount3.mul(2)
+            );
+            expect(tx01)
+                .to.emit(vault, "TotalSharesInReferralUpdated")
+                .withArgs(depositAmount3.mul(2));
+            expect(await vault.totalSharesInReferral()).equal(depositAmount3.mul(2));
+            
+            const tx02 = await vault.connect(owner).setTotalSharesInReferral(
+                depositAmount3
+            );
+            expect(tx02)
+                .to.emit(vault, "TotalSharesInReferralUpdated")
+                .withArgs(depositAmount3);
+            expect(await vault.totalSharesInReferral()).equal(depositAmount3);
         });
     });
 });

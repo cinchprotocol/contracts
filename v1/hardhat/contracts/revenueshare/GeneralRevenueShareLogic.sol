@@ -41,16 +41,16 @@ abstract contract GeneralRevenueShareLogic is
     );
     /// @dev Emitted when cinchPerformanceFeePercentage is updated
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
-    /// @dev Emitted upon setTotalSharesByUserReferral
-    event TotalSharesByUserReferralUpdated(
-        address indexed sharesOwner,
+    /// @dev Emitted upon setTotalSharesByReferral
+    event TotalSharesByReferralUpdated(
         address indexed referral,
-        uint256 shares
+        uint256 shares_
     );
+    /// @dev Emitted upon setTotalSharesInReferral
+    event TotalSharesInReferralUpdated(uint256 shares_);
 
     /// @dev Address set of all referrals
     EnumerableSetUpgradeable.AddressSet internal _referralSet;
-
     /// @dev Tracking total shares in all referrals, for calculating the share of each referral
     uint256 public totalSharesInReferral;
     /// @dev Partner referral address -> Total shares
@@ -169,38 +169,28 @@ abstract contract GeneralRevenueShareLogic is
 
     /**
      * @dev In case the integration does not have full control over the yield source withdrawal process, contract owner will be able to fix any discrepancy according to the off-chain tracking.
-     * @param sharesOwner The address of the shares owner
+     * @dev onlyOwner
      * @param referral The address of the referral
-     * @param shares The amount of shares decreased
+     * @param shares_ The amount of shares decreased
      */
-    function setTotalSharesByUserReferral(
-        address sharesOwner,
+    function setTotalSharesByReferral(
         address referral,
-        uint256 shares
-    ) public virtual onlyOwner {
-        if (totalSharesByUserReferral[sharesOwner][referral] > shares) {
-            _trackSharesInReferralRemoved(
-                sharesOwner,
-                referral,
-                totalSharesByUserReferral[sharesOwner][referral] - shares
-            );
-            emit TotalSharesByUserReferralUpdated(
-                sharesOwner,
-                referral,
-                shares
-            );
-        } else if (totalSharesByUserReferral[sharesOwner][referral] < shares) {
-            _trackSharesInReferralAdded(
-                sharesOwner,
-                referral,
-                shares - totalSharesByUserReferral[sharesOwner][referral]
-            );
-            emit TotalSharesByUserReferralUpdated(
-                sharesOwner,
-                referral,
-                shares
-            );
-        }
+        uint256 shares_
+    ) external virtual onlyOwner {
+        totalSharesByReferral[referral] = shares_;
+        emit TotalSharesByReferralUpdated(referral, shares_);
+    }
+
+    /**
+     * @dev In case the integration does not have full control over the yield source withdrawal process, contract owner will be able to fix any discrepancy according to the off-chain tracking.
+     * @dev onlyOwner
+     * @param shares_ The amount of shares decreased
+     */
+    function setTotalSharesInReferral(
+        uint256 shares_
+    ) external virtual onlyOwner {
+        totalSharesInReferral = shares_;
+        emit TotalSharesInReferralUpdated(shares_);
     }
 
     /**
