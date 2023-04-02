@@ -112,7 +112,7 @@ contract RevenueShareVault is
      * @notice Deposit assets to the vault with referral
      * @dev Transfer assets to this contract, then deposit into yield source vault, and mint shares to receiver
      * @dev See {IERC4626-deposit}
-     * @dev whenNotPaused whenDepositNotPaused
+     * @dev whenNotPaused whenDepositNotPaused nonReentrant
      * @dev emit Deposit
      * @param assets amount of assets to deposit
      * @param receiver address to receive the shares
@@ -123,7 +123,14 @@ contract RevenueShareVault is
         uint256 assets,
         address receiver,
         address referral
-    ) public virtual whenNotPaused whenDepositNotPaused returns (uint256) {
+    )
+        public
+        virtual
+        whenNotPaused
+        whenDepositNotPaused
+        nonReentrant
+        returns (uint256)
+    {
         require(assets > 0, "ZERO_ASSETS");
         require(
             receiver != address(0) && referral != address(0),

@@ -196,7 +196,7 @@ abstract contract GeneralRevenueShareLogic is
     /**
      * @notice Deposit asset as revenue share into this vault
      * @dev The amount will be splitted among referrals according to their shares ratio
-     * @dev whenNotPaused
+     * @dev whenNotPaused nonReentrant
      * @param assetsFrom_ The address of the asset owner that the deposit will be taken from
      * @param asset_ The address of the asset to be deposited
      * @param amount_ The amount of asset to be deposited
@@ -205,7 +205,7 @@ abstract contract GeneralRevenueShareLogic is
         address assetsFrom_,
         address asset_,
         uint256 amount_
-    ) external virtual whenNotPaused {
+    ) external virtual whenNotPaused nonReentrant {
         require(
             assetsFrom_ != address(0) && asset_ != address(0),
             "ZERO_ADDRESS"
@@ -264,8 +264,7 @@ abstract contract GeneralRevenueShareLogic is
     /**
      * @notice Withdraw asset from revenue share balance on this vault
      * @dev _msgSender() must be a referral with enough revenue share balance
-     * @dev whenNotPaused
-     * @dev nonReentrant
+     * @dev whenNotPaused nonReentrant
      * @param asset_ The address of the asset to be deposited
      * @param amount_ The amount of asset to be deposited
      * @param receiver_ The address of the receiver

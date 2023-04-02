@@ -78,7 +78,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * receiver address to receive the assets
      * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
      * referral address of the partner referral
-     * @return assets amount of assets received
+     * @return assets_ amount of assets received
      */
     function redeemWithReferral(
         uint256, // shares,
