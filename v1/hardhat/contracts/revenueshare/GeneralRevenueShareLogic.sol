@@ -41,10 +41,16 @@ abstract contract GeneralRevenueShareLogic is
     );
     /// @dev Emitted when cinchPerformanceFeePercentage is updated
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
+    /// @dev Emitted upon setTotalSharesByReferral
+    event TotalSharesByReferralUpdated(
+        address indexed referral,
+        uint256 shares_
+    );
+    /// @dev Emitted upon setTotalSharesInReferral
+    event TotalSharesInReferralUpdated(uint256 shares_);
 
     /// @dev Address set of all referrals
     EnumerableSetUpgradeable.AddressSet internal _referralSet;
-
     /// @dev Tracking total shares in all referrals, for calculating the share of each referral
     uint256 public totalSharesInReferral;
     /// @dev Partner referral address -> Total shares
@@ -59,6 +65,9 @@ abstract contract GeneralRevenueShareLogic is
     mapping(address => uint256) public totalRevenueShareProcessedByAsset;
     /// @dev Cinch performance fee percentage with 2 decimals
     uint256 public cinchPerformanceFeePercentage;
+    /// @dev Address set of all users by referral
+    mapping(address => EnumerableSetUpgradeable.AddressSet)
+        internal _userSetByReferral;
 
     /**
      * @notice GeneralRevenueShareLogic initializer
@@ -139,6 +148,7 @@ abstract contract GeneralRevenueShareLogic is
         totalSharesByReferral[referral] += shares;
         totalSharesByUserReferral[sharesOwner][referral] += shares;
         totalSharesInReferral += shares;
+        _userSetByReferral[referral].add(sharesOwner);
     }
 
     /**
@@ -158,9 +168,35 @@ abstract contract GeneralRevenueShareLogic is
     }
 
     /**
+     * @dev In case the integration does not have full control over the yield source withdrawal process, contract owner will be able to fix any discrepancy according to the off-chain tracking.
+     * @dev onlyOwner
+     * @param referral The address of the referral
+     * @param shares_ The amount of shares decreased
+     */
+    function setTotalSharesByReferral(
+        address referral,
+        uint256 shares_
+    ) external virtual onlyOwner {
+        totalSharesByReferral[referral] = shares_;
+        emit TotalSharesByReferralUpdated(referral, shares_);
+    }
+
+    /**
+     * @dev In case the integration does not have full control over the yield source withdrawal process, contract owner will be able to fix any discrepancy according to the off-chain tracking.
+     * @dev onlyOwner
+     * @param shares_ The amount of shares decreased
+     */
+    function setTotalSharesInReferral(
+        uint256 shares_
+    ) external virtual onlyOwner {
+        totalSharesInReferral = shares_;
+        emit TotalSharesInReferralUpdated(shares_);
+    }
+
+    /**
      * @notice Deposit asset as revenue share into this vault
      * @dev The amount will be splitted among referrals according to their shares ratio
-     * @dev whenNotPaused
+     * @dev whenNotPaused nonReentrant
      * @param assetsFrom_ The address of the asset owner that the deposit will be taken from
      * @param asset_ The address of the asset to be deposited
      * @param amount_ The amount of asset to be deposited
@@ -169,7 +205,7 @@ abstract contract GeneralRevenueShareLogic is
         address assetsFrom_,
         address asset_,
         uint256 amount_
-    ) external virtual whenNotPaused {
+    ) external virtual whenNotPaused nonReentrant {
         require(
             assetsFrom_ != address(0) && asset_ != address(0),
             "ZERO_ADDRESS"
@@ -228,8 +264,7 @@ abstract contract GeneralRevenueShareLogic is
     /**
      * @notice Withdraw asset from revenue share balance on this vault
      * @dev _msgSender() must be a referral with enough revenue share balance
-     * @dev whenNotPaused
-     * @dev nonReentrant
+     * @dev whenNotPaused nonReentrant
      * @param asset_ The address of the asset to be deposited
      * @param amount_ The amount of asset to be deposited
      * @param receiver_ The address of the receiver

@@ -1,4 +1,3 @@
-// deploy/00_deploy_my_contract.js
 // https://github.com/wighawag/hardhat-deploy
 // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
 
@@ -13,19 +12,16 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log: true,
   });
 
-  const mockProtocol = await deploy("MockProtocolDHedge", {
+  const mockProtocol = await deploy("MockProtocolRibbonEarn", {
     from: deployer,
     log: true,
     args: [mockERC20.address],
   });
 
-  const mockSwapper = await deploy("MockProtocolDHedgeSwapper", {
-    from: deployer,
-    log: true,
-  });
+  const cinchPerformanceFeePercentage = ethers.utils.parseUnits("10", 2);
+  const mockSwapperAddress = ethers.constants.AddressZero;
 
-  const cinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
-  const vault = await deploy('RevenueShareVaultDHedge', {
+  const vault = await deploy('RevenueShareVaultRibbonEarn', {
     from: deployer,
     proxy: {
       owner: deployer,
@@ -38,7 +34,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             "CinchRevenueShare",
             "CRS",
             mockProtocol.address,
-            mockSwapper.address,
+            mockSwapperAddress,
             cinchPerformanceFeePercentage,
           ],
         }
@@ -47,4 +43,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     log: true
   });
 };
-module.exports.tags = ['cinch-protocol-contracts-00'];
+module.exports.tags = ['RevenueShareVaultRibbonEarnMock'];

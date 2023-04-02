@@ -31,6 +31,24 @@ contract RevenueShareVault is
 {
     using MathUpgradeable for uint256;
 
+    /// @dev Emitted when user deposit with referral
+    event DepositWithReferral(
+        address caller,
+        address receiver,
+        uint256 assets,
+        uint256 shares,
+        address indexed referral
+    );
+    /// @dev Emitted when user redeem with referral
+    event RedeemWithReferral(
+        address caller,
+        address receiver,
+        address sharesOwner,
+        uint256 assets,
+        uint256 shares,
+        address indexed referral
+    );
+
     /// @dev Total asset deposit processed
     uint256 public totalAssetDepositProcessed;
 
@@ -94,7 +112,7 @@ contract RevenueShareVault is
      * @notice Deposit assets to the vault with referral
      * @dev Transfer assets to this contract, then deposit into yield source vault, and mint shares to receiver
      * @dev See {IERC4626-deposit}
-     * @dev whenNotPaused whenDepositNotPaused
+     * @dev whenNotPaused whenDepositNotPaused nonReentrant
      * @dev emit Deposit
      * @param assets amount of assets to deposit
      * @param receiver address to receive the shares
@@ -105,7 +123,14 @@ contract RevenueShareVault is
         uint256 assets,
         address receiver,
         address referral
-    ) public virtual whenNotPaused whenDepositNotPaused returns (uint256) {
+    )
+        public
+        virtual
+        whenNotPaused
+        whenDepositNotPaused
+        nonReentrant
+        returns (uint256)
+    {
         require(assets > 0, "ZERO_ASSETS");
         require(
             receiver != address(0) && referral != address(0),
@@ -131,7 +156,13 @@ contract RevenueShareVault is
         _mint(receiver, shares);
         _trackSharesInReferralAdded(receiver, referral, shares);
         totalAssetDepositProcessed += assets;
-        emit Deposit(_msgSender(), receiver, assets, shares);
+        emit DepositWithReferral(
+            _msgSender(),
+            receiver,
+            assets,
+            shares,
+            referral
+        );
 
         return shares;
     }
@@ -220,11 +251,19 @@ contract RevenueShareVault is
             "RevenueShareVault: insufficient shares by referral"
         );
 
-        //remove the shares from the user first to avoid reentrancy attack
+        //remove the shares from the user record first to avoid reentrancy attack
         _trackSharesInReferralRemoved(sharesOwner, referral, shares);
 
         uint256 assets = _redeemFromYieldSourceVault(shares);
         _withdraw(_msgSender(), receiver, sharesOwner, assets, shares);
+        emit RedeemWithReferral(
+            _msgSender(),
+            receiver,
+            sharesOwner,
+            assets,
+            shares,
+            referral
+        );
         return assets;
     }
 

@@ -20,11 +20,6 @@ interface IYieldSourceDHedge {
     /// @param _fundTokenAmount the fund token amount
     function withdrawTo(address _recipient, uint256 _fundTokenAmount) external;
 
-    /// @notice Withdraw a single asset with the fund token amount
-    /// @param fundTokenAmount_ the fund token amount
-    /// @param asset_ the asset address
-    function withdrawSingle(uint256 fundTokenAmount_, address asset_) external;
-
     /// @notice Get price of the asset adjusted for any unminted manager fees
     /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L584
     /// @dev price is in unit of USD with 18 decimals

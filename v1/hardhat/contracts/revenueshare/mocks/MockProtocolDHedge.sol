@@ -19,12 +19,12 @@ contract MockProtocolDHedge is ERC4626 {
 
     /// @notice Deposit funds into the pool
     /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L275
-    /// @param asset_ Address of the token
+    /// asset_ Address of the token
     /// @param amount_ Amount of tokens to deposit
     /// @return liquidityMinted Amount of liquidity minted
     function depositFor(
         address recipient_,
-        address asset_,
+        address, // asset_
         uint256 amount_
     ) external returns (uint256 liquidityMinted) {
         _deposit(_msgSender(), recipient_, amount_, amount_);
@@ -39,20 +39,6 @@ contract MockProtocolDHedge is ERC4626 {
         _withdraw(
             _msgSender(),
             recipient_,
-            _msgSender(),
-            fundTokenAmount_,
-            fundTokenAmount_
-        );
-    }
-
-    /// @notice Withdraw a single asset with the fund token amount
-    /// @param fundTokenAmount_ the fund token amount
-    /// @param asset_ the asset address
-    function withdrawSingle(uint256 fundTokenAmount_, address asset_) external {
-        require(asset_ == asset(), "asset_ not supported");
-        _withdraw(
-            _msgSender(),
-            _msgSender(),
             _msgSender(),
             fundTokenAmount_,
             fundTokenAmount_
