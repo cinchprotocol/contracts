@@ -18,7 +18,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     args: [mockERC20.address],
   });
 
-  const cinchPerformanceFeePercentage = ethers.utils.parseUnits("1000", 2);
+  const cinchPerformanceFeePercentage = ethers.utils.parseUnits("10", 2);
   const mockSwapperAddress = ethers.constants.AddressZero;
 
   const vault = await deploy('RevenueShareVaultRibbonEarn', {
