@@ -65,6 +65,9 @@ abstract contract GeneralRevenueShareLogic is
     mapping(address => uint256) public totalRevenueShareProcessedByAsset;
     /// @dev Cinch performance fee percentage with 2 decimals
     uint256 public cinchPerformanceFeePercentage;
+    /// @dev Address set of all users by referral
+    mapping(address => EnumerableSetUpgradeable.AddressSet)
+        internal _userSetByReferral;
 
     /**
      * @notice GeneralRevenueShareLogic initializer
@@ -145,6 +148,7 @@ abstract contract GeneralRevenueShareLogic is
         totalSharesByReferral[referral] += shares;
         totalSharesByUserReferral[sharesOwner][referral] += shares;
         totalSharesInReferral += shares;
+        _userSetByReferral[referral].add(sharesOwner);
     }
 
     /**
