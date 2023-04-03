@@ -5,6 +5,10 @@ require('@openzeppelin/hardhat-upgrades');
 //require("@eth-optimism/hardhat-ovm");
 
 const defaultNetwork = process.env.DEFAULT_WEB3_PROVIDER || "localhost";
+const optimismGoerliUrl = process.env.OPTIMISM_GOERLI_URL || "https://opt-goerli.g.alchemy.com/v2/ABC";
+const optimismGoerliDeployerPriKey = process.env.OPTIMISM_GOERLI_DEPLOYER_PRIVATE_KEY || "SECRET";
+const goerliUrl = process.env.GOERLI_URL || "https://eth-goerli.g.alchemy.com/v2/ABC";
+const goerliDeployerPriKey = process.env.GOERLI_DEPLOYER_PRIVATE_KEY || "SECRET";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -27,13 +31,13 @@ module.exports = {
       url: "http://localhost:8545",
     },
     optimismGoerli: {
-      url: process.env.OPTIMISM_GOERLI_URL,
-      accounts: [process.env.OPTIMISM_GOERLI_DEPLOYER_PRIVATE_KEY],
+      url: optimismGoerliUrl,
+      accounts: [optimismGoerliDeployerPriKey],
       ovm:true,
     },
     goerli: {
-      url: process.env.GOERLI_URL,
-      accounts: [process.env.GOERLI_DEPLOYER_PRIVATE_KEY],
+      url: goerliUrl,
+      accounts: [goerliDeployerPriKey],
     }
   },
   namedAccounts: {
