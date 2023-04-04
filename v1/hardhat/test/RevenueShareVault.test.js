@@ -59,6 +59,17 @@ describe("RevenueShareVault", function () {
         });
     });
 
+    describe("depositToRevenueShare", function () {
+        it("should be reverted with zero totalSharesInReferral", async function () {
+            const tx = vault.depositToRevenueShare(
+                user3.address,
+                user3.address,
+                revenueShareAmount3
+            );
+            await expect(tx).to.be.revertedWith("GeneralRevenueShareLogic: totalSharesInReferral is zero");
+        });
+    });
+
     describe("Deposit", function () {
         it("should fail without mockERC20 approval", async function () {
             const tx = vault
@@ -268,6 +279,10 @@ describe("RevenueShareVault", function () {
                 .to.emit(vault, "RevenueShareReferralRemoved")
                 .withArgs(user3.address);
         });
+        it("should not be able to removeRevenueShareReferral with non-existing referral", async function () {
+            const tx = vault.removeRevenueShareReferral(user3.address);
+            await expect(tx).to.be.revertedWith("GeneralRevenueShare: referral does not exist");
+        });
         it("undistributed revenue share should be allocated to contract owner", async function () {
             await mockERC20.faucet(user3.address, revenueShareAmount3);
             await mockERC20
@@ -299,6 +314,10 @@ describe("RevenueShareVault", function () {
                 .to.emit(vault, "RevenueShareReferralAdded")
                 .withArgs(user3.address);
             expect((await vault.getRevenueShareReferralSet()).length).equal(3);
+        });
+        it("should not be able to addRevenueShareReferral with existing referral", async function () {
+            const tx = vault.addRevenueShareReferral(user3.address);
+            await expect(tx).to.be.revertedWith("GeneralRevenueShare: referral already exists");
         });
     });
 
@@ -422,6 +441,19 @@ describe("RevenueShareVault", function () {
     });
 
     describe("Fixing data by contract owner", function () {
+        it("setTotalSharesByReferral onlyOwner", async function () {
+            const tx = vault.connect(user3).setTotalSharesByReferral(
+                referral3,
+                depositAmount3
+            );
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+        it("setTotalSharesInReferral onlyOwner", async function () {
+            const tx = vault.connect(user3).setTotalSharesInReferral(
+                depositAmount3
+            );
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
         it("should be able to setTotalSharesByReferral", async function () {
             const tx01 = await vault.connect(owner).setTotalSharesByReferral(
                 referral3,
@@ -457,6 +489,129 @@ describe("RevenueShareVault", function () {
                 .to.emit(vault, "TotalSharesInReferralUpdated")
                 .withArgs(depositAmount3);
             expect(await vault.totalSharesInReferral()).equal(depositAmount3);
+        });
+    });
+
+    describe("GeneralRevenueShareLogic", function () {
+        describe("addRevenueShareReferral", function () {
+            it("onlyOwner", async function () {
+                const tx = vault.connect(user3).addRevenueShareReferral(
+                    ethers.constants.AddressZero
+                );
+                await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+            });
+            it("should be reverted with zero address referral", async function () {
+                const tx = vault.addRevenueShareReferral(
+                    ethers.constants.AddressZero
+                );
+                await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+            });
+        });
+        describe("removeRevenueShareReferral", function () {
+            it("onlyOwner", async function () {
+                const tx = vault.connect(user3).removeRevenueShareReferral(
+                    ethers.constants.AddressZero
+                );
+                await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+            });
+            it("should be reverted with zero address referral", async function () {
+                const tx = vault.removeRevenueShareReferral(
+                    ethers.constants.AddressZero
+                );
+                await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+            });
+        });
+        describe("depositToRevenueShare", function () {
+            it("should be reverted with zero address assetsFrom_", async function () {
+                const tx = vault.depositToRevenueShare(
+                    ethers.constants.AddressZero,
+                    user3.address,
+                    revenueShareAmount3
+                );
+                await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+            });
+            it("should be reverted with zero amount_", async function () {
+                const tx = vault.depositToRevenueShare(
+                    user3.address,
+                    user3.address,
+                    ethers.constants.AddressZero
+                );
+                await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
+            });
+            it("should be pausable", async function () {
+                const tx01 = await vault.connect(owner).pause();
+                const tx02 = vault
+                .connect(user3)
+                .depositToRevenueShare(
+                    user3.address,
+                    mockERC20.address,
+                    revenueShareAmount3
+                );
+                await expect(tx02).to.be.revertedWith("Pausable: paused");
+                const tx03 = await vault.connect(owner).unpause();
+            });
+        });
+        describe("withdrawFromRevenueShare", function () {
+            it("should be reverted with zero address asset_", async function () {
+                const tx = vault.withdrawFromRevenueShare(
+                    ethers.constants.AddressZero,
+                    revenueShareAmount3,
+                    user3.address
+                );
+                await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+            });
+            it("should be reverted with zero amount_", async function () {
+                const tx = vault.withdrawFromRevenueShare(
+                    user3.address,
+                    ethers.constants.AddressZero,
+                    user3.address
+                );
+                await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
+            });
+            it("should be reverted with zero address receiver_", async function () {
+                const tx = vault.withdrawFromRevenueShare(
+                    user3.address,
+                    revenueShareAmount3,
+                    ethers.constants.AddressZero
+                );
+                await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+            });            
+            it("should be reverted with insufficient shares balance", async function () {
+                const tx = vault
+                .connect(user3)
+                .withdrawFromRevenueShare(
+                    mockERC20.address,
+                    ethers.utils.parseUnits("100000", 18),
+                    user3.address
+                );                
+                await expect(tx).to.be.revertedWith("GeneralRevenueShareLogic: insufficient shares balance");
+            });
+            it("should be pausable", async function () {
+                const tx01 = await vault.connect(owner).pause();
+                const tx02 = vault
+                .connect(user3)
+                .withdrawFromRevenueShare(
+                    mockERC20.address,
+                    ethers.utils.parseUnits("100000", 18),
+                    user3.address
+                );                
+                await expect(tx02).to.be.revertedWith("Pausable: paused");
+                const tx03 = await vault.connect(owner).unpause();
+            });
+        });
+        describe("setCinchPerformanceFeePercentage", function () {
+            it("onlyOwner", async function () {
+                const tx = vault.connect(user3).setCinchPerformanceFeePercentage(
+                    ethers.utils.parseUnits("1000000", 2)
+                );
+                await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+            });
+            it("should be reverted with invalid feePercentage_", async function () {
+                const tx = vault.setCinchPerformanceFeePercentage(
+                    ethers.utils.parseUnits("1000000", 2)
+                );
+                await expect(tx).to.be.revertedWith("GeneralRevenueShare: invalid fee percentage");
+            });
         });
     });
 });

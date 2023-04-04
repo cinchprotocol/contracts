@@ -283,10 +283,6 @@ abstract contract GeneralRevenueShareLogic is
             revenueShareBalanceByAssetReferral[asset_][_msgSender()] >= amount_,
             "GeneralRevenueShareLogic: insufficient shares balance"
         );
-        require(
-            IERC20Upgradeable(asset_).balanceOf(address(this)) >= amount_,
-            "GeneralRevenueShareLogic: insufficient assets balance"
-        );
 
         // Substract the amount from the revenue share balance first, to avoid reentrancy attack
         revenueShareBalanceByAssetReferral[asset_][_msgSender()] -= amount_;
