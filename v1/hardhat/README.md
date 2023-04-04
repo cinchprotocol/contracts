@@ -3,7 +3,7 @@
 ## Development
 ```
 yarn install
-yarn coverage
+yarn test
 ```
 
 ## Deployment
