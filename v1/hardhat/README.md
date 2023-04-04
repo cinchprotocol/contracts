@@ -12,3 +12,7 @@ yarn test
 ```
 yarn deploy --tags RevenueShareVaultRibbonEarnMock
 ```
+
+## Docs
+* [High level design](https://docs.google.com/document/d/12nkopFwwz0xqZGNzzpnlJ63a--mSYwqaBId5bz2a2Do/edit?usp=sharing)
+* [docgen](https://github.com/cinchprotocol/contracts/blob/main/v1/hardhat/docs/index.md)
