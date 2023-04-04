@@ -1,8 +1,9 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
 require("@nomiclabs/hardhat-ethers");
-require('@openzeppelin/hardhat-upgrades');
+require("@openzeppelin/hardhat-upgrades");
 //require("@eth-optimism/hardhat-ovm");
+require("solidity-docgen");
 
 const defaultNetwork = process.env.DEFAULT_WEB3_PROVIDER || "localhost";
 const dummyPriKey = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";

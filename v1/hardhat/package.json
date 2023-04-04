@@ -7,7 +7,8 @@
     "test": "hardhat coverage --network hardhat",
     "chain": "hardhat node --network hardhat --no-deploy",
     "deploy": "hardhat deploy --export-all ./hardhat_contracts.json",
-    "copycontract": "cp ./hardhat_contracts.json ../../../cinch-dapp/packages/react-app/contracts/hardhat_contracts.json"
+    "copycontract": "cp ./hardhat_contracts.json ../../../cinch-dapp/packages/react-app/contracts/hardhat_contracts.json",
+    "docgen": "hardhat docgen"
   },
   "license": "MIT",
   "devDependencies": {
@@ -38,7 +39,8 @@
     "@eth-optimism/hardhat-ovm": "^0.2.4",
     "@openzeppelin/contracts": "^4.8.1",
     "@openzeppelin/contracts-upgradeable": "^4.8.2",
-    "@openzeppelin/hardhat-upgrades": "^1.22.1"
+    "@openzeppelin/hardhat-upgrades": "^1.22.1",
+    "solidity-docgen": "^0.6.0-beta.35"
   },
   "mocha": {
     "timeout": 10000000
