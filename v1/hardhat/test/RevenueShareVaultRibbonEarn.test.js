@@ -114,6 +114,9 @@ describe("RevenueShareVaultRibbonEarn", function () {
         it("totalAssets should return correct amount", async function () {
             expect(await vault.totalAssets()).to.equal(depositAmount1.add(depositAmount2));
         });
+        it("totalShareBalanceAtYieldSourceInReferralSet should work with zero referral", async function () {
+            expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(0);
+        });
         it("should be able to addRevenueShareReferral", async function () {
             const tx01 = await vault.addRevenueShareReferral(user1.address);
             expect(tx01)
@@ -398,6 +401,13 @@ describe("RevenueShareVaultRibbonEarn", function () {
     describe("totalShareBalanceAtYieldSourceInReferralSet", function () {
         it("should be able to get total share balance at yield source in referral set", async function () {
             expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(depositAmount3);
+        });
+    });
+
+    describe("setTotalSharesInReferralAccordingToYieldSource", function () {
+        it("onlyOwner", async function () {
+            const tx = vault.connect(user1).setTotalSharesInReferralAccordingToYieldSource();
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
         });
     });
 });

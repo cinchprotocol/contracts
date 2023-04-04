@@ -86,7 +86,7 @@ abstract contract DepositPausableUpgradeable is
      * @dev Throws if the contract is not paused.
      */
     function _requireDepositPaused() internal view virtual {
-        require(depositPaused(), "DepositPausable: not paused");
+        require(depositPaused(), "DepositPausable: unpaused");
     }
 
     /**

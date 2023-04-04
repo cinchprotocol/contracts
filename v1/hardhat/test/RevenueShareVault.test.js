@@ -14,7 +14,8 @@ const revenueShareAmount3 = ethers.utils.parseUnits("100", mockERC20Decimals);
 const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
 const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
 const cinchPerformanceFeePercentage100 = ethers.utils.parseUnits("100", 2);
-const mockSwapperAddress = ethers.constants.AddressZero;
+const ZERO_ADDRESS = ethers.constants.AddressZero;
+const mockSwapperAddress = ZERO_ADDRESS;
 
 before(async function () {
     // get accounts from hardhat
@@ -56,6 +57,15 @@ describe("RevenueShareVault", function () {
             ]);
             expect(vault.address).to.not.be.undefined;
             console.log("vault", vault.address);
+        });
+        it("Should not be able to re-initialized", async function () {
+            const tx = vault.initialize(mockERC20.address,
+                "CinchRevenueShare",
+                "CRS",
+                mockProtocol.address,
+                mockSwapperAddress,
+                initCinchPerformanceFeePercentage);
+            await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
         });
     });
 
@@ -117,6 +127,24 @@ describe("RevenueShareVault", function () {
                 depositAmount2
             );
         });
+        it("should be pausable", async function () {
+            await vault.pause();
+            const tx01 = vault.connect(user1).deposit(depositAmount1, user1.address);
+            await expect(tx01).to.be.revertedWith("Pausable: paused");
+            const tx02 = vault.connect(user2).depositWithReferral(depositAmount2, user2.address, referral2);
+            await expect(tx02).to.be.revertedWith("Pausable: paused");
+            const tx03 = vault.connect(user1).mint(depositAmount1, user1.address);
+            await expect(tx03).to.be.revertedWith("Pausable: paused");
+            await vault.unpause();
+        });
+        it("should not work with zero assets", async function () {
+            const tx = vault.connect(user1).depositWithReferral(0, user1.address, referral1);
+            await expect(tx).to.be.revertedWith("ZERO_ASSETS");
+        });
+        it("should not work with zero address", async function () {
+            const tx = vault.connect(user1).depositWithReferral(depositAmount1, ZERO_ADDRESS, referral1);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
     });
 
     describe("Redeem/withdraw", function () {
@@ -136,6 +164,10 @@ describe("RevenueShareVault", function () {
                 .connect(user2)
                 .redeem(depositAmount1.div(2), user1.address, user1.address);
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
+        });
+        it("should not work with insufficient referral", async function () {
+            const tx = vault.connect(user1).redeemWithReferral(depositAmount1, user1.address, user1.address, referral2);
+            await expect(tx).to.be.revertedWith("RevenueShareVault: insufficient shares by referral");
         });
         it("should be able to redeem partial", async function () {
             await vault
@@ -176,6 +208,20 @@ describe("RevenueShareVault", function () {
             expect(await vault.balanceOf(user2.address)).to.equal(0);
             expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
             expect(await vault.totalSharesByReferral(referral2)).to.equal(0);
+        });
+        it("should be pausable", async function () {
+            await vault.pause();
+            const tx01 = vault.connect(user2).withdrawWithReferral(depositAmount2, user2.address, user2.address, referral2);
+            await expect(tx01).to.be.revertedWith("Pausable: paused");
+            await vault.unpause();
+        });
+        it("should not work with zero shares", async function () {
+            const tx = vault.connect(user1).redeemWithReferral(0, user1.address, user1.address, referral1);
+            await expect(tx).to.be.revertedWith("ZERO_SHARES");
+        });
+        it("should not work with insufficient shares", async function () {
+            const tx = vault.connect(user1).redeemWithReferral(depositAmount1.mul(10), user1.address, user1.address, referral1);
+            await expect(tx).to.be.revertedWith("RevenueShareVault: max redeem exceeded");
         });
     });
 
@@ -322,6 +368,10 @@ describe("RevenueShareVault", function () {
     });
 
     describe("GeneralYieldSourceAdapter", function () {
+        it("setYieldSourceVault onlyOwner", async function () {
+            const tx = vault.connect(user1).setYieldSourceVault(mockProtocol.address);
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
         it("setYieldSourceVault should work", async function () {
             const tx01 = await vault.setYieldSourceVault(mockProtocol.address);
             expect(tx01)
@@ -380,6 +430,10 @@ describe("RevenueShareVault", function () {
                 .to.emit(vault, "DepositPaused")
                 .withArgs(owner.address);
         });
+        it("pauseDeposit should not work when already paused", async function () {
+            const tx = vault.connect(owner).pauseDeposit();
+            await expect(tx).to.be.revertedWith("DepositPausable: paused");
+        });
         it("whenDepositNotPaused function should not work when paused", async function () {
             const tx = vault
                 .connect(user3)
@@ -394,6 +448,10 @@ describe("RevenueShareVault", function () {
             expect(tx)
                 .to.emit(vault, "DepositUnpaused")
                 .withArgs(owner.address);
+        });
+        it("unpauseDeposit should not work when already unpaused", async function () {
+            const tx = vault.connect(owner).unpauseDeposit();
+            await expect(tx).to.be.revertedWith("DepositPausable: unpaused");
         });
     });
 
@@ -496,13 +554,13 @@ describe("RevenueShareVault", function () {
         describe("addRevenueShareReferral", function () {
             it("onlyOwner", async function () {
                 const tx = vault.connect(user3).addRevenueShareReferral(
-                    ethers.constants.AddressZero
+                    ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
             });
             it("should be reverted with zero address referral", async function () {
                 const tx = vault.addRevenueShareReferral(
-                    ethers.constants.AddressZero
+                    ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
             });
@@ -510,13 +568,13 @@ describe("RevenueShareVault", function () {
         describe("removeRevenueShareReferral", function () {
             it("onlyOwner", async function () {
                 const tx = vault.connect(user3).removeRevenueShareReferral(
-                    ethers.constants.AddressZero
+                    ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
             });
             it("should be reverted with zero address referral", async function () {
                 const tx = vault.removeRevenueShareReferral(
-                    ethers.constants.AddressZero
+                    ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
             });
@@ -524,7 +582,7 @@ describe("RevenueShareVault", function () {
         describe("depositToRevenueShare", function () {
             it("should be reverted with zero address assetsFrom_", async function () {
                 const tx = vault.depositToRevenueShare(
-                    ethers.constants.AddressZero,
+                    ZERO_ADDRESS,
                     user3.address,
                     revenueShareAmount3
                 );
@@ -534,7 +592,7 @@ describe("RevenueShareVault", function () {
                 const tx = vault.depositToRevenueShare(
                     user3.address,
                     user3.address,
-                    ethers.constants.AddressZero
+                    ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
             });
@@ -554,7 +612,7 @@ describe("RevenueShareVault", function () {
         describe("withdrawFromRevenueShare", function () {
             it("should be reverted with zero address asset_", async function () {
                 const tx = vault.withdrawFromRevenueShare(
-                    ethers.constants.AddressZero,
+                    ZERO_ADDRESS,
                     revenueShareAmount3,
                     user3.address
                 );
@@ -563,7 +621,7 @@ describe("RevenueShareVault", function () {
             it("should be reverted with zero amount_", async function () {
                 const tx = vault.withdrawFromRevenueShare(
                     user3.address,
-                    ethers.constants.AddressZero,
+                    ZERO_ADDRESS,
                     user3.address
                 );
                 await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
@@ -572,7 +630,7 @@ describe("RevenueShareVault", function () {
                 const tx = vault.withdrawFromRevenueShare(
                     user3.address,
                     revenueShareAmount3,
-                    ethers.constants.AddressZero
+                    ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
             });            

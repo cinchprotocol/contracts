@@ -89,7 +89,6 @@ contract RevenueShareVault is
     /**
      * @notice Deposit assets to the vault
      * @dev See {IERC4626-deposit}
-     * @dev whenNotPaused whenDepositNotPaused
      * @dev depositWithReferral(assets, receiver, receiver)
      * @param assets amount of assets to deposit
      * @param receiver address to receive the shares
@@ -97,14 +96,7 @@ contract RevenueShareVault is
     function deposit(
         uint256 assets,
         address receiver
-    )
-        public
-        virtual
-        override
-        whenNotPaused
-        whenDepositNotPaused
-        returns (uint256)
-    {
+    ) public virtual override returns (uint256) {
         return depositWithReferral(assets, receiver, receiver);
     }
 
@@ -172,7 +164,6 @@ contract RevenueShareVault is
      * @notice As opposed to {deposit}, minting is allowed even if the vault is in a state where the price of a share is zero.
      * @notice In this case, the shares will be minted without requiring any assets to be deposited.
      * @dev See {IERC4626-mint}
-     * @dev whenNotPaused whenDepositNotPaused
      * @dev depositWithReferral(assets, receiver, receiver)
      * @param shares amount of shares to mint
      * @param receiver address to receive the shares
@@ -181,14 +172,7 @@ contract RevenueShareVault is
     function mint(
         uint256 shares,
         address receiver
-    )
-        public
-        virtual
-        override
-        whenNotPaused
-        whenDepositNotPaused
-        returns (uint256)
-    {
+    ) public virtual override returns (uint256) {
         require(
             shares <= maxMint(receiver),
             "RevenueShareVault: mint more than max"
@@ -201,7 +185,6 @@ contract RevenueShareVault is
     /**
      * @notice Redeem assets with vault shares
      * @dev See {IERC4626-redeem}
-     * @dev whenNotPaused
      * @param shares amount of shares to burn and redeem assets
      * @param receiver address to receive the assets
      * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
@@ -211,7 +194,7 @@ contract RevenueShareVault is
         uint256 shares,
         address receiver,
         address sharesOwner
-    ) public virtual override whenNotPaused returns (uint256) {
+    ) public virtual override returns (uint256) {
         return redeemWithReferral(shares, receiver, sharesOwner, sharesOwner);
     }
 
@@ -243,10 +226,6 @@ contract RevenueShareVault is
             "RevenueShareVault: max redeem exceeded"
         );
         require(
-            shares <= balanceOf(sharesOwner),
-            "RevenueShareVault: insufficient shares"
-        );
-        require(
             shares <= totalSharesByUserReferral[sharesOwner][referral],
             "RevenueShareVault: insufficient shares by referral"
         );
@@ -270,7 +249,6 @@ contract RevenueShareVault is
     /**
      * @notice Withdraw a specific amount of assets to be redeemed with vault shares
      * @dev See {IERC4626-withdraw}
-     * @dev whenNotPaused
      * @dev redeem
      * @param assets target amount of assets to be withdrawn
      * @param receiver address to receive the assets
@@ -281,7 +259,7 @@ contract RevenueShareVault is
         uint256 assets,
         address receiver,
         address sharesOwner
-    ) public virtual override whenNotPaused returns (uint256) {
+    ) public virtual override returns (uint256) {
         uint256 shares = convertToShares(assets);
         return redeem(shares, receiver, sharesOwner);
     }
@@ -289,7 +267,6 @@ contract RevenueShareVault is
     /**
      * @notice Withdraw a specific amount of assets to be redeemed with vault shares and referral
      * @dev See {IERC4626-withdraw}
-     * @dev whenNotPaused
      * @param assets target amount of assets to be withdrawn
      * @param receiver address to receive the assets
      * @param sharesOwner address of the owner of the shares to be consumed
@@ -301,7 +278,7 @@ contract RevenueShareVault is
         address receiver,
         address sharesOwner,
         address referral
-    ) public virtual whenNotPaused returns (uint256) {
+    ) public virtual returns (uint256) {
         uint256 shares = convertToShares(assets);
         return redeemWithReferral(shares, receiver, sharesOwner, referral);
     }
