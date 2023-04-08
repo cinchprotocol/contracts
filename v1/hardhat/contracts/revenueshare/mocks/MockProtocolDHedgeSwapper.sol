@@ -9,17 +9,8 @@ import "../interfaces/IYieldSourceDHedge.sol";
 contract MockProtocolDHedgeSwapper {
     using SafeERC20 for IERC20;
 
-    function withdraw(
-        address pool,
-        uint256 fundTokenAmount,
-        IERC20, //withdrawalAsset
-        uint256 //expectedAmountOut
-    ) external {
-        IERC20(pool).safeTransferFrom(
-            msg.sender,
-            address(this),
-            fundTokenAmount
-        );
+    function withdraw(address pool, uint256 fundTokenAmount, IERC20, uint256) external {
+        IERC20(pool).safeTransferFrom(msg.sender, address(this), fundTokenAmount);
         IYieldSourceDHedge(pool).withdrawTo(msg.sender, fundTokenAmount);
     }
 }

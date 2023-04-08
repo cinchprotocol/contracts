@@ -6,12 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MockProtocolRibbonEarn is ERC4626 {
-    constructor(
-        address asset_
-    )
-        ERC4626(ERC20(asset_))
-        ERC20("MockProtocolRibbonEarn", "MOCKPROTOCOLRIBBONEARN")
-    {}
+    constructor(address asset_) ERC4626(ERC20(asset_)) ERC20("MockProtocolRibbonEarn", "MOCKPROTOCOLRIBBONEARN") {}
 
     /**
      * @notice Deposits the `asset` from msg.sender added to `creditor`'s deposit.
@@ -43,20 +38,14 @@ contract MockProtocolRibbonEarn is ERC4626 {
     /**
      * @dev Internal conversion function (from assets to shares) with support for rounding direction.
      */
-    function _convertToShares(
-        uint256 assets,
-        Math.Rounding
-    ) internal pure override returns (uint256) {
+    function _convertToShares(uint256 assets, Math.Rounding) internal pure override returns (uint256) {
         return assets;
     }
 
     /**
      * @dev Internal conversion function (from shares to assets) with support for rounding direction.
      */
-    function _convertToAssets(
-        uint256 shares_,
-        Math.Rounding
-    ) internal pure override returns (uint256) {
+    function _convertToAssets(uint256 shares_, Math.Rounding) internal pure override returns (uint256) {
         return shares_;
     }
 }
