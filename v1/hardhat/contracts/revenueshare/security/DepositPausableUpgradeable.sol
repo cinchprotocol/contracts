@@ -16,11 +16,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  * the functions of your contract. Note that they will not be pausable by
  * simply including this module, only once the modifiers are put in place.
  */
-abstract contract DepositPausableUpgradeable is
-    Initializable,
-    ContextUpgradeable,
-    OwnableUpgradeable
-{
+abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeable, OwnableUpgradeable {
     /**
      * @dev Emitted when the pause is triggered by `account`.
      */

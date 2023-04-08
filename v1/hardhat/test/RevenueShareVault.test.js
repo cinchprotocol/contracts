@@ -3,7 +3,7 @@ const { upgrades } = require("hardhat");
 
 let accounts;
 let owner, user1, user2, user3;
-let mockERC20, mockProtocol, vault;
+let mockERC20, mockProtocol, vault, mockAttackerERC20, mockAttacker;
 let mockERC20Decimals = 6;
 let referral1, referral2, referral3;
 
@@ -411,6 +411,10 @@ describe("RevenueShareVault", function () {
                 );
             await expect(tx).to.be.revertedWith("Pausable: paused");
         });
+        it("only owner can unpause", async function () {
+            const tx = vault.connect(user1).unpause();
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
         it("should be able to unpause", async function () {
             const tx = await vault.connect(owner).unpause();
             expect(tx)
@@ -442,6 +446,10 @@ describe("RevenueShareVault", function () {
                     user3.address
                 );
             await expect(tx).to.be.revertedWith("DepositPausable: paused");
+        });
+        it("only owner can unpause deposit", async function () {
+            const tx = vault.connect(user1).unpauseDeposit();
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
         });
         it("should be able to unpause deposit", async function () {
             const tx = await vault.connect(owner).unpauseDeposit();
@@ -539,7 +547,7 @@ describe("RevenueShareVault", function () {
                 .to.emit(vault, "TotalSharesInReferralUpdated")
                 .withArgs(depositAmount3.mul(2));
             expect(await vault.totalSharesInReferral()).equal(depositAmount3.mul(2));
-            
+
             const tx02 = await vault.connect(owner).setTotalSharesInReferral(
                 depositAmount3
             );
@@ -599,12 +607,12 @@ describe("RevenueShareVault", function () {
             it("should be pausable", async function () {
                 const tx01 = await vault.connect(owner).pause();
                 const tx02 = vault
-                .connect(user3)
-                .depositToRevenueShare(
-                    user3.address,
-                    mockERC20.address,
-                    revenueShareAmount3
-                );
+                    .connect(user3)
+                    .depositToRevenueShare(
+                        user3.address,
+                        mockERC20.address,
+                        revenueShareAmount3
+                    );
                 await expect(tx02).to.be.revertedWith("Pausable: paused");
                 const tx03 = await vault.connect(owner).unpause();
             });
@@ -633,26 +641,26 @@ describe("RevenueShareVault", function () {
                     ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
-            });            
+            });
             it("should be reverted with insufficient shares balance", async function () {
                 const tx = vault
-                .connect(user3)
-                .withdrawFromRevenueShare(
-                    mockERC20.address,
-                    ethers.utils.parseUnits("100000", 18),
-                    user3.address
-                );                
+                    .connect(user3)
+                    .withdrawFromRevenueShare(
+                        mockERC20.address,
+                        ethers.utils.parseUnits("100000", 18),
+                        user3.address
+                    );
                 await expect(tx).to.be.revertedWith("GeneralRevenueShareLogic: insufficient shares balance");
             });
             it("should be pausable", async function () {
                 const tx01 = await vault.connect(owner).pause();
                 const tx02 = vault
-                .connect(user3)
-                .withdrawFromRevenueShare(
-                    mockERC20.address,
-                    ethers.utils.parseUnits("100000", 18),
-                    user3.address
-                );                
+                    .connect(user3)
+                    .withdrawFromRevenueShare(
+                        mockERC20.address,
+                        ethers.utils.parseUnits("100000", 18),
+                        user3.address
+                    );
                 await expect(tx02).to.be.revertedWith("Pausable: paused");
                 const tx03 = await vault.connect(owner).unpause();
             });
@@ -670,6 +678,59 @@ describe("RevenueShareVault", function () {
                 );
                 await expect(tx).to.be.revertedWith("GeneralRevenueShare: invalid fee percentage");
             });
+        });
+    });
+
+    describe("Mock Attacker", function () {
+        it("Should deploy MockAttackerERC20", async function () {
+            const MockAttackerERC20 = await ethers.getContractFactory("MockAttackerERC20");
+            mockAttackerERC20 = await MockAttackerERC20.deploy();
+            expect(mockAttackerERC20.address).to.not.be.undefined;
+        });
+        it("Should deploy MockAttacker", async function () {
+            const MockAttacker = await ethers.getContractFactory("MockAttacker", owner);
+            mockAttacker = await upgrades.deployProxy(MockAttacker, [
+                mockAttackerERC20.address,
+                "MockAttackerCinchRevenueShare",
+                "ACRS",
+                mockProtocol.address,
+                mockSwapperAddress,
+                initCinchPerformanceFeePercentage,
+            ]);
+            expect(mockAttacker.address).to.not.be.undefined;
+        });
+        it("should not be able to re-initialize", async function () {
+            const tx01 = mockAttacker.reInitGeneralRevenueShareLogic();
+            await expect(tx01).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx02 = mockAttacker.reInitGeneralRevenueShareLogicUnChained();
+            await expect(tx02).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx03 = mockAttacker.reInitGeneralYieldSourceAdapter();
+            await expect(tx03).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx04 = mockAttacker.reInitGeneralYieldSourceAdapterUnChained();
+            await expect(tx04).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx05 = mockAttacker.reInitDepositPausable();
+            await expect(tx05).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx06 = mockAttacker.reInitDepositPausableUnChained();
+            await expect(tx06).to.be.revertedWith("Initializable: contract is not initializing");
+        });
+        it("should not be able to reentrant", async function () {
+            await mockAttackerERC20.faucet(user3.address, depositAmount3);
+            await mockAttackerERC20.connect(user3).approve(mockAttacker.address, depositAmount3);
+            const tx01 = mockAttacker
+                .connect(user3)
+                .depositWithReferral(depositAmount3, user3.address, referral3);
+            await expect(tx01).to.be.revertedWith("ReentrancyGuard: reentrant call");
+
+            await mockAttacker.forceFakeDepositState(depositAmount3, user3.address, referral3);
+            const tx02 = mockAttacker
+                .connect(user3)
+                .redeemWithReferral(depositAmount3, user3.address, user3.address, referral3);
+            await expect(tx02).to.be.revertedWith("ReentrancyGuard: reentrant call");
         });
     });
 });

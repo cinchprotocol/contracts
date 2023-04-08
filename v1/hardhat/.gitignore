@@ -5,6 +5,7 @@ coverage
 # coverage.json
 typechain
 typechain-types
+.VSCodeCounter/
 
 # Hardhat files
 cache

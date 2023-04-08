@@ -13,12 +13,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
  * @title GeneralRevenueShareLogic
  * @dev sub-contract of Cinch Vault that handles revenue share distribution
  */
-abstract contract GeneralRevenueShareLogic is
-    Initializable,
-    OwnableUpgradeable,
-    PausableUpgradeable,
-    ReentrancyGuardUpgradeable
-{
+abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using MathUpgradeable for uint256;
 
@@ -27,25 +22,13 @@ abstract contract GeneralRevenueShareLogic is
     /// @dev Emitted when a referral is removed
     event RevenueShareReferralRemoved(address referral);
     /// @dev Emitted when revenue share is deposited, i.e. by a yield source
-    event RevenueShareDeposited(
-        address indexed assetsFrom,
-        address asset,
-        uint256 amount
-    );
+    event RevenueShareDeposited(address indexed assetsFrom, address asset, uint256 amount);
     /// @dev Emitted when revenue share is withdrawn by a referral
-    event RevenueShareWithdrawn(
-        address indexed asset,
-        uint256 amount,
-        address referral,
-        address receiver
-    );
+    event RevenueShareWithdrawn(address indexed asset, uint256 amount, address referral, address receiver);
     /// @dev Emitted when cinchPerformanceFeePercentage is updated
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
     /// @dev Emitted upon setTotalSharesByReferral
-    event TotalSharesByReferralUpdated(
-        address indexed referral,
-        uint256 shares_
-    );
+    event TotalSharesByReferralUpdated(address indexed referral, uint256 shares_);
     /// @dev Emitted upon setTotalSharesInReferral
     event TotalSharesInReferralUpdated(uint256 shares_);
 
@@ -56,34 +39,25 @@ abstract contract GeneralRevenueShareLogic is
     /// @dev Partner referral address -> Total shares
     mapping(address => uint256) public totalSharesByReferral;
     /// @dev User address -> Partner referral address -> Total shares
-    mapping(address => mapping(address => uint256))
-        public totalSharesByUserReferral;
+    mapping(address => mapping(address => uint256)) public totalSharesByUserReferral;
     /// @dev asset => (referral => revenueShareBalance)
-    mapping(address => mapping(address => uint256))
-        public revenueShareBalanceByAssetReferral;
+    mapping(address => mapping(address => uint256)) public revenueShareBalanceByAssetReferral;
     /// @dev asset => totalRevenueShareProcessed
     mapping(address => uint256) public totalRevenueShareProcessedByAsset;
     /// @dev Cinch performance fee percentage with 2 decimals
     uint256 public cinchPerformanceFeePercentage;
     /// @dev Address set of all users by referral
-    mapping(address => EnumerableSetUpgradeable.AddressSet)
-        internal _userSetByReferral;
+    mapping(address => EnumerableSetUpgradeable.AddressSet) internal _userSetByReferral;
 
     /**
      * @notice GeneralRevenueShareLogic initializer
      * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
      */
-    function __GeneralRevenueShareLogic_init(
-        uint256 cinchPerformanceFeePercentage_
-    ) internal onlyInitializing {
-        __GeneralRevenueShareLogic_init_unchained(
-            cinchPerformanceFeePercentage_
-        );
+    function __GeneralRevenueShareLogic_init(uint256 cinchPerformanceFeePercentage_) internal onlyInitializing {
+        __GeneralRevenueShareLogic_init_unchained(cinchPerformanceFeePercentage_);
     }
 
-    function __GeneralRevenueShareLogic_init_unchained(
-        uint256 cinchPerformanceFeePercentage_
-    ) internal onlyInitializing {
+    function __GeneralRevenueShareLogic_init_unchained(uint256 cinchPerformanceFeePercentage_) internal onlyInitializing {
         cinchPerformanceFeePercentage = cinchPerformanceFeePercentage_;
     }
 
@@ -92,14 +66,9 @@ abstract contract GeneralRevenueShareLogic is
      * @dev onlyOwner
      * @param referral_ The address of the referral to add
      */
-    function addRevenueShareReferral(
-        address referral_
-    ) external virtual onlyOwner {
+    function addRevenueShareReferral(address referral_) external virtual onlyOwner {
         require(referral_ != address(0), "ZERO_ADDRESS");
-        require(
-            !_referralSet.contains(referral_),
-            "GeneralRevenueShare: referral already exists"
-        );
+        require(!_referralSet.contains(referral_), "GeneralRevenueShare: referral already exists");
         _referralSet.add(referral_);
         emit RevenueShareReferralAdded(referral_);
     }
@@ -109,16 +78,10 @@ abstract contract GeneralRevenueShareLogic is
      * @dev onlyOwner
      * @param referral_ The address of the referral to remove
      */
-    function removeRevenueShareReferral(
-        address referral_
-    ) external virtual onlyOwner {
+    function removeRevenueShareReferral(address referral_) external virtual onlyOwner {
         require(referral_ != address(0), "ZERO_ADDRESS");
-        require(
-            _referralSet.contains(referral_),
-            "GeneralRevenueShare: referral does not exist"
-        );
+        require(_referralSet.contains(referral_), "GeneralRevenueShare: referral does not exist");
         _referralSet.remove(referral_);
-
         emit RevenueShareReferralRemoved(referral_);
     }
 
@@ -126,11 +89,7 @@ abstract contract GeneralRevenueShareLogic is
      * @notice Getter for the cinchPxPayeeSet
      * @return referrals The array of referrals
      */
-    function getRevenueShareReferralSet()
-        external
-        view
-        returns (address[] memory referrals)
-    {
+    function getRevenueShareReferralSet() external view returns (address[] memory referrals) {
         referrals = _referralSet.values();
     }
 
@@ -140,11 +99,7 @@ abstract contract GeneralRevenueShareLogic is
      * @param referral The address of the referral
      * @param shares The amount of shares added
      */
-    function _trackSharesInReferralAdded(
-        address sharesOwner,
-        address referral,
-        uint256 shares
-    ) internal virtual {
+    function _trackSharesInReferralAdded(address sharesOwner, address referral, uint256 shares) internal virtual {
         totalSharesByReferral[referral] += shares;
         totalSharesByUserReferral[sharesOwner][referral] += shares;
         totalSharesInReferral += shares;
@@ -157,11 +112,7 @@ abstract contract GeneralRevenueShareLogic is
      * @param referral The address of the referral
      * @param shares The amount of shares decreased
      */
-    function _trackSharesInReferralRemoved(
-        address sharesOwner,
-        address referral,
-        uint256 shares
-    ) internal virtual {
+    function _trackSharesInReferralRemoved(address sharesOwner, address referral, uint256 shares) internal virtual {
         totalSharesByUserReferral[sharesOwner][referral] -= shares;
         totalSharesByReferral[referral] -= shares;
         totalSharesInReferral -= shares;
@@ -173,10 +124,7 @@ abstract contract GeneralRevenueShareLogic is
      * @param referral The address of the referral
      * @param shares_ The amount of shares decreased
      */
-    function setTotalSharesByReferral(
-        address referral,
-        uint256 shares_
-    ) external virtual onlyOwner {
+    function setTotalSharesByReferral(address referral, uint256 shares_) external virtual onlyOwner {
         totalSharesByReferral[referral] = shares_;
         emit TotalSharesByReferralUpdated(referral, shares_);
     }
@@ -186,9 +134,7 @@ abstract contract GeneralRevenueShareLogic is
      * @dev onlyOwner
      * @param shares_ The amount of shares decreased
      */
-    function setTotalSharesInReferral(
-        uint256 shares_
-    ) external virtual onlyOwner {
+    function setTotalSharesInReferral(uint256 shares_) external virtual onlyOwner {
         totalSharesInReferral = shares_;
         emit TotalSharesInReferralUpdated(shares_);
     }
@@ -201,50 +147,25 @@ abstract contract GeneralRevenueShareLogic is
      * @param asset_ The address of the asset to be deposited
      * @param amount_ The amount of asset to be deposited
      */
-    function depositToRevenueShare(
-        address assetsFrom_,
-        address asset_,
-        uint256 amount_
-    ) external virtual whenNotPaused nonReentrant {
-        require(
-            assetsFrom_ != address(0) && asset_ != address(0),
-            "ZERO_ADDRESS"
-        );
+    function depositToRevenueShare(address assetsFrom_, address asset_, uint256 amount_) external virtual whenNotPaused nonReentrant {
+        require(assetsFrom_ != address(0) && asset_ != address(0), "ZERO_ADDRESS");
         require(amount_ > 0, "ZERO_AMOUNT");
-        require(
-            totalSharesInReferral > 0,
-            "GeneralRevenueShareLogic: totalSharesInReferral is zero"
-        );
+        require(totalSharesInReferral > 0, "GeneralRevenueShareLogic: totalSharesInReferral is zero");
 
         // Transfer assets to this vault first, assuming it was approved by the sender
-        SafeERC20Upgradeable.safeTransferFrom(
-            IERC20Upgradeable(asset_),
-            assetsFrom_,
-            address(this),
-            amount_
-        );
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(asset_), assetsFrom_, address(this), amount_);
         totalRevenueShareProcessedByAsset[asset_] += amount_;
 
         // Take Cinch performance fee from the amount
-        uint256 amountAfterFee = amount_.mulDiv(
-            10000 - cinchPerformanceFeePercentage,
-            10000,
-            MathUpgradeable.Rounding.Up
-        );
+        uint256 amountAfterFee = amount_.mulDiv(10000 - cinchPerformanceFeePercentage, 10000, MathUpgradeable.Rounding.Up);
 
         uint256 distributedAmount = 0;
         // Make the amount claimable among referrals according to their shares ratio
         address[] memory referrals = _referralSet.values();
         for (uint256 i = 0; i < referrals.length; i++) {
             address referral = referrals[i];
-            uint256 revenueShareForReferral = amountAfterFee.mulDiv(
-                totalSharesByReferral[referral],
-                totalSharesInReferral,
-                MathUpgradeable.Rounding.Down
-            );
-            revenueShareBalanceByAssetReferral[asset_][
-                referral
-            ] += revenueShareForReferral;
+            uint256 revenueShareForReferral = amountAfterFee.mulDiv(totalSharesByReferral[referral], totalSharesInReferral, MathUpgradeable.Rounding.Down);
+            revenueShareBalanceByAssetReferral[asset_][referral] += revenueShareForReferral;
             distributedAmount += revenueShareForReferral;
         }
 
@@ -253,9 +174,7 @@ abstract contract GeneralRevenueShareLogic is
         // In both case, allocate undistributed amount to contract owner
         if (amount_ > distributedAmount) {
             uint256 undistributedAmount = amount_ - distributedAmount;
-            revenueShareBalanceByAssetReferral[asset_][
-                owner()
-            ] += undistributedAmount;
+            revenueShareBalanceByAssetReferral[asset_][owner()] += undistributedAmount;
         }
 
         emit RevenueShareDeposited(assetsFrom_, asset_, amount_);
@@ -269,30 +188,16 @@ abstract contract GeneralRevenueShareLogic is
      * @param amount_ The amount of asset to be deposited
      * @param receiver_ The address of the receiver
      */
-    function withdrawFromRevenueShare(
-        address asset_,
-        uint256 amount_,
-        address receiver_
-    ) external virtual whenNotPaused nonReentrant {
-        require(
-            asset_ != address(0) && receiver_ != address(0),
-            "ZERO_ADDRESS"
-        );
+    function withdrawFromRevenueShare(address asset_, uint256 amount_, address receiver_) external virtual whenNotPaused nonReentrant {
+        require(asset_ != address(0) && receiver_ != address(0), "ZERO_ADDRESS");
         require(amount_ > 0, "ZERO_AMOUNT");
-        require(
-            revenueShareBalanceByAssetReferral[asset_][_msgSender()] >= amount_,
-            "GeneralRevenueShareLogic: insufficient shares balance"
-        );
+        require(revenueShareBalanceByAssetReferral[asset_][_msgSender()] >= amount_, "GeneralRevenueShareLogic: insufficient shares balance");
 
         // Substract the amount from the revenue share balance first, to avoid reentrancy attack
         revenueShareBalanceByAssetReferral[asset_][_msgSender()] -= amount_;
 
         // Transfer assets to the receiver
-        SafeERC20Upgradeable.safeTransfer(
-            IERC20Upgradeable(asset_),
-            receiver_,
-            amount_
-        );
+        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset_), receiver_, amount_);
 
         emit RevenueShareWithdrawn(asset_, amount_, _msgSender(), receiver_);
     }
@@ -300,13 +205,8 @@ abstract contract GeneralRevenueShareLogic is
     /**
      * @param feePercentage_ Cinch performance fee percentage with 2 decimals
      */
-    function setCinchPerformanceFeePercentage(
-        uint256 feePercentage_
-    ) external virtual onlyOwner {
-        require(
-            feePercentage_ <= 10000,
-            "GeneralRevenueShare: invalid fee percentage"
-        );
+    function setCinchPerformanceFeePercentage(uint256 feePercentage_) external virtual onlyOwner {
+        require(feePercentage_ <= 10000, "GeneralRevenueShare: invalid fee percentage");
         cinchPerformanceFeePercentage = feePercentage_;
         emit CinchPerformanceFeePercentageUpdated(feePercentage_);
     }

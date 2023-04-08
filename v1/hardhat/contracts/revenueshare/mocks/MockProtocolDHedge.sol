@@ -6,12 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MockProtocolDHedge is ERC4626 {
-    constructor(
-        address asset_
-    )
-        ERC4626(ERC20(asset_))
-        ERC20("MockProtocolDHedge", "MOCKPROTOCOLDHEDGE")
-    {}
+    constructor(address asset_) ERC4626(ERC20(asset_)) ERC20("MockProtocolDHedge", "MOCKPROTOCOLDHEDGE") {}
 
     function tokenPrice() public pure returns (uint256) {
         return 1;
@@ -22,11 +17,7 @@ contract MockProtocolDHedge is ERC4626 {
     /// asset_ Address of the token
     /// @param amount_ Amount of tokens to deposit
     /// @return liquidityMinted Amount of liquidity minted
-    function depositFor(
-        address recipient_,
-        address, // asset_
-        uint256 amount_
-    ) external returns (uint256 liquidityMinted) {
+    function depositFor(address recipient_, address, uint256 amount_) external returns (uint256 liquidityMinted) {
         _deposit(_msgSender(), recipient_, amount_, amount_);
         liquidityMinted = amount_;
     }
@@ -36,12 +27,6 @@ contract MockProtocolDHedge is ERC4626 {
     /// @param recipient_ the receipient
     /// @param fundTokenAmount_ the fund token amount
     function withdrawTo(address recipient_, uint256 fundTokenAmount_) external {
-        _withdraw(
-            _msgSender(),
-            recipient_,
-            _msgSender(),
-            fundTokenAmount_,
-            fundTokenAmount_
-        );
+        _withdraw(_msgSender(), recipient_, _msgSender(), fundTokenAmount_, fundTokenAmount_);
     }
 }
