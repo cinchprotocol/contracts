@@ -20,34 +20,13 @@ import "./security/DepositPausableUpgradeable.sol";
  * @dev Should be deployed per yield source pool/vault
  * @dev ERC4626 based vault
  */
-contract RevenueShareVault is
-    ERC4626Upgradeable,
-    OwnableUpgradeable,
-    PausableUpgradeable,
-    DepositPausableUpgradeable,
-    ReentrancyGuardUpgradeable,
-    GeneralYieldSourceAdapter,
-    GeneralRevenueShareLogic
-{
+contract RevenueShareVault is ERC4626Upgradeable, OwnableUpgradeable, PausableUpgradeable, DepositPausableUpgradeable, ReentrancyGuardUpgradeable, GeneralYieldSourceAdapter, GeneralRevenueShareLogic {
     using MathUpgradeable for uint256;
 
     /// @dev Emitted when user deposit with referral
-    event DepositWithReferral(
-        address caller,
-        address receiver,
-        uint256 assets,
-        uint256 shares,
-        address indexed referral
-    );
+    event DepositWithReferral(address caller, address receiver, uint256 assets, uint256 shares, address indexed referral);
     /// @dev Emitted when user redeem with referral
-    event RedeemWithReferral(
-        address caller,
-        address receiver,
-        address sharesOwner,
-        uint256 assets,
-        uint256 shares,
-        address indexed referral
-    );
+    event RedeemWithReferral(address caller, address receiver, address sharesOwner, uint256 assets, uint256 shares, address indexed referral);
 
     /// @dev Total asset deposit processed
     uint256 public totalAssetDepositProcessed;
@@ -61,20 +40,12 @@ contract RevenueShareVault is
      * @param yieldSourceSwapper_ swapper address of yield source
      * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
      */
-    function initialize(
-        address asset_,
-        string calldata name,
-        string calldata symbol,
-        address yieldSourceVault_,
-        address yieldSourceSwapper_,
-        uint256 cinchPerformanceFeePercentage_
-    ) public initializer {
+    function initialize(address asset_, string calldata name, string calldata symbol, address yieldSourceVault_, address yieldSourceSwapper_, uint256 cinchPerformanceFeePercentage_) public initializer {
         __Ownable_init();
         __Pausable_init();
         __DepositPausable_init();
         __ERC4626_init(IERC20Upgradeable(asset_));
         __ERC20_init(name, symbol);
-
         __GeneralYieldSourceAdapter_init(
             yieldSourceVault_,
             yieldSourceSwapper_
@@ -93,10 +64,7 @@ contract RevenueShareVault is
      * @param assets amount of assets to deposit
      * @param receiver address to receive the shares
      */
-    function deposit(
-        uint256 assets,
-        address receiver
-    ) public virtual override returns (uint256) {
+    function deposit(uint256 assets, address receiver) public virtual override returns (uint256) {
         return depositWithReferral(assets, receiver, receiver);
     }
 
@@ -111,35 +79,13 @@ contract RevenueShareVault is
      * @param referral address of the partner referral
      * @return shares amount of shares received
      */
-    function depositWithReferral(
-        uint256 assets,
-        address receiver,
-        address referral
-    )
-        public
-        virtual
-        whenNotPaused
-        whenDepositNotPaused
-        nonReentrant
-        returns (uint256)
-    {
+    function depositWithReferral(uint256 assets, address receiver, address referral) public virtual whenNotPaused whenDepositNotPaused nonReentrant returns (uint256) {
         require(assets > 0, "ZERO_ASSETS");
-        require(
-            receiver != address(0) && referral != address(0),
-            "ZERO_ADDRESS"
-        );
-        require(
-            assets <= maxDeposit(receiver),
-            "RevenueShareVault: max deposit exceeded"
-        );
+        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
+        require(assets <= maxDeposit(receiver), "RevenueShareVault: max deposit exceeded");
 
         // Transfer assets to this vault first, assuming it was approved by the sender
-        SafeERC20Upgradeable.safeTransferFrom(
-            IERC20Upgradeable(asset()),
-            _msgSender(),
-            address(this),
-            assets
-        );
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(asset()), _msgSender(), address(this), assets);
 
         // Deposit assets to yield source vault
         uint256 shares = _depositToYieldSourceVault(asset(), assets);
@@ -148,13 +94,7 @@ contract RevenueShareVault is
         _mint(receiver, shares);
         _trackSharesInReferralAdded(receiver, referral, shares);
         totalAssetDepositProcessed += assets;
-        emit DepositWithReferral(
-            _msgSender(),
-            receiver,
-            assets,
-            shares,
-            referral
-        );
+        emit DepositWithReferral(_msgSender(), receiver, assets, shares, referral);
 
         return shares;
     }
@@ -169,14 +109,8 @@ contract RevenueShareVault is
      * @param receiver address to receive the shares
      * @return assets amount of assets consumed
      */
-    function mint(
-        uint256 shares,
-        address receiver
-    ) public virtual override returns (uint256) {
-        require(
-            shares <= maxMint(receiver),
-            "RevenueShareVault: mint more than max"
-        );
+    function mint(uint256 shares, address receiver) public virtual override returns (uint256) {
+        require(shares <= maxMint(receiver), "RevenueShareVault: mint more than max");
         uint256 assets = previewMint(shares);
         depositWithReferral(assets, receiver, receiver);
         return assets;
@@ -190,11 +124,7 @@ contract RevenueShareVault is
      * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
      * @return assets amount of assets received
      */
-    function redeem(
-        uint256 shares,
-        address receiver,
-        address sharesOwner
-    ) public virtual override returns (uint256) {
+    function redeem(uint256 shares, address receiver, address sharesOwner) public virtual override returns (uint256) {
         return redeemWithReferral(shares, receiver, sharesOwner, sharesOwner);
     }
 
@@ -210,39 +140,18 @@ contract RevenueShareVault is
      * @param referral address of the partner referral
      * @return assets amount of assets received
      */
-    function redeemWithReferral(
-        uint256 shares,
-        address receiver,
-        address sharesOwner,
-        address referral
-    ) public virtual whenNotPaused nonReentrant returns (uint256) {
+    function redeemWithReferral(uint256 shares, address receiver, address sharesOwner, address referral) public virtual whenNotPaused nonReentrant returns (uint256) {
         require(shares > 0, "ZERO_SHARES");
-        require(
-            receiver != address(0) && referral != address(0),
-            "ZERO_ADDRESS"
-        );
-        require(
-            shares <= maxRedeem(sharesOwner),
-            "RevenueShareVault: max redeem exceeded"
-        );
-        require(
-            shares <= totalSharesByUserReferral[sharesOwner][referral],
-            "RevenueShareVault: insufficient shares by referral"
-        );
+        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
+        require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
+        require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVault: insufficient shares by referral");
 
         //remove the shares from the user record first to avoid reentrancy attack
         _trackSharesInReferralRemoved(sharesOwner, referral, shares);
 
         uint256 assets = _redeemFromYieldSourceVault(shares);
         _withdraw(_msgSender(), receiver, sharesOwner, assets, shares);
-        emit RedeemWithReferral(
-            _msgSender(),
-            receiver,
-            sharesOwner,
-            assets,
-            shares,
-            referral
-        );
+        emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
         return assets;
     }
 
@@ -255,11 +164,7 @@ contract RevenueShareVault is
      * @param sharesOwner address of the owner of the shares to be consumed
      * @return assets amount of assets received
      */
-    function withdraw(
-        uint256 assets,
-        address receiver,
-        address sharesOwner
-    ) public virtual override returns (uint256) {
+    function withdraw(uint256 assets, address receiver, address sharesOwner) public virtual override returns (uint256) {
         uint256 shares = convertToShares(assets);
         return redeem(shares, receiver, sharesOwner);
     }
@@ -273,12 +178,7 @@ contract RevenueShareVault is
      * @param referral address of the partner referral
      * @return assets amount of assets received
      */
-    function withdrawWithReferral(
-        uint256 assets,
-        address receiver,
-        address sharesOwner,
-        address referral
-    ) public virtual returns (uint256) {
+    function withdrawWithReferral(uint256 assets, address receiver, address sharesOwner, address referral) public virtual returns (uint256) {
         uint256 shares = convertToShares(assets);
         return redeemWithReferral(shares, receiver, sharesOwner, referral);
     }
@@ -289,28 +189,20 @@ contract RevenueShareVault is
      */
     function totalAssets() public view virtual override returns (uint256) {
         uint256 shares = shareBalanceAtYieldSourceOf(address(this));
-        return
-            _convertYieldSourceSharesToAssets(
-                shares,
-                MathUpgradeable.Rounding.Down
-            );
+        return _convertYieldSourceSharesToAssets(shares, MathUpgradeable.Rounding.Down);
     }
 
     /**
      * @return assets maximum asset amounts that can be deposited
      */
-    function maxDeposit(
-        address
-    ) public view virtual override returns (uint256) {
+    function maxDeposit(address) public view virtual override returns (uint256) {
         return type(uint256).max;
     }
 
     /**
      * @return assets maximum asset amounts that can be withdrawn
      */
-    function maxWithdraw(
-        address _owner
-    ) public view virtual override returns (uint256) {
+    function maxWithdraw(address _owner) public view virtual override returns (uint256) {
         return convertToAssets(balanceOf(_owner));
     }
 
@@ -321,10 +213,7 @@ contract RevenueShareVault is
      * @param rounding rounding mode
      * @return shares amount of shares that would be converted from assets
      */
-    function _convertToShares(
-        uint256 assets,
-        MathUpgradeable.Rounding rounding
-    ) internal view virtual override returns (uint256) {
+    function _convertToShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view virtual override returns (uint256) {
         return _convertAssetsToYieldSourceShares(assets, rounding);
     }
 
@@ -335,10 +224,7 @@ contract RevenueShareVault is
      * @param rounding rounding mode
      * @return assets amount of assets that would be converted from shares
      */
-    function _convertToAssets(
-        uint256 shares,
-        MathUpgradeable.Rounding rounding
-    ) internal view virtual override returns (uint256) {
+    function _convertToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view virtual override returns (uint256) {
         return _convertYieldSourceSharesToAssets(shares, rounding);
     }
 
@@ -351,15 +237,8 @@ contract RevenueShareVault is
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault
      */
-    function assetBalanceAtYieldSourceOf(
-        address account,
-        address referral
-    ) public view virtual override returns (uint256) {
-        return
-            _convertYieldSourceSharesToAssets(
-                totalSharesByUserReferral[account][referral],
-                MathUpgradeable.Rounding.Down
-            );
+    function assetBalanceAtYieldSourceOf(address account, address referral) public view virtual override returns (uint256) {
+        return _convertYieldSourceSharesToAssets(totalSharesByUserReferral[account][referral], MathUpgradeable.Rounding.Down);
     }
 
     /*//////////////////////////////////////////////////////////////
