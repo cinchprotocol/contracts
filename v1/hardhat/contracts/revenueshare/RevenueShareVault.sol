@@ -46,10 +46,7 @@ contract RevenueShareVault is ERC4626Upgradeable, OwnableUpgradeable, PausableUp
         __DepositPausable_init();
         __ERC4626_init(IERC20Upgradeable(asset_));
         __ERC20_init(name, symbol);
-        __GeneralYieldSourceAdapter_init(
-            yieldSourceVault_,
-            yieldSourceSwapper_
-        );
+        __GeneralYieldSourceAdapter_init(yieldSourceVault_, yieldSourceSwapper_);
         __GeneralRevenueShareLogic_init(cinchPerformanceFeePercentage_);
     }
 

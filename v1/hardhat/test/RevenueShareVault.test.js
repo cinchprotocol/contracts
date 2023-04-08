@@ -3,7 +3,7 @@ const { upgrades } = require("hardhat");
 
 let accounts;
 let owner, user1, user2, user3;
-let mockERC20, mockProtocol, vault;
+let mockERC20, mockProtocol, vault, attacker;
 let mockERC20Decimals = 6;
 let referral1, referral2, referral3;
 
@@ -66,6 +66,18 @@ describe("RevenueShareVault", function () {
                 mockSwapperAddress,
                 initCinchPerformanceFeePercentage);
             await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+        });
+        it("Should deploy MockAttacker", async function () {
+            const MockAttacker = await ethers.getContractFactory("MockAttacker", owner);
+            attacker = await upgrades.deployProxy(MockAttacker, [
+                mockERC20.address,
+                "MockAttackerCinchRevenueShare",
+                "ACRS",
+                mockProtocol.address,
+                mockSwapperAddress,
+                initCinchPerformanceFeePercentage,
+            ]);
+            expect(attacker.address).to.not.be.undefined;
         });
     });
 
@@ -539,7 +551,7 @@ describe("RevenueShareVault", function () {
                 .to.emit(vault, "TotalSharesInReferralUpdated")
                 .withArgs(depositAmount3.mul(2));
             expect(await vault.totalSharesInReferral()).equal(depositAmount3.mul(2));
-            
+
             const tx02 = await vault.connect(owner).setTotalSharesInReferral(
                 depositAmount3
             );
@@ -599,12 +611,12 @@ describe("RevenueShareVault", function () {
             it("should be pausable", async function () {
                 const tx01 = await vault.connect(owner).pause();
                 const tx02 = vault
-                .connect(user3)
-                .depositToRevenueShare(
-                    user3.address,
-                    mockERC20.address,
-                    revenueShareAmount3
-                );
+                    .connect(user3)
+                    .depositToRevenueShare(
+                        user3.address,
+                        mockERC20.address,
+                        revenueShareAmount3
+                    );
                 await expect(tx02).to.be.revertedWith("Pausable: paused");
                 const tx03 = await vault.connect(owner).unpause();
             });
@@ -633,26 +645,26 @@ describe("RevenueShareVault", function () {
                     ZERO_ADDRESS
                 );
                 await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
-            });            
+            });
             it("should be reverted with insufficient shares balance", async function () {
                 const tx = vault
-                .connect(user3)
-                .withdrawFromRevenueShare(
-                    mockERC20.address,
-                    ethers.utils.parseUnits("100000", 18),
-                    user3.address
-                );                
+                    .connect(user3)
+                    .withdrawFromRevenueShare(
+                        mockERC20.address,
+                        ethers.utils.parseUnits("100000", 18),
+                        user3.address
+                    );
                 await expect(tx).to.be.revertedWith("GeneralRevenueShareLogic: insufficient shares balance");
             });
             it("should be pausable", async function () {
                 const tx01 = await vault.connect(owner).pause();
                 const tx02 = vault
-                .connect(user3)
-                .withdrawFromRevenueShare(
-                    mockERC20.address,
-                    ethers.utils.parseUnits("100000", 18),
-                    user3.address
-                );                
+                    .connect(user3)
+                    .withdrawFromRevenueShare(
+                        mockERC20.address,
+                        ethers.utils.parseUnits("100000", 18),
+                        user3.address
+                    );
                 await expect(tx02).to.be.revertedWith("Pausable: paused");
                 const tx03 = await vault.connect(owner).unpause();
             });
@@ -670,6 +682,22 @@ describe("RevenueShareVault", function () {
                 );
                 await expect(tx).to.be.revertedWith("GeneralRevenueShare: invalid fee percentage");
             });
+        });
+    });
+
+    describe("Mock Attacker", function () {
+        it("should not be able to re-initialize", async function () {
+            const tx01 = attacker.reInitGeneralRevenueShareLogic();
+            await expect(tx01).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx02 = attacker.reInitGeneralRevenueShareLogicUnChained();
+            await expect(tx02).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx03 = attacker.reInitGeneralYieldSourceAdapter();
+            await expect(tx03).to.be.revertedWith("Initializable: contract is not initializing");
+
+            const tx04 = attacker.reInitGeneralYieldSourceAdapterUnChained();
+            await expect(tx04).to.be.revertedWith("Initializable: contract is not initializing");
         });
     });
 });
