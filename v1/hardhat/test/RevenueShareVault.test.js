@@ -411,6 +411,10 @@ describe("RevenueShareVault", function () {
                 );
             await expect(tx).to.be.revertedWith("Pausable: paused");
         });
+        it("only owner can unpause", async function () {
+            const tx = vault.connect(user1).unpause();
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
         it("should be able to unpause", async function () {
             const tx = await vault.connect(owner).unpause();
             expect(tx)
