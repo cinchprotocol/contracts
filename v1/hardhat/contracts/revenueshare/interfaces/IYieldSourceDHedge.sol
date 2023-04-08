@@ -9,11 +9,7 @@ interface IYieldSourceDHedge {
     /// @param _asset Address of the token
     /// @param _amount Amount of tokens to deposit
     /// @return liquidityMinted Amount of liquidity minted
-    function depositFor(
-        address _recipient,
-        address _asset,
-        uint256 _amount
-    ) external returns (uint256 liquidityMinted);
+    function depositFor(address _recipient, address _asset, uint256 _amount) external returns (uint256 liquidityMinted);
 
     /// @notice Withdraw assets based on the fund token amount
     /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L364
@@ -40,10 +36,5 @@ interface IYieldSourceDHedgeSwapper {
     /// @param fundTokenAmount the amount to withdraw
     /// @param withdrawalAsset must have direct pair to all pool.supportedAssets on swapRouter
     /// @param expectedAmountOut the amount of value in the withdrawalAsset expected (slippage protection)
-    function withdraw(
-        address pool,
-        uint256 fundTokenAmount,
-        IERC20 withdrawalAsset,
-        uint256 expectedAmountOut
-    ) external;
+    function withdraw(address pool, uint256 fundTokenAmount, IERC20 withdrawalAsset, uint256 expectedAmountOut) external;
 }
