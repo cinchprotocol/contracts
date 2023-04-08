@@ -45,25 +45,11 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @param assets_ The amount of assets to deposit
      * @return shares amount of shares received
      */
-    function _depositToYieldSourceVault(
-        address asset_,
-        uint256 assets_
-    ) internal override returns (uint256) {
+    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
         IERC20Upgradeable(asset_).approve(yieldSourceVault, assets_);
-
-        uint256 shares0 = IYieldSourceRibbonEarn(yieldSourceVault).shares(
-            _msgSender()
-        );
-
-        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(
-            assets_,
-            _msgSender()
-        );
-
-        uint256 shares1 = IYieldSourceRibbonEarn(yieldSourceVault).shares(
-            _msgSender()
-        );
-
+        uint256 shares0 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
+        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(assets_, _msgSender());
+        uint256 shares1 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
         return shares1 - shares0;
     }
 
@@ -78,12 +64,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * referral address of the partner referral
      * @return assets_ amount of assets received
      */
-    function redeemWithReferral(
-        uint256, // shares,
-        address, // receiver,
-        address, // sharesOwner,
-        address // referral
-    ) public override returns (uint256) {
+    function redeemWithReferral(uint256, address, address, address) public override returns (uint256) {
         require(false, "RevenueShareVaultRibbonEarn: not supported");
     }
 
@@ -101,10 +82,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @param rounding rounding mode
      * @return shares amount of shares that would be converted from assets
      */
-    function _convertAssetsToYieldSourceShares(
-        uint256 assets,
-        MathUpgradeable.Rounding rounding
-    ) internal view override returns (uint256) {
+    function _convertAssetsToYieldSourceShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
         return assets.mulDiv(1, sharePriceOfYieldSource(), rounding);
     }
 
@@ -115,10 +93,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @param rounding rounding mode
      * @return assets amount of assets that would be converted from shares
      */
-    function _convertYieldSourceSharesToAssets(
-        uint256 shares,
-        MathUpgradeable.Rounding rounding
-    ) internal view override returns (uint256) {
+    function _convertYieldSourceSharesToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
         return shares.mulDiv(sharePriceOfYieldSource(), 1, rounding);
     }
 
@@ -126,9 +101,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @param account target account address
      * @return shares yield source share balance of this vault
      */
-    function shareBalanceAtYieldSourceOf(
-        address account
-    ) public view override returns (uint256) {
+    function shareBalanceAtYieldSourceOf(address account) public view override returns (uint256) {
         return IYieldSourceRibbonEarn(yieldSourceVault).shares(account);
     }
 
@@ -136,12 +109,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev to be used for calculating the revenue share ratio
      * @return yieldSourceTotalShares total yield source shares supply
      */
-    function getYieldSourceVaultTotalShares()
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function getYieldSourceVaultTotalShares() external view override returns (uint256) {
         return IYieldSourceRibbonEarn(yieldSourceVault).totalSupply();
     }
 
@@ -150,21 +118,14 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @return assets total amount of the underlying asset managed by this vault
      */
     function totalAssets() public view override returns (uint256) {
-        return
-            _convertYieldSourceSharesToAssets(
-                totalSharesInReferral,
-                MathUpgradeable.Rounding.Down
-            );
+        return _convertYieldSourceSharesToAssets(totalSharesInReferral, MathUpgradeable.Rounding.Down);
     }
 
     /**
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalShareBalanceAtYieldSourceInReferralSet
      * @return shares_ total share balance at yield source in referral set
      */
-    function totalShareBalanceAtYieldSourceInReferralSet()
-        external
-        view
-        returns (uint256 shares_)
+    function totalShareBalanceAtYieldSourceInReferralSet() external view returns (uint256 shares_)
     {
         address[] memory referrals = _referralSet.values();
         for (uint256 i = 0; i < referrals.length; i++) {
@@ -181,10 +142,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral
      * @dev onlyOwner
      */
-    function setTotalSharesInReferralAccordingToYieldSource()
-        external
-        onlyOwner
-    {
+    function setTotalSharesInReferralAccordingToYieldSource() external onlyOwner {
         uint256 totalSharesByReferral_;
         uint256 totalSharesInReferral_ = 0;
         address[] memory referrals = _referralSet.values();
