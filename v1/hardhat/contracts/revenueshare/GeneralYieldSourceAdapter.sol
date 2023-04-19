@@ -38,17 +38,6 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     }
 
     /**
-     * @notice setter of yieldSourceVault
-     * @dev onlyOwner
-     * @dev emit YieldSourceVaultUpdated
-     * @param yieldSourceVault_ address of yieldSourceVault to be updated to
-     */
-    function setYieldSourceVault(address yieldSourceVault_) external onlyOwner {
-        yieldSourceVault = yieldSourceVault_;
-        emit YieldSourceVaultUpdated(yieldSourceVault);
-    }
-
-    /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The addres of the ERC20 asset contract
