@@ -3,7 +3,8 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
 import "./interfaces/IYieldSourceContract.sol";
@@ -14,6 +15,7 @@ import "./interfaces/IYieldSourceContract.sol";
  */
 abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
     using MathUpgradeable for uint256;
+    using SafeERC20 for IERC20;
 
     /// @dev Emitted when the yieldSourceVault address is updated.
     event YieldSourceVaultUpdated(address yieldSourceVault_);
@@ -45,7 +47,7 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
      * @return shares amount of shares received
      */
     function _depositToYieldSourceVault(address asset_, uint256 assets_) internal virtual returns (uint256) {
-        IERC20Upgradeable(asset_).approve(yieldSourceVault, assets_);
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
         return IYieldSourceContract(yieldSourceVault).deposit(assets_, address(this));
     }
 

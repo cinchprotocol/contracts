@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./RevenueShareVault.sol";
@@ -37,7 +38,8 @@ interface IYieldSourceRibbonEarn {
 contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     using MathUpgradeable for uint256;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
-
+    using SafeERC20 for IERC20;
+    
     /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
@@ -46,7 +48,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @return shares amount of shares received
      */
     function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
-        IERC20Upgradeable(asset_).approve(yieldSourceVault, assets_);
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
         uint256 shares0 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
         IYieldSourceRibbonEarn(yieldSourceVault).depositFor(assets_, _msgSender());
         uint256 shares1 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
