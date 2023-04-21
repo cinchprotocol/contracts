@@ -42,7 +42,7 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
-     * @param asset_ The addres of the ERC20 asset contract
+     * @param asset_ The address of the ERC20 asset contract
      * @param assets_ The amount of assets to deposit
      * @return shares amount of shares received
      */
@@ -107,7 +107,7 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     }
 
     /**
-     * @dev abstruct function to be implemented by specific yield source vault
+     * @dev abstract function to be implemented by specific yield source vault
      * @param account target account address
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault

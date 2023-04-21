@@ -14,7 +14,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
-     * @param asset_ The addres of the ERC20 asset contract
+     * @param asset_ The address of the ERC20 asset contract
      * @param amount_ The amount of assets to deposit
      * @return shares amount of shares received
      */

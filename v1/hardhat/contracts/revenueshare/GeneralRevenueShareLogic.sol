@@ -141,7 +141,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
 
     /**
      * @notice Deposit asset as revenue share into this vault
-     * @dev The amount will be splitted among referrals according to their shares ratio
+     * @dev The amount will be split among referrals according to their shares ratio
      * @dev whenNotPaused nonReentrant
      * @param assetsFrom_ The address of the asset owner that the deposit will be taken from
      * @param asset_ The address of the asset to be deposited
@@ -194,7 +194,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         require(amount_ > 0, "ZERO_AMOUNT");
         require(revenueShareBalanceByAssetReferral[asset_][_msgSender()] >= amount_, "GeneralRevenueShareLogic: insufficient shares balance");
 
-        // Substract the amount from the revenue share balance first, to avoid reentrancy attack
+        // Subtract the amount from the revenue share balance first, to avoid reentrancy attack
         revenueShareBalanceByAssetReferral[asset_][_msgSender()] -= amount_;
 
         emit RevenueShareWithdrawn(asset_, amount_, _msgSender(), receiver_);
