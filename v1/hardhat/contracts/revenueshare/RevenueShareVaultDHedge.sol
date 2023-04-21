@@ -15,12 +15,12 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The addres of the ERC20 asset contract
-     * @param assets_ The amount of assets to deposit
+     * @param amount_ The amount of assets to deposit
      * @return shares amount of shares received
      */
-    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
-        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
-        return IYieldSourceDHedge(yieldSourceVault).depositFor(address(this), asset_, assets_);
+    function _depositToYieldSourceVault(address asset_, uint256 amount_) internal override returns (uint256) {
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, amount_);
+        return IYieldSourceDHedge(yieldSourceVault).depositFor(address(this), asset_, amount_);
     }
 
     /**
