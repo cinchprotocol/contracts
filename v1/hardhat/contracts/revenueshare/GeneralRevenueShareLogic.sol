@@ -197,10 +197,10 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         // Substract the amount from the revenue share balance first, to avoid reentrancy attack
         revenueShareBalanceByAssetReferral[asset_][_msgSender()] -= amount_;
 
+        emit RevenueShareWithdrawn(asset_, amount_, _msgSender(), receiver_);
+
         // Transfer assets to the receiver
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset_), receiver_, amount_);
-
-        emit RevenueShareWithdrawn(asset_, amount_, _msgSender(), receiver_);
     }
 
     /**
