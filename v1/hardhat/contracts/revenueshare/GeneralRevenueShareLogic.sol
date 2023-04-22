@@ -141,7 +141,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
 
     /**
      * @notice Deposit asset as revenue share into this vault
-     * @dev The amount will be splitted among referrals according to their shares ratio
+     * @dev The amount will be split among referrals according to their shares ratio
      * @dev whenNotPaused nonReentrant
      * @param assetsFrom_ The address of the asset owner that the deposit will be taken from
      * @param asset_ The address of the asset to be deposited
@@ -150,7 +150,8 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     function depositToRevenueShare(address assetsFrom_, address asset_, uint256 amount_) external virtual whenNotPaused nonReentrant {
         require(assetsFrom_ != address(0) && asset_ != address(0), "ZERO_ADDRESS");
         require(amount_ > 0, "ZERO_AMOUNT");
-        require(totalSharesInReferral > 0, "GeneralRevenueShareLogic: totalSharesInReferral is zero");
+        uint256 totalSharesInReferral_ = totalSharesInReferral;
+        require(totalSharesInReferral_ > 0, "GeneralRevenueShareLogic: totalSharesInReferral is zero");
 
         // Transfer assets to this vault first, assuming it was approved by the sender
         SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(asset_), assetsFrom_, address(this), amount_);
@@ -164,7 +165,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         address[] memory referrals = _referralSet.values();
         for (uint256 i = 0; i < referrals.length; i++) {
             address referral = referrals[i];
-            uint256 revenueShareForReferral = amountAfterFee.mulDiv(totalSharesByReferral[referral], totalSharesInReferral, MathUpgradeable.Rounding.Down);
+            uint256 revenueShareForReferral = amountAfterFee.mulDiv(totalSharesByReferral[referral], totalSharesInReferral_, MathUpgradeable.Rounding.Down);
             revenueShareBalanceByAssetReferral[asset_][referral] += revenueShareForReferral;
             distributedAmount += revenueShareForReferral;
         }
@@ -193,13 +194,13 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         require(amount_ > 0, "ZERO_AMOUNT");
         require(revenueShareBalanceByAssetReferral[asset_][_msgSender()] >= amount_, "GeneralRevenueShareLogic: insufficient shares balance");
 
-        // Substract the amount from the revenue share balance first, to avoid reentrancy attack
+        // Subtract the amount from the revenue share balance first, to avoid reentrancy attack
         revenueShareBalanceByAssetReferral[asset_][_msgSender()] -= amount_;
+
+        emit RevenueShareWithdrawn(asset_, amount_, _msgSender(), receiver_);
 
         // Transfer assets to the receiver
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset_), receiver_, amount_);
-
-        emit RevenueShareWithdrawn(asset_, amount_, _msgSender(), receiver_);
     }
 
     /**

@@ -2,51 +2,26 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./RevenueShareVault.sol";
-
-interface IYieldSourceRibbonEarn {
-    /**
-     * @notice Deposits the `asset` from msg.sender added to `creditor`'s deposit.
-     * @notice Used for vault -> vault deposits on the user's behalf
-     * @dev https://github.com/ribbon-finance/ribbon-v2/blob/7d8deadf8dd63273aeee105beebcb99564ad4711/contracts/vaults/RETHVault/base/RibbonVault.sol#L348
-     * @param amount is the amount of `asset` to deposit
-     * @param creditor is the address that can claim/withdraw deposited amount
-     */
-    function depositFor(uint256 amount, address creditor) external;
-
-    /**
-     * @notice Getter for returning the account's share balance including unredeemed shares
-     * @param account is the account to lookup share balance for
-     * @return the share balance
-     */
-    function shares(address account) external view returns (uint256);
-
-    /**
-     * @notice The price of a unit of share denominated in the `asset`
-     */
-    function pricePerShare() external view returns (uint256);
-
-    /**
-     * @notice Total supply of shares
-     */
-    function totalSupply() external view returns (uint256);
-}
+import "./interfaces/IYieldSourceRibbonEarn.sol";
 
 contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     using MathUpgradeable for uint256;
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+    using SafeERC20 for IERC20;
 
     /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
-     * @param asset_ The addres of the ERC20 asset contract
+     * @param asset_ The address of the ERC20 asset contract
      * @param assets_ The amount of assets to deposit
      * @return shares amount of shares received
      */
     function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
-        IERC20Upgradeable(asset_).approve(yieldSourceVault, assets_);
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
         uint256 shares0 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
         IYieldSourceRibbonEarn(yieldSourceVault).depositFor(assets_, _msgSender());
         uint256 shares1 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
@@ -64,7 +39,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * referral address of the partner referral
      * @return assets_ amount of assets received
      */
-    function redeemWithReferral(uint256, address, address, address) public override returns (uint256) {
+    function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
         require(false, "RevenueShareVaultRibbonEarn: not supported");
     }
 
@@ -125,8 +100,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalShareBalanceAtYieldSourceInReferralSet
      * @return shares_ total share balance at yield source in referral set
      */
-    function totalShareBalanceAtYieldSourceInReferralSet() external view returns (uint256 shares_)
-    {
+    function totalShareBalanceAtYieldSourceInReferralSet() external view returns (uint256 shares_) {
         address[] memory referrals = _referralSet.values();
         for (uint256 i = 0; i < referrals.length; i++) {
             address referral = referrals[i];

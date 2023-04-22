@@ -2,23 +2,25 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./RevenueShareVault.sol";
 import "./interfaces/IYieldSourceDHedge.sol";
 
 contract RevenueShareVaultDHedge is RevenueShareVault {
     using MathUpgradeable for uint256;
+    using SafeERC20 for IERC20;
 
     /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
-     * @param asset_ The addres of the ERC20 asset contract
-     * @param assets_ The amount of assets to deposit
+     * @param asset_ The address of the ERC20 asset contract
+     * @param amount_ The amount of assets to deposit
      * @return shares amount of shares received
      */
-    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
-        IERC20Upgradeable(asset_).approve(yieldSourceVault, assets_);
-        return IYieldSourceDHedge(yieldSourceVault).depositFor(address(this), asset_, assets_);
+    function _depositToYieldSourceVault(address asset_, uint256 amount_) internal override returns (uint256) {
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, amount_);
+        return IYieldSourceDHedge(yieldSourceVault).depositFor(address(this), asset_, amount_);
     }
 
     /**
@@ -30,7 +32,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     function _redeemFromYieldSourceVault(uint256 shares) internal override returns (uint256) {
         uint256 expectedAmountOut = _convertYieldSourceSharesToAssets(shares, MathUpgradeable.Rounding.Down);
         uint256 assetBalance0 = IERC20Upgradeable(asset()).balanceOf(address(this));
-        IERC20Upgradeable(yieldSourceVault).approve(yieldSourceSwapper, shares);
+         IERC20(yieldSourceVault).safeIncreaseAllowance(yieldSourceSwapper, shares);
         // redeem the assets into this contract first
         IYieldSourceDHedgeSwapper(yieldSourceSwapper).withdraw(yieldSourceVault, shares, IERC20(asset()), expectedAmountOut);
         uint256 assetBalance1 = IERC20Upgradeable(asset()).balanceOf(address(this));

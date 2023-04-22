@@ -3,7 +3,8 @@ pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 
 import "./interfaces/IYieldSourceContract.sol";
@@ -14,6 +15,7 @@ import "./interfaces/IYieldSourceContract.sol";
  */
 abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
     using MathUpgradeable for uint256;
+    using SafeERC20 for IERC20;
 
     /// @dev Emitted when the yieldSourceVault address is updated.
     event YieldSourceVaultUpdated(address yieldSourceVault_);
@@ -38,25 +40,14 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     }
 
     /**
-     * @notice setter of yieldSourceVault
-     * @dev onlyOwner
-     * @dev emit YieldSourceVaultUpdated
-     * @param yieldSourceVault_ address of yieldSourceVault to be updated to
-     */
-    function setYieldSourceVault(address yieldSourceVault_) external onlyOwner {
-        yieldSourceVault = yieldSourceVault_;
-        emit YieldSourceVaultUpdated(yieldSourceVault);
-    }
-
-    /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
-     * @param asset_ The addres of the ERC20 asset contract
+     * @param asset_ The address of the ERC20 asset contract
      * @param assets_ The amount of assets to deposit
      * @return shares amount of shares received
      */
     function _depositToYieldSourceVault(address asset_, uint256 assets_) internal virtual returns (uint256) {
-        IERC20Upgradeable(asset_).approve(yieldSourceVault, assets_);
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
         return IYieldSourceContract(yieldSourceVault).deposit(assets_, address(this));
     }
 
@@ -116,7 +107,7 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     }
 
     /**
-     * @dev abstruct function to be implemented by specific yield source vault
+     * @dev abstract function to be implemented by specific yield source vault
      * @param account target account address
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault
