@@ -18,7 +18,7 @@ import "./security/DepositPausableUpgradeable.sol";
  * @title RevenueShareVault
  * @notice Contract allows deposits and Withdrawals to Yield source product
  * @dev Should be deployed per yield source pool/vault
- * @dev ERC4626 based vault
+ * @dev This contract does not intend to confront to the whole ERC4626 standard
  */
 contract RevenueShareVault is ERC4626Upgradeable, OwnableUpgradeable, PausableUpgradeable, DepositPausableUpgradeable, ReentrancyGuardUpgradeable, GeneralYieldSourceAdapter, GeneralRevenueShareLogic {
     using MathUpgradeable for uint256;
@@ -34,18 +34,18 @@ contract RevenueShareVault is ERC4626Upgradeable, OwnableUpgradeable, PausableUp
     /**
      * @notice vault initializer
      * @param asset_ underneath asset, which should match the asset of the yield source vault
-     * @param name ERC20 name of the vault shares token
-     * @param symbol ERC20 symbol of the vault shares token
+     * @param name_ ERC20 name of the vault shares token
+     * @param symbol_ ERC20 symbol of the vault shares token
      * @param yieldSourceVault_ vault address of yield source
      * @param yieldSourceSwapper_ swapper address of yield source
      * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
      */
-    function initialize(address asset_, string calldata name, string calldata symbol, address yieldSourceVault_, address yieldSourceSwapper_, uint256 cinchPerformanceFeePercentage_) public initializer {
+    function initialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, address yieldSourceSwapper_, uint256 cinchPerformanceFeePercentage_) public initializer {
         __Ownable_init();
         __Pausable_init();
         __DepositPausable_init();
         __ERC4626_init(IERC20Upgradeable(asset_));
-        __ERC20_init(name, symbol);
+        __ERC20_init(name_, symbol_);
         __GeneralYieldSourceAdapter_init(yieldSourceVault_, yieldSourceSwapper_);
         __GeneralRevenueShareLogic_init(cinchPerformanceFeePercentage_);
     }
