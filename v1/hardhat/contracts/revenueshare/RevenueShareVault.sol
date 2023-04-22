@@ -161,20 +161,6 @@ contract RevenueShareVault is ERC4626Upgradeable, OwnableUpgradeable, PausableUp
     }
 
     /**
-     * @notice Withdraw a specific amount of assets to be redeemed with vault shares and referral
-     * @dev See {IERC4626-withdraw}
-     * @param assets target amount of assets to be withdrawn
-     * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed
-     * @param referral address of the partner referral
-     * @return assets amount of assets received
-     */
-    function withdrawWithReferral(uint256 assets, address receiver, address sharesOwner, address referral) public virtual returns (uint256) {
-        uint256 shares = convertToShares(assets);
-        return redeemWithReferral(shares, receiver, sharesOwner, referral);
-    }
-
-    /**
      * @dev See {IERC4626-totalAssets}
      * @return assets total amount of the underlying asset managed by this vault
      */

@@ -137,10 +137,12 @@ describe("RevenueShareVaultRibbonEarn", function () {
             const tx = vault.connect(user1).redeemWithReferral(depositAmount1, user1.address, user1.address, referral1);
             await expect(tx).to.be.revertedWith("RevenueShareVaultRibbonEarn: not supported");
         });
+        /*
         it("should not be able to withdraw from vault", async function () {
             const tx = vault.connect(user1).withdrawWithReferral(depositAmount1, user1.address, user1.address, referral1);
             await expect(tx).to.be.revertedWith("RevenueShareVaultRibbonEarn: not supported");
         });
+        */
     });
 
     describe("GeneralRevenueShare", function () {
