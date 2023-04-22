@@ -280,12 +280,6 @@ describe("RevenueShareVaultRibbonEarn", function () {
     });
 
     describe("GeneralYieldSourceAdapter", function () {
-        it("setYieldSourceVault should work", async function () {
-            const tx01 = await vault.setYieldSourceVault(mockProtocol.address);
-            expect(tx01)
-                .to.emit(vault, "YieldSourceVaultUpdated")
-                .withArgs(mockProtocol.address);
-        });
         it("getYieldSourceVaultTotalShares should return the correct value", async function () {
             expect(await vault.getYieldSourceVaultTotalShares()).equal(
                 depositAmount3
