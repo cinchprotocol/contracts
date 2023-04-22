@@ -96,17 +96,7 @@ describe("RevenueShareVault", function () {
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
         it("should be able to deposit", async function () {
-            await vault.connect(user1).deposit(depositAmount1.div(2), user1.address);
-            expect(await vault.balanceOf(user1.address)).to.equal(depositAmount1.div(2));
-            expect(await vault.totalSharesByReferral(user1.address)).to.equal(
-                depositAmount1.div(2)
-            );
-            expect(
-                await vault.assetBalanceAtYieldSourceOf(user1.address, referral1)
-            ).to.equal(depositAmount1.div(2));
-        });
-        it("should be able to mint", async function () {
-            await vault.connect(user1).mint(depositAmount1.div(2), user1.address);
+            await vault.connect(user1).deposit(depositAmount1, user1.address);
             expect(await vault.balanceOf(user1.address)).to.equal(depositAmount1);
             expect(await vault.totalSharesByReferral(user1.address)).to.equal(
                 depositAmount1
@@ -127,14 +117,18 @@ describe("RevenueShareVault", function () {
                 depositAmount2
             );
         });
+        it("should not be able to mint", async function () {
+            const tx = vault
+                .connect(user2)
+                .mint(depositAmount2, user2.address);
+            await expect(tx).to.be.revertedWith("RevenueShareVault: not supported");
+        });
         it("should be pausable", async function () {
             await vault.pause();
             const tx01 = vault.connect(user1).deposit(depositAmount1, user1.address);
             await expect(tx01).to.be.revertedWith("Pausable: paused");
             const tx02 = vault.connect(user2).depositWithReferral(depositAmount2, user2.address, referral2);
             await expect(tx02).to.be.revertedWith("Pausable: paused");
-            const tx03 = vault.connect(user1).mint(depositAmount1, user1.address);
-            await expect(tx03).to.be.revertedWith("Pausable: paused");
             await vault.unpause();
         });
         it("should not work with zero assets", async function () {

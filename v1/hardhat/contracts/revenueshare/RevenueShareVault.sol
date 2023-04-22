@@ -97,20 +97,14 @@ contract RevenueShareVault is ERC4626Upgradeable, OwnableUpgradeable, PausableUp
     }
 
     /**
-     * @notice Mint shares with assets
-     * @notice As opposed to {deposit}, minting is allowed even if the vault is in a state where the price of a share is zero.
-     * @notice In this case, the shares will be minted without requiring any assets to be deposited.
+     * @notice IERC4626-mint function is not supported by default, unless child contract overrides this function
      * @dev See {IERC4626-mint}
-     * @dev depositWithReferral(assets, receiver, receiver)
-     * @param shares amount of shares to mint
-     * @param receiver address to receive the shares
-     * @return assets amount of assets consumed
+     * param shares amount of shares to mint
+     * param receiver address to receive the shares
+     * @return amount of assets consumed
      */
-    function mint(uint256 shares, address receiver) public virtual override returns (uint256) {
-        require(shares <= maxMint(receiver), "RevenueShareVault: mint more than max");
-        uint256 assets = previewMint(shares);
-        depositWithReferral(assets, receiver, receiver);
-        return assets;
+    function mint(uint256, address) public virtual override returns (uint256) {
+        require(false, "RevenueShareVault: not supported");
     }
 
     /**
