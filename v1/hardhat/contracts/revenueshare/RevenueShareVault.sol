@@ -49,7 +49,6 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         __Ownable_init();
         __Pausable_init();
         __DepositPausable_init();
-        //__ERC4626_init(IERC20Upgradeable(asset_));
         __ERC20_init(name_, symbol_);
         __GeneralYieldSourceAdapter_init(yieldSourceVault_, yieldSourceSwapper_);
         __GeneralRevenueShareLogic_init(cinchPerformanceFeePercentage_);
@@ -221,9 +220,11 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @param rounding rounding mode
      * @return shares amount of shares that would be converted from assets
      */
+    /*
     function _convertToShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view virtual returns (uint256) {
         return _convertAssetsToYieldSourceShares(assets, rounding);
     }
+    */
 
     /**
      * @notice Returns the amount of assets that the Vault would exchange for the amount of shares provided, in an ideal scenario where all the conditions are met
