@@ -233,9 +233,11 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @param rounding rounding mode
      * @return assets amount of assets that would be converted from shares
      */
+    /*
     function _convertToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view virtual returns (uint256) {
         return _convertYieldSourceSharesToAssets(shares, rounding);
     }
+    */
 
     /*//////////////////////////////////////////////////////////////
                             YIELD SOURCE
