@@ -140,7 +140,16 @@ describe("RevenueShareVaultDHedge", function () {
             expect(await vault.balanceOf(user1.address)).to.equal(0);
             expect(await mockERC20.balanceOf(user1.address)).to.equal(depositAmount1);
             expect(await vault.totalSharesByReferral(referral1)).to.equal(0);
+
+            await vault
+                .connect(user2)
+                .redeem(depositAmount2, user2.address, user2.address);
+            expect(await vault.balanceOf(user2.address)).to.equal(
+                0
+            );
+            expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
         });
+        /*
         it("should be able to withdraw partial", async function () {
             await vault
                 .connect(user2)
@@ -150,7 +159,6 @@ describe("RevenueShareVaultDHedge", function () {
             );
             expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
         });
-        /*
         it("should be able to withdraw remaining with referral", async function () {
             expect(await vault.totalSharesByReferral(referral2)).to.equal(
                 depositAmount2.div(2)

@@ -147,17 +147,15 @@ contract RevenueShareVault is ERC4626Upgradeable, OwnableUpgradeable, PausableUp
     }
 
     /**
-     * @notice Withdraw a specific amount of assets to be redeemed with vault shares
+     * @notice IERC4626-withdraw function is not supported by default, unless child contract overrides this function
      * @dev See {IERC4626-withdraw}
-     * @dev redeem
-     * @param assets target amount of assets to be withdrawn
-     * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed
+     * param assets target amount of assets to be withdrawn
+     * param receiver address to receive the assets
+     * param sharesOwner address of the owner of the shares to be consumed
      * @return assets amount of assets received
      */
-    function withdraw(uint256 assets, address receiver, address sharesOwner) public virtual override returns (uint256) {
-        uint256 shares = convertToShares(assets);
-        return redeem(shares, receiver, sharesOwner);
+    function withdraw(uint256, address, address) public virtual override returns (uint256) {
+        require(false, "RevenueShareVault: not supported");
     }
 
     /**

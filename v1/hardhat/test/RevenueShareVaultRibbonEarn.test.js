@@ -124,9 +124,8 @@ describe("RevenueShareVaultRibbonEarn", function () {
             expect(await vault.totalSharesByReferral(referral1)).to.equal(
                 0
             );
-        });
-        it("should be able to withdraw from yield source", async function () {
-            await mockProtocol.connect(user2).withdraw(depositAmount2, user2.address, user2.address);
+
+            await mockProtocol.connect(user2).redeem(depositAmount2, user2.address, user2.address);
             expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
             await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource();
             expect(await vault.totalSharesByReferral(referral2)).to.equal(
