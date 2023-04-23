@@ -117,12 +117,14 @@ describe("RevenueShareVault", function () {
                 depositAmount2
             );
         });
+        /*
         it("should not be able to mint", async function () {
             const tx = vault
                 .connect(user2)
                 .mint(depositAmount2, user2.address);
             await expect(tx).to.be.revertedWith("RevenueShareVault: not supported");
         });
+        */
         it("should be pausable", async function () {
             await vault.pause();
             const tx01 = vault.connect(user1).deposit(depositAmount1, user1.address);

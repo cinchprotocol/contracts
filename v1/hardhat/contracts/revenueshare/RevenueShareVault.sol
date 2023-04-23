@@ -133,9 +133,11 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * param receiver address to receive the shares
      * @return amount of assets consumed
      */
+    /*
     function mint(uint256, address) public virtual returns (uint256) {
         require(false, "RevenueShareVault: not supported");
     }
+    */
 
     /**
      * @notice Redeem assets with vault shares
