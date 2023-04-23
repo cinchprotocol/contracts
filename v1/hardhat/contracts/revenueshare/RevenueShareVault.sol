@@ -24,7 +24,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
     using MathUpgradeable for uint256;
 
     //TODO: doc
-    event Withdraw(address indexed sender, address indexed receiver, address indexed sharesOwner, uint256 assets, uint256 shares);
+    event Redeem(address indexed sender, address indexed receiver, address indexed sharesOwner, uint256 assets, uint256 shares);
 
     /// @dev Emitted when user deposit with referral
     event DepositWithReferral(address caller, address receiver, uint256 assets, uint256 shares, address indexed referral);
@@ -106,10 +106,11 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         return balanceOf(sharesOwner_);
     }
 
+    //TODO: doc
     /**
      * @dev Withdraw/redeem common workflow.
      */
-    function _withdraw(address caller, address receiver, address sharesOwner_, uint256 assets, uint256 shares) internal virtual {
+    function _redeem(address caller, address receiver, address sharesOwner_, uint256 assets, uint256 shares) internal virtual {
         if (caller != sharesOwner_) {
             _spendAllowance(sharesOwner_, caller, shares);
         }
@@ -123,7 +124,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         _burn(sharesOwner_, shares);
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset), receiver, assets);
 
-        emit Withdraw(caller, receiver, sharesOwner_, assets, shares);
+        emit Redeem(caller, receiver, sharesOwner_, assets, shares);
     }
 
     /**
@@ -173,7 +174,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         _trackSharesInReferralRemoved(sharesOwner, referral, shares);
 
         uint256 assets = _redeemFromYieldSourceVault(shares);
-        _withdraw(_msgSender(), receiver, sharesOwner, assets, shares);
+        _redeem(_msgSender(), receiver, sharesOwner, assets, shares);
         emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
         return assets;
     }
