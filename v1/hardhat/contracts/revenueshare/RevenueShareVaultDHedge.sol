@@ -31,11 +31,11 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      */
     function _redeemFromYieldSourceVault(uint256 shares) internal override returns (uint256) {
         uint256 expectedAmountOut = _convertYieldSourceSharesToAssets(shares, MathUpgradeable.Rounding.Down);
-        uint256 assetBalance0 = IERC20Upgradeable(asset()).balanceOf(address(this));
+        uint256 assetBalance0 = IERC20Upgradeable(asset).balanceOf(address(this));
          IERC20(yieldSourceVault).safeIncreaseAllowance(yieldSourceSwapper, shares);
         // redeem the assets into this contract first
-        IYieldSourceDHedgeSwapper(yieldSourceSwapper).withdraw(yieldSourceVault, shares, IERC20(asset()), expectedAmountOut);
-        uint256 assetBalance1 = IERC20Upgradeable(asset()).balanceOf(address(this));
+        IYieldSourceDHedgeSwapper(yieldSourceSwapper).withdraw(yieldSourceVault, shares, IERC20(asset), expectedAmountOut);
+        uint256 assetBalance1 = IERC20Upgradeable(asset).balanceOf(address(this));
         return assetBalance1 - assetBalance0;
     }
 
