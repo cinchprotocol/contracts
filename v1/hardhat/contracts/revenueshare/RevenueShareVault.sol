@@ -184,9 +184,11 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * param sharesOwner address of the owner of the shares to be consumed
      * @return assets amount of assets received
      */
+    /*
     function withdraw(uint256, address, address) public virtual returns (uint256) {
         require(false, "RevenueShareVault: not supported");
     }
+    */
 
     /**
      * @dev See {IERC4626-totalAssets}
