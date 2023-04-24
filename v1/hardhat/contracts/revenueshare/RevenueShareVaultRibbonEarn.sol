@@ -92,7 +92,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev See {IERC4626-totalAssets}
      * @return assets total amount of the underlying asset managed by this vault
      */
-    function totalAssets() public view override returns (uint256) {
+    function totalAssets() public view returns (uint256) {
         return _convertYieldSourceSharesToAssets(totalSharesInReferral, MathUpgradeable.Rounding.Down);
     }
 

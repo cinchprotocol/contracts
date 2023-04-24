@@ -59,6 +59,15 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
     //////////////////////////////////////////////////////////////*/
 
     /**
+     * @notice For guarding the deposit function with an upper limit
+     * param receiver address for checking the max asset amount for deposit
+     * @return max asset amount that can be deposited
+     */    
+    function maxDeposit(address) public view virtual returns (uint256) {
+        return type(uint256).max;
+    }
+
+    /**
      * @notice Deposit assets to the vault
      * @dev depositWithReferral(assets, receiver, receiver)
      * @param amount amount of assets to deposit
@@ -72,7 +81,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @notice Deposit assets to the vault with referral
      * @dev Transfer assets to this contract, then deposit into yield source vault, and mint shares to receiver
      * @dev whenNotPaused whenDepositNotPaused nonReentrant
-     * @dev emit Deposit
+     * @dev emit DepositWithReferral
      * @param amount amount of assets to deposit
      * @param receiver address to receive the shares
      * @param referral address of the partner referral
@@ -174,18 +183,12 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @dev See {IERC4626-totalAssets}
      * @return assets total amount of the underlying asset managed by this vault
      */
+    /*
     function totalAssets() public view virtual returns (uint256) {
         uint256 shares = shareBalanceAtYieldSourceOf(address(this));
         return _convertYieldSourceSharesToAssets(shares, MathUpgradeable.Rounding.Down);
     }
-
-//TODO: doc
-    /**
-     * @return assets maximum asset amounts that can be deposited
-     */
-    function maxDeposit(address) public view virtual returns (uint256) {
-        return type(uint256).max;
-    }
+    */
 
     /*//////////////////////////////////////////////////////////////
                             YIELD SOURCE
