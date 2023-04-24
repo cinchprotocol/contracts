@@ -135,7 +135,7 @@ describe("RevenueShareVault", function () {
         });
         it("should not work with zero assets", async function () {
             const tx = vault.connect(user1).depositWithReferral(0, user1.address, referral1);
-            await expect(tx).to.be.revertedWith("ZERO_ASSETS");
+            await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
         });
         it("should not work with zero address", async function () {
             const tx = vault.connect(user1).depositWithReferral(depositAmount1, ZERO_ADDRESS, referral1);

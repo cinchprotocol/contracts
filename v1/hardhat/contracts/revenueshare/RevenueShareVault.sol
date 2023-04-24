@@ -55,63 +55,69 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
     }
 
     /*//////////////////////////////////////////////////////////////
-                                ERC4626
+                                Vault
     //////////////////////////////////////////////////////////////*/
 
     /**
      * @notice Deposit assets to the vault
-     * @dev See {IERC4626-deposit}
      * @dev depositWithReferral(assets, receiver, receiver)
-     * @param assets amount of assets to deposit
+     * @param amount amount of assets to deposit
      * @param receiver address to receive the shares
      */
-    function deposit(uint256 assets, address receiver) public virtual returns (uint256) {
-        return depositWithReferral(assets, receiver, receiver);
+    function deposit(uint256 amount, address receiver) public virtual returns (uint256) {
+        return depositWithReferral(amount, receiver, receiver);
     }
 
     /**
      * @notice Deposit assets to the vault with referral
      * @dev Transfer assets to this contract, then deposit into yield source vault, and mint shares to receiver
-     * @dev See {IERC4626-deposit}
      * @dev whenNotPaused whenDepositNotPaused nonReentrant
      * @dev emit Deposit
-     * @param assets amount of assets to deposit
+     * @param amount amount of assets to deposit
      * @param receiver address to receive the shares
      * @param referral address of the partner referral
-     * @return shares amount of shares received
+     * @return amount of shares received
      */
-    function depositWithReferral(uint256 assets, address receiver, address referral) public virtual whenNotPaused whenDepositNotPaused nonReentrant returns (uint256) {
-        require(assets > 0, "ZERO_ASSETS");
+    function depositWithReferral(uint256 amount, address receiver, address referral) public virtual whenNotPaused whenDepositNotPaused nonReentrant returns (uint256) {
+        require(amount > 0, "ZERO_AMOUNT");
         require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
-        require(assets <= maxDeposit(receiver), "RevenueShareVault: max deposit exceeded");
+        require(amount <= maxDeposit(receiver), "RevenueShareVault: max deposit exceeded");
 
         // Transfer assets to this vault first, assuming it was approved by the sender
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(asset), _msgSender(), address(this), assets);
+        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(asset), _msgSender(), address(this), amount);
 
         // Deposit assets to yield source vault
-        uint256 shares = _depositToYieldSourceVault(asset, assets);
+        uint256 shares = _depositToYieldSourceVault(asset, amount);
 
         // Mint the shares from this vault according to the number of shares received from yield source vault
         _mint(receiver, shares);
         _trackSharesInReferralAdded(receiver, referral, shares);
-        totalAssetDepositProcessed += assets;
-        emit DepositWithReferral(_msgSender(), receiver, assets, shares, referral);
+        totalAssetDepositProcessed += amount;
+        emit DepositWithReferral(_msgSender(), receiver, amount, shares, referral);
 
         return shares;
     }
 
-    //TODO: doc
+    /**
+     * @notice For guarding the redeem function with an upper limit
+     * @param sharesOwner_ owner address of the shares to be redeemed
+     * @return balance of shares owned by the sharesOwner_
+     */    
     function maxRedeem(address sharesOwner_) public view virtual returns (uint256) {
         return balanceOf(sharesOwner_);
     }
 
-    //TODO: doc
     /**
-     * @dev Withdraw/redeem common workflow.
+     * @dev redeem internal common workflow.
+     * @param caller caller address
+     * @param receiver address to receive the assets
+     * @param sharesOwner address of the owner of the shares to be consumed
+     * @param assets amount of assets redeemed
+     * @param shares amount of shares to burn and redeem assets
      */
-    function _redeem(address caller, address receiver, address sharesOwner_, uint256 assets, uint256 shares) internal virtual {
-        if (caller != sharesOwner_) {
-            _spendAllowance(sharesOwner_, caller, shares);
+    function _redeem(address caller, address receiver, address sharesOwner, uint256 assets, uint256 shares) internal virtual {
+        if (caller != sharesOwner) {
+            _spendAllowance(sharesOwner, caller, shares);
         }
 
         // If _asset is ERC777, `transfer` can trigger a reentrancy AFTER the transfer happens through the
@@ -120,32 +126,18 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         //
         // Conclusion: we need to do the transfer after the burn so that any reentrancy would happen after the
         // shares are burned and after the assets are transferred, which is a valid state.
-        _burn(sharesOwner_, shares);
+        _burn(sharesOwner, shares);
         SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset), receiver, assets);
 
-        emit Redeem(caller, receiver, sharesOwner_, assets, shares);
+        emit Redeem(caller, receiver, sharesOwner, assets, shares);
     }
-
-    /**
-     * @notice IERC4626-mint function is not supported by default, unless child contract overrides this function
-     * @dev See {IERC4626-mint}
-     * param shares amount of shares to mint
-     * param receiver address to receive the shares
-     * @return amount of assets consumed
-     */
-    /*
-    function mint(uint256, address) public virtual returns (uint256) {
-        require(false, "RevenueShareVault: not supported");
-    }
-    */
 
     /**
      * @notice Redeem assets with vault shares
-     * @dev See {IERC4626-redeem}
      * @param shares amount of shares to burn and redeem assets
      * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * @return assets amount of assets received
+     * @param sharesOwner address of the owner of the shares to be consumed
+     * @return amount of assets received
      */
     function redeem(uint256 shares, address receiver, address sharesOwner) public virtual returns (uint256) {
         return redeemWithReferral(shares, receiver, sharesOwner, sharesOwner);
@@ -153,7 +145,6 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
 
     /**
      * @notice Redeem assets with vault shares and referral
-     * @dev See {IERC4626-redeem}
      * @dev whenNotPaused
      * @dev nonReentrant
      * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
@@ -161,7 +152,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @param receiver address to receive the assets
      * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
      * @param referral address of the partner referral
-     * @return assets amount of assets received
+     * @return amount of assets received
      */
     function redeemWithReferral(uint256 shares, address receiver, address sharesOwner, address referral) public virtual whenNotPaused nonReentrant returns (uint256) {
         require(shares > 0, "ZERO_SHARES");
@@ -178,20 +169,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         return assets;
     }
 
-    /**
-     * @notice IERC4626-withdraw function is not supported by default, unless child contract overrides this function
-     * @dev See {IERC4626-withdraw}
-     * param assets target amount of assets to be withdrawn
-     * param receiver address to receive the assets
-     * param sharesOwner address of the owner of the shares to be consumed
-     * @return assets amount of assets received
-     */
-    /*
-    function withdraw(uint256, address, address) public virtual returns (uint256) {
-        require(false, "RevenueShareVault: not supported");
-    }
-    */
-
+//TODO: ?
     /**
      * @dev See {IERC4626-totalAssets}
      * @return assets total amount of the underlying asset managed by this vault
@@ -201,47 +179,13 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         return _convertYieldSourceSharesToAssets(shares, MathUpgradeable.Rounding.Down);
     }
 
+//TODO: doc
     /**
      * @return assets maximum asset amounts that can be deposited
      */
     function maxDeposit(address) public view virtual returns (uint256) {
         return type(uint256).max;
     }
-
-    /**
-     * @return assets maximum asset amounts that can be withdrawn
-     */
-    /*
-    function maxWithdraw(address _owner) public view virtual override returns (uint256) {
-        return convertToAssets(balanceOf(_owner));
-    }
-    */
-
-    /**
-     * @notice Returns the amount of shares that the Vault would exchange for the amount of assets provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param assets amount of assets to be converted to shares
-     * @param rounding rounding mode
-     * @return shares amount of shares that would be converted from assets
-     */
-    /*
-    function _convertToShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view virtual returns (uint256) {
-        return _convertAssetsToYieldSourceShares(assets, rounding);
-    }
-    */
-
-    /**
-     * @notice Returns the amount of assets that the Vault would exchange for the amount of shares provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param shares amount of shares to be converted to assets
-     * @param rounding rounding mode
-     * @return assets amount of assets that would be converted from shares
-     */
-    /*
-    function _convertToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view virtual returns (uint256) {
-        return _convertYieldSourceSharesToAssets(shares, rounding);
-    }
-    */
 
     /*//////////////////////////////////////////////////////////////
                             YIELD SOURCE
