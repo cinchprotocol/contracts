@@ -106,13 +106,16 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
         return IYieldSourceContract(yieldSourceVault).totalSupply();
     }
 
+//TODO: ?
     /**
      * @dev abstract function to be implemented by specific yield source vault
      * @param account target account address
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault
      */
+    /*
     function assetBalanceAtYieldSourceOf(address account, address referral) public view virtual returns (uint256);
+    */
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

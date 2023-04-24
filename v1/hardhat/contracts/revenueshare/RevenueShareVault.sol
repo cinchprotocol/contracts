@@ -194,14 +194,17 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
                             YIELD SOURCE
     //////////////////////////////////////////////////////////////*/
 
+//TODO: ?
     /**
      * @param account target account address
      * @param referral target referral address
      * @return assets amount of assets that the user has deposited to the vault
      */
+    /*
     function assetBalanceAtYieldSourceOf(address account, address referral) public view virtual override returns (uint256) {
         return _convertYieldSourceSharesToAssets(totalSharesByUserReferral[account][referral], MathUpgradeable.Rounding.Down);
     }
+    */
 
     /*//////////////////////////////////////////////////////////////
                             HELPER FUNCTIONS
