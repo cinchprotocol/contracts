@@ -23,11 +23,10 @@ import "./security/DepositPausableUpgradeable.sol";
 contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgradeable, DepositPausableUpgradeable, ReentrancyGuardUpgradeable, GeneralYieldSourceAdapter, GeneralRevenueShareLogic {
     using MathUpgradeable for uint256;
 
-    //TODO: doc
-    event Redeem(address indexed sender, address indexed receiver, address indexed sharesOwner, uint256 assets, uint256 shares);
-
     /// @dev Emitted when user deposit with referral
     event DepositWithReferral(address caller, address receiver, uint256 assets, uint256 shares, address indexed referral);
+    /// @dev Emited when user redeem
+    event Redeem(address indexed caller, address indexed receiver, address indexed sharesOwner, uint256 assets, uint256 shares);
     /// @dev Emitted when user redeem with referral
     event RedeemWithReferral(address caller, address receiver, address sharesOwner, uint256 assets, uint256 shares, address indexed referral);
 
