@@ -146,23 +146,10 @@ describe("RevenueShareVault", function () {
     });
 
     describe("Redeem/withdraw", function () {
-        /*
-        it("previewRedeem should return correct amount", async function () {
-            expect(await vault.previewRedeem(depositAmount1)).to.equal(
-                depositAmount1
-            );
-        });
-        it("maxWithdraw should return correct amount", async function () {
-            expect(await vault.maxWithdraw(user1.address)).to.equal(depositAmount1);
-        });
-        it("totalAssets should return correct amount", async function () {
-            expect(await vault.totalAssets()).to.equal(depositAmount1.add(depositAmount2));
-        });
-        */
         it("non-share-owner should fail to redeem without approval", async function () {
             const tx = vault
                 .connect(user2)
-                .redeem(depositAmount1.div(2), user1.address, user1.address);
+                .redeemWithReferral(depositAmount1.div(2), user1.address, user1.address, referral1);
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
         it("should not work with insufficient referral", async function () {
@@ -172,7 +159,7 @@ describe("RevenueShareVault", function () {
         it("should be able to redeem partial", async function () {
             await vault
                 .connect(user1)
-                .redeem(depositAmount1.div(2), user1.address, user1.address);
+                .redeemWithReferral(depositAmount1.div(2), user1.address, user1.address, referral1);
             expect(await vault.balanceOf(user1.address)).to.equal(
                 depositAmount1.div(2)
             );
@@ -191,7 +178,7 @@ describe("RevenueShareVault", function () {
 
             await vault
                 .connect(user2)
-                .redeem(depositAmount2, user2.address, user2.address);
+                .redeemWithReferral(depositAmount2, user2.address, user2.address, referral2);
             expect(await vault.balanceOf(user2.address)).to.equal(
                 0
             );

@@ -106,19 +106,6 @@ describe("RevenueShareVaultDHedge", function () {
     });
 
     describe("Redeem/withdraw", function () {
-        /*
-        it("previewRedeem should return correct amount", async function () {
-            expect(await vault.previewRedeem(depositAmount1)).to.equal(
-                depositAmount1
-            );
-        });
-        it("maxWithdraw should return correct amount", async function () {
-            expect(await vault.maxWithdraw(user1.address)).to.equal(depositAmount1);
-        });
-        it("totalAssets should return correct amount", async function () {
-            expect(await vault.totalAssets()).to.equal(depositAmount1.add(depositAmount2));
-        });
-        */
         it("non-share-owner should fail to redeem without approval", async function () {
             const tx = vault
                 .connect(user2)

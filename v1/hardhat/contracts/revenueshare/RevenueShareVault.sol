@@ -150,9 +150,11 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @param sharesOwner address of the owner of the shares to be consumed
      * @return amount of assets received
      */
+    /*
     function redeem(uint256 shares, address receiver, address sharesOwner) public virtual returns (uint256) {
         return redeemWithReferral(shares, receiver, sharesOwner, sharesOwner);
     }
+    */
 
     /**
      * @notice Redeem assets with vault shares and referral
