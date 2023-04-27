@@ -51,28 +51,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @notice Returns the amount of shares that the yield source vault would exchange for the amount of assets provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param assets amount of assets to be converted to shares
-     * @param rounding rounding mode
-     * @return shares amount of shares that would be converted from assets
-     */
-    function _convertAssetsToYieldSourceShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
-        return assets.mulDiv(1, sharePriceOfYieldSource(), rounding);
-    }
-
-    /**
-     * @notice Returns the amount of assets that the yield source vault would exchange for the amount of shares provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param shares amount of shares to be converted to assets
-     * @param rounding rounding mode
-     * @return assets amount of assets that would be converted from shares
-     */
-    function _convertYieldSourceSharesToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
-        return shares.mulDiv(sharePriceOfYieldSource(), 1, rounding);
-    }
-
-    /**
      * @param account target account address
      * @return shares yield source share balance of this vault
      */
@@ -92,9 +70,11 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev See {IERC4626-totalAssets}
      * @return assets total amount of the underlying asset managed by this vault
      */
+    /*
     function totalAssets() public view returns (uint256) {
         return _convertYieldSourceSharesToAssets(totalSharesInReferral, MathUpgradeable.Rounding.Down);
     }
+    */
 
     /**
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalShareBalanceAtYieldSourceInReferralSet

@@ -122,13 +122,13 @@ describe("RevenueShareVaultDHedge", function () {
         it("non-share-owner should fail to redeem without approval", async function () {
             const tx = vault
                 .connect(user2)
-                .redeem(depositAmount1.div(2), user1.address, user1.address);
+                .redeemWithReferralAndExpectedAmountOut(depositAmount1.div(2), user1.address, user1.address, referral1, depositAmount1.div(2));
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
         it("should be able to redeem partial", async function () {
             await vault
                 .connect(user1)
-                .redeem(depositAmount1.div(2), user1.address, user1.address);
+                .redeemWithReferralAndExpectedAmountOut(depositAmount1.div(2), user1.address, user1.address, referral1, depositAmount1.div(2));
             expect(await vault.balanceOf(user1.address)).to.equal(
                 depositAmount1.div(2)
             );
@@ -140,14 +140,14 @@ describe("RevenueShareVaultDHedge", function () {
             );
             await vault
                 .connect(user1)
-                .redeemWithReferral(depositAmount1.div(2), user1.address, user1.address, referral1);
+                .redeemWithReferralAndExpectedAmountOut(depositAmount1.div(2), user1.address, user1.address, referral1, depositAmount1.div(2));
             expect(await vault.balanceOf(user1.address)).to.equal(0);
             expect(await mockERC20.balanceOf(user1.address)).to.equal(depositAmount1);
             expect(await vault.totalSharesByReferral(referral1)).to.equal(0);
 
             await vault
                 .connect(user2)
-                .redeem(depositAmount2, user2.address, user2.address);
+                .redeemWithReferralAndExpectedAmountOut(depositAmount2, user2.address, user2.address, referral2, depositAmount2);
             expect(await vault.balanceOf(user2.address)).to.equal(
                 0
             );

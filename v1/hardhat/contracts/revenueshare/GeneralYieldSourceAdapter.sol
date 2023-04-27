@@ -43,12 +43,12 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The address of the ERC20 asset contract
-     * @param assets_ The amount of assets to deposit
+     * @param amount_ The amount of assets to deposit
      * @return shares amount of shares received
      */
-    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal virtual returns (uint256) {
-        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
-        return IYieldSourceContract(yieldSourceVault).deposit(assets_, address(this));
+    function _depositToYieldSourceVault(address asset_, uint256 amount_) internal virtual returns (uint256) {
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, amount_);
+        return IYieldSourceContract(yieldSourceVault).deposit(amount_, address(this));
     }
 
     /**
@@ -69,28 +69,6 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     }
 
     /**
-     * @notice Returns the amount of shares that the yield source vault would exchange for the amount of assets provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param assets amount of assets to be converted to shares
-     * @param rounding rounding mode
-     * @return shares amount of shares that would be converted from assets
-     */
-    function _convertAssetsToYieldSourceShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view virtual returns (uint256) {
-        return assets.mulDiv(1, sharePriceOfYieldSource(), rounding);
-    }
-
-    /**
-     * @notice Returns the amount of assets that the yield source vault would exchange for the amount of shares provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param shares amount of shares to be converted to assets
-     * @param rounding rounding mode
-     * @return assets amount of assets that would be converted from shares
-     */
-    function _convertYieldSourceSharesToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view virtual returns (uint256) {
-        return shares.mulDiv(sharePriceOfYieldSource(), 1, rounding);
-    }
-
-    /**
      * @param account target account address
      * @return shares yield source share balance of this vault
      */
@@ -106,7 +84,7 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
         return IYieldSourceContract(yieldSourceVault).totalSupply();
     }
 
-//TODO: ?
+    //TODO: ?
     /**
      * @dev abstract function to be implemented by specific yield source vault
      * @param account target account address

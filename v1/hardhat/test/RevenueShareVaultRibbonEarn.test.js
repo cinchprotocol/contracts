@@ -103,9 +103,11 @@ describe("RevenueShareVaultRibbonEarn", function () {
     });
 
     describe("Redeem/withdraw", function () {
+        /*
         it("totalAssets should return correct amount", async function () {
             expect(await vault.totalAssets()).to.equal(depositAmount1.add(depositAmount2));
         });
+        */
         it("totalShareBalanceAtYieldSourceInReferralSet should work with zero referral", async function () {
             expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(0);
         });
