@@ -80,7 +80,7 @@ describe("RevenueShareVaultDHedge", function () {
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
         it("should be able to deposit", async function () {
-            await vault.connect(user1).deposit(depositAmount1, user1.address);
+            await vault.connect(user1).depositWithReferral(depositAmount1, user1.address, referral1);
             expect(await vault.balanceOf(user1.address)).to.equal(depositAmount1);
             expect(await vault.totalSharesByReferral(user1.address)).to.equal(
                 depositAmount1
@@ -367,9 +367,10 @@ describe("RevenueShareVaultDHedge", function () {
         it("whenDepositNotPaused function should not work when paused", async function () {
             const tx = vault
                 .connect(user3)
-                .deposit(
+                .depositWithReferral(
                     depositAmount3,
-                    user3.address
+                    user3.address,
+                    referral3
                 );
             await expect(tx).to.be.revertedWith("DepositPausable: paused");
         });

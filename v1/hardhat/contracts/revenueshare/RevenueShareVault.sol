@@ -62,7 +62,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @notice For guarding the deposit function with an upper limit
      * param receiver address for checking the max asset amount for deposit
      * @return max asset amount that can be deposited
-     */    
+     */
     function maxDeposit(address) public view virtual returns (uint256) {
         return type(uint256).max;
     }
@@ -73,9 +73,11 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @param amount amount of assets to deposit
      * @param receiver address to receive the shares
      */
+    /*
     function deposit(uint256 amount, address receiver) public virtual returns (uint256) {
         return depositWithReferral(amount, receiver, receiver);
     }
+    */
 
     /**
      * @notice Deposit assets to the vault with referral
@@ -111,7 +113,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
      * @notice For guarding the redeem function with an upper limit
      * @param sharesOwner_ owner address of the shares to be redeemed
      * @return balance of shares owned by the sharesOwner_
-     */    
+     */
     function maxRedeem(address sharesOwner_) public view virtual returns (uint256) {
         return balanceOf(sharesOwner_);
     }
@@ -178,7 +180,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         return assets;
     }
 
-//TODO: ?
+    //TODO: ?
     /**
      * @dev See {IERC4626-totalAssets}
      * @return assets total amount of the underlying asset managed by this vault
@@ -194,7 +196,7 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
                             YIELD SOURCE
     //////////////////////////////////////////////////////////////*/
 
-//TODO: ?
+    //TODO: ?
     /**
      * @param account target account address
      * @param referral target referral address
