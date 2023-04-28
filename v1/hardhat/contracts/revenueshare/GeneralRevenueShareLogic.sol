@@ -27,8 +27,6 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     event RevenueShareWithdrawn(address indexed asset, uint256 amount, address referral, address receiver);
     /// @dev Emitted when cinchPerformanceFeePercentage is updated
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
-    /// @dev Emitted upon setTotalSharesByReferral
-    event TotalSharesByReferralUpdated(address indexed referral, uint256 shares_);
     /// @dev Emitted upon setTotalSharesInReferral
     event TotalSharesInReferralUpdated(uint256 shares_);
 
@@ -116,17 +114,6 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         totalSharesByUserReferral[sharesOwner][referral] -= shares;
         totalSharesByReferral[referral] -= shares;
         totalSharesInReferral -= shares;
-    }
-
-    /**
-     * @dev In case the integration does not have full control over the yield source withdrawal process, contract owner will be able to fix any discrepancy according to the off-chain tracking.
-     * @dev onlyOwner
-     * @param referral The address of the referral
-     * @param shares_ The amount of shares decreased
-     */
-    function setTotalSharesByReferral(address referral, uint256 shares_) external virtual onlyOwner {
-        totalSharesByReferral[referral] = shares_;
-        emit TotalSharesByReferralUpdated(referral, shares_);
     }
 
     /**
