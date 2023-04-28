@@ -136,7 +136,7 @@ describe("RevenueShareVaultRibbonEarn", function () {
                 0
             );
         });
-        it("should not be able to redeem from vault", async function () {
+        it("should not be able to call redeemWithReferral", async function () {
             const tx = vault.connect(user1).redeemWithReferral(depositAmount1, user1.address, user1.address, referral1);
             await expect(tx).to.be.revertedWith("RevenueShareVaultRibbonEarn: not supported");
         });

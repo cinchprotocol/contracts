@@ -67,6 +67,20 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     }
 
     /**
+     * @notice Redeem assets with vault shares and referral
+     * @dev For this integration, redeemWithReferralAndExpectedAmountOut is supported instead of redeemWithReferral
+     * @dev not supported
+     * shares amount of shares to burn and redeem assets
+     * receiver address to receive the assets
+     * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
+     * referral address of the partner referral
+     * @return assets_ amount of assets received
+     */
+    function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
+        require(false, "RevenueShareVaultDHedge: not supported");
+    }
+
+    /**
      * @return price share price of yield source vault
      */
     function sharePriceOfYieldSource() public view override returns (uint256) {

@@ -68,18 +68,6 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
     }
 
     /**
-     * @notice Deposit assets to the vault
-     * @dev depositWithReferral(assets, receiver, receiver)
-     * @param amount amount of assets to deposit
-     * @param receiver address to receive the shares
-     */
-    /*
-    function deposit(uint256 amount, address receiver) public virtual returns (uint256) {
-        return depositWithReferral(amount, receiver, receiver);
-    }
-    */
-
-    /**
      * @notice Deposit assets to the vault with referral
      * @dev Transfer assets to this contract, then deposit into yield source vault, and mint shares to receiver
      * @dev whenNotPaused whenDepositNotPaused nonReentrant
@@ -142,19 +130,6 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
 
         emit Redeem(caller, receiver, sharesOwner, assets, shares);
     }
-
-    /**
-     * @notice Redeem assets with vault shares
-     * @param shares amount of shares to burn and redeem assets
-     * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed
-     * @return amount of assets received
-     */
-    /*
-    function redeem(uint256 shares, address receiver, address sharesOwner) public virtual returns (uint256) {
-        return redeemWithReferral(shares, receiver, sharesOwner, sharesOwner);
-    }
-    */
 
     /**
      * @notice Redeem assets with vault shares and referral
