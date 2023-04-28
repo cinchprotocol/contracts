@@ -66,16 +66,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @dev See {IERC4626-totalAssets}
-     * @return assets total amount of the underlying asset managed by this vault
-     */
-    /*
-    function totalAssets() public view returns (uint256) {
-        return _convertYieldSourceSharesToAssets(totalSharesInReferral, MathUpgradeable.Rounding.Down);
-    }
-    */
-
-    /**
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalShareBalanceAtYieldSourceInReferralSet
      * @return shares_ total share balance at yield source in referral set
      */

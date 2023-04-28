@@ -18,7 +18,7 @@ import "./security/DepositPausableUpgradeable.sol";
  * @title RevenueShareVault
  * @notice Contract allows deposits and Withdrawals to Yield source product
  * @dev Should be deployed per yield source pool/vault
- * @dev This contract does not intend to confront to the whole ERC4626 standard
+ * @dev This contract does not intend to confront to the ERC4626 standard
  */
 contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgradeable, DepositPausableUpgradeable, ReentrancyGuardUpgradeable, GeneralYieldSourceAdapter, GeneralRevenueShareLogic {
     using MathUpgradeable for uint256;
@@ -156,34 +156,6 @@ contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgr
         emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
         return assets;
     }
-
-    //TODO: ?
-    /**
-     * @dev See {IERC4626-totalAssets}
-     * @return assets total amount of the underlying asset managed by this vault
-     */
-    /*
-    function totalAssets() public view virtual returns (uint256) {
-        uint256 shares = shareBalanceAtYieldSourceOf(address(this));
-        return _convertYieldSourceSharesToAssets(shares, MathUpgradeable.Rounding.Down);
-    }
-    */
-
-    /*//////////////////////////////////////////////////////////////
-                            YIELD SOURCE
-    //////////////////////////////////////////////////////////////*/
-
-    //TODO: ?
-    /**
-     * @param account target account address
-     * @param referral target referral address
-     * @return assets amount of assets that the user has deposited to the vault
-     */
-    /*
-    function assetBalanceAtYieldSourceOf(address account, address referral) public view virtual override returns (uint256) {
-        return _convertYieldSourceSharesToAssets(totalSharesByUserReferral[account][referral], MathUpgradeable.Rounding.Down);
-    }
-    */
 
     /*//////////////////////////////////////////////////////////////
                             HELPER FUNCTIONS

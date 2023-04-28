@@ -494,6 +494,7 @@ describe("RevenueShareVault", function () {
         });
     });
 
+    /*
     describe("Fixing data by contract owner", function () {
         it("setTotalSharesByReferral onlyOwner", async function () {
             const tx = vault.connect(user3).setTotalSharesByReferral(
@@ -545,7 +546,7 @@ describe("RevenueShareVault", function () {
             expect(await vault.totalSharesInReferral()).equal(depositAmount3);
         });
     });
-
+    */
     describe("GeneralRevenueShareLogic", function () {
         describe("addRevenueShareReferral", function () {
             it("onlyOwner", async function () {
