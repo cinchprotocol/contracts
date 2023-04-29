@@ -103,6 +103,8 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev onlyOwner
      */
     function setTotalSharesInReferralAccordingToYieldSource(address referral, address user) external onlyOwner {
+        require(referral != address(0) && user != address(0), "ZERO_ADDRESS");
+
         uint256 recordedUserShares_ = totalSharesByUserReferral[user][referral];
         uint256 updatedUserShares_ = shareBalanceAtYieldSourceOf(user);
 

@@ -17,6 +17,7 @@ const revenueShareAmount3 = ethers.utils.parseUnits("100", mockERC20Decimals);
 const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
 const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
 const cinchPerformanceFeePercentage100 = ethers.utils.parseUnits("100", 2);
+const ZERO_ADDRESS = ethers.constants.AddressZero;
 
 before(async function () {
     // get accounts from hardhat
@@ -373,6 +374,10 @@ describe("RevenueShareVaultRibbonEarn", function () {
         it("onlyOwner", async function () {
             const tx = vault.connect(user1).setTotalSharesInReferralAccordingToYieldSource(referral1, user1.address);
             await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+        it("should not work with zero address", async function () {
+            const tx = vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(ZERO_ADDRESS, ZERO_ADDRESS);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
         });
     });
 });

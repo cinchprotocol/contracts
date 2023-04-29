@@ -446,59 +446,6 @@ describe("MockRevenueShareVault", function () {
         });
     });
 
-    /*
-    describe("Fixing data by contract owner", function () {
-        it("setTotalSharesByReferral onlyOwner", async function () {
-            const tx = vault.connect(user3).setTotalSharesByReferral(
-                referral3,
-                depositAmount3
-            );
-            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
-        });
-        it("setTotalSharesInReferral onlyOwner", async function () {
-            const tx = vault.connect(user3).setTotalSharesInReferral(
-                depositAmount3
-            );
-            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
-        });
-        it("should be able to setTotalSharesByReferral", async function () {
-            const tx01 = await vault.connect(owner).setTotalSharesByReferral(
-                referral3,
-                depositAmount3.mul(2)
-            );
-            expect(tx01)
-                .to.emit(vault, "TotalSharesByReferralUpdated")
-                .withArgs(referral3, depositAmount3.mul(2));
-            expect(await vault.totalSharesByReferral(referral3)).equal(depositAmount3.mul(2));
-
-            const tx02 = await vault.connect(owner).setTotalSharesByReferral(
-                referral3,
-                depositAmount3
-            );
-            expect(tx02)
-                .to.emit(vault, "TotalSharesByReferralUpdated")
-                .withArgs(referral3, depositAmount3);
-            expect(await vault.totalSharesByReferral(referral3)).equal(depositAmount3);
-        });
-        it("should be able to setTotalSharesInReferral", async function () {
-            const tx01 = await vault.connect(owner).setTotalSharesInReferral(
-                depositAmount3.mul(2)
-            );
-            expect(tx01)
-                .to.emit(vault, "TotalSharesInReferralUpdated")
-                .withArgs(depositAmount3.mul(2));
-            expect(await vault.totalSharesInReferral()).equal(depositAmount3.mul(2));
-
-            const tx02 = await vault.connect(owner).setTotalSharesInReferral(
-                depositAmount3
-            );
-            expect(tx02)
-                .to.emit(vault, "TotalSharesInReferralUpdated")
-                .withArgs(depositAmount3);
-            expect(await vault.totalSharesInReferral()).equal(depositAmount3);
-        });
-    });
-    */
     describe("GeneralRevenueShareLogic", function () {
         describe("addRevenueShareReferral", function () {
             it("onlyOwner", async function () {
