@@ -28,7 +28,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     /// @dev Emitted when cinchPerformanceFeePercentage is updated
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
     /// @dev Emitted upon setTotalSharesInReferralAccordingToYieldSource
-    event TotalSharesInReferralUpdated(uint256 shares_);
+    event TotalSharesByUserReferralUpdated(address user, address referral, uint256 shares_);
 
     /// @dev Address set of all referrals
     EnumerableSetUpgradeable.AddressSet internal _referralSet;

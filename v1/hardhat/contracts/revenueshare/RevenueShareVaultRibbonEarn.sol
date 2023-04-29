@@ -85,28 +85,24 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
         }
     }
 
-    //TODO: ?
     /**
-     * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral
+     * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral if needed
+     * @dev This is fesiable as this vault is targeted for institutional users, and the number of users is expected to be small
      * @dev onlyOwner
      */
-    function setTotalSharesInReferralAccordingToYieldSource() external onlyOwner {
-        uint256 totalSharesByReferral_;
-        uint256 totalSharesInReferral_ = 0;
-        address[] memory referrals = _referralSet.values();
-        for (uint256 i = 0; i < referrals.length; i++) {
-            totalSharesByReferral_ = 0;
-            address referral = referrals[i];
-            address[] memory users = _userSetByReferral[referral].values();
-            for (uint256 j = 0; j < users.length; j++) {
-                address user = users[j];
-                totalSharesByReferral_ += shareBalanceAtYieldSourceOf(user);
-            }
-            totalSharesByReferral[referral] = totalSharesByReferral_;
-            totalSharesInReferral_ += totalSharesByReferral_;
+    function setTotalSharesInReferralAccordingToYieldSource(address referral, address user) external onlyOwner {
+        uint256 recordedUserShares_ = totalSharesByUserReferral[user][referral];
+        uint256 updatedUserShares_ = shareBalanceAtYieldSourceOf(user);
+
+        if (recordedUserShares_ > updatedUserShares_) {
+            uint256 deltaShares_ = recordedUserShares_ - updatedUserShares_;
+            _trackSharesInReferralRemoved(referral, user, deltaShares_);
+            emit TotalSharesByUserReferralUpdated(user, referral, updatedUserShares_);
+        } else if (recordedUserShares_ < updatedUserShares_) {
+            uint256 deltaShares_ = updatedUserShares_ - recordedUserShares_;
+            _trackSharesInReferralAdded(referral, user, deltaShares_);
+            emit TotalSharesByUserReferralUpdated(user, referral, updatedUserShares_);
         }
-        totalSharesInReferral = totalSharesInReferral_;
-        emit TotalSharesInReferralUpdated(totalSharesInReferral_);
     }
 
     /**

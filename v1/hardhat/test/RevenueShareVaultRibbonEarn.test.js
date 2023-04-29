@@ -116,17 +116,13 @@ describe("RevenueShareVaultRibbonEarn", function () {
         it("should be able to redeem from yield source", async function () {
             await mockProtocol.connect(user1).redeem(depositShare1, user1.address, user1.address);
             expect(await mockERC20.balanceOf(user1.address)).to.equal(depositAmount1);
-            await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource();
-            expect(await vault.totalSharesByReferral(referral1)).to.equal(
-                0
-            );
+            await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(referral1, user1.address);
+            expect(await vault.totalSharesByReferral(referral1)).to.equal(0);
 
             await mockProtocol.connect(user2).redeem(depositShare2, user2.address, user2.address);
             expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
-            await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource();
-            expect(await vault.totalSharesByReferral(referral2)).to.equal(
-                0
-            );
+            await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(referral2, user2.address);
+            expect(await vault.totalSharesByReferral(referral2)).to.equal(0);
         });
         it("should not be able to call redeemWithReferral", async function () {
             const tx = vault.connect(user1).redeemWithReferral(depositAmount1, user1.address, user1.address, referral1);
@@ -377,7 +373,7 @@ describe("RevenueShareVaultRibbonEarn", function () {
 
     describe("setTotalSharesInReferralAccordingToYieldSource", function () {
         it("onlyOwner", async function () {
-            const tx = vault.connect(user1).setTotalSharesInReferralAccordingToYieldSource();
+            const tx = vault.connect(user1).setTotalSharesInReferralAccordingToYieldSource(referral1, user1.address);
             await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
         });
     });
