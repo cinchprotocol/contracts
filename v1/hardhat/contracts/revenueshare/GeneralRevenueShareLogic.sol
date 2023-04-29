@@ -6,8 +6,9 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title GeneralRevenueShareLogic
@@ -16,6 +17,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using MathUpgradeable for uint256;
+    using SafeERC20 for IERC20;
 
     /// @dev Emitted when a referral is added
     event RevenueShareReferralAdded(address referral);
@@ -131,7 +133,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         require(totalSharesInReferral_ > 0, "GeneralRevenueShareLogic: totalSharesInReferral is zero");
 
         // Transfer assets to this vault first, assuming it was approved by the sender
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(asset_), assetsFrom_, address(this), amount_);
+        IERC20(asset_).safeTransferFrom(assetsFrom_, address(this), amount_);
         totalRevenueShareProcessedByAsset[asset_] += amount_;
 
         // Take Cinch performance fee from the amount
@@ -177,7 +179,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         emit RevenueShareWithdrawn(asset_, amount_, _msgSender(), receiver_);
 
         // Transfer assets to the receiver
-        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset_), receiver_, amount_);
+        IERC20(asset_).safeTransfer(receiver_, amount_);
     }
 
     /**
