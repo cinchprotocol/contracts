@@ -26,54 +26,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @dev Deposit assets to yield source vault
-     * @dev virtual, expected to be overridden with specific yield source vault
-     * @param asset_ The address of the ERC20 asset contract
-     * @param assets_ The amount of assets to deposit
-     * @return shares amount of shares received
-     */
-    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
-        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
-        uint256 shares0 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
-        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(assets_, _msgSender());
-        uint256 shares1 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
-        return shares1 - shares0;
-    }
-
-    /**
-     * @dev Redeem assets with vault shares from yield source vault
-     * @dev For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
-     * @dev not supported
-     * param shares amount of shares to burn and redeem assets
-     * @return assets amount of assets received
-     */
-    function _redeemFromYieldSourceVault(uint256) internal pure override returns (uint256) {
-        require(false, "RevenueShareVaultRibbonEarn: not supported");
-    }
-
-    /**
-     * @notice Redeem assets with vault shares and referral
-     * @dev For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
-     * @dev not supported
-     * shares amount of shares to burn and redeem assets
-     * receiver address to receive the assets
-     * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * referral address of the partner referral
-     * @return assets_ amount of assets received
-     */
-    function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
-        require(false, "RevenueShareVaultRibbonEarn: not supported");
-    }
-
-    /**
-     * @param account target account address
-     * @return shares yield source share balance of this vault
-     */
-    function shareBalanceAtYieldSourceOf(address account) public view override returns (uint256) {
-        return IYieldSourceRibbonEarn(yieldSourceVault).shares(account);
-    }
-
-    /**
      * @dev to be used for calculating the revenue share ratio
      * @return yieldSourceTotalShares total yield source shares supply
      */
@@ -117,6 +69,54 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
             _trackSharesInReferralAdded(referral, user, deltaShares_);
             emit TotalSharesByUserReferralUpdated(user, referral, updatedUserShares_);
         }
+    }
+
+    /**
+     * @notice Redeem assets with vault shares and referral
+     * @dev For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
+     * @dev not supported
+     * shares amount of shares to burn and redeem assets
+     * receiver address to receive the assets
+     * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
+     * referral address of the partner referral
+     * @return assets_ amount of assets received
+     */
+    function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
+        require(false, "RevenueShareVaultRibbonEarn: not supported");
+    }
+
+    /**
+     * @param account target account address
+     * @return shares yield source share balance of this vault
+     */
+    function shareBalanceAtYieldSourceOf(address account) public view override returns (uint256) {
+        return IYieldSourceRibbonEarn(yieldSourceVault).shares(account);
+    }
+
+    /**
+     * @dev Deposit assets to yield source vault
+     * @dev virtual, expected to be overridden with specific yield source vault
+     * @param asset_ The address of the ERC20 asset contract
+     * @param assets_ The amount of assets to deposit
+     * @return shares amount of shares received
+     */
+    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
+        uint256 shares0 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
+        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(assets_, _msgSender());
+        uint256 shares1 = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
+        return shares1 - shares0;
+    }
+
+    /**
+     * @dev Redeem assets with vault shares from yield source vault
+     * @dev For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
+     * @dev not supported
+     * param shares amount of shares to burn and redeem assets
+     * @return assets amount of assets received
+     */
+    function _redeemFromYieldSourceVault(uint256) internal pure override returns (uint256) {
+        require(false, "RevenueShareVaultRibbonEarn: not supported");
     }
 
     /**
