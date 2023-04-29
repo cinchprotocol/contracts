@@ -59,17 +59,20 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
         asset = asset_;
     }
 
-    /*//////////////////////////////////////////////////////////////
-                                Vault
-    //////////////////////////////////////////////////////////////*/
+    /**
+     * @notice Pause the contract.
+     * @dev onlyOwner
+     */
+    function pause() external onlyOwner {
+        _pause();
+    }
 
     /**
-     * @notice For guarding the deposit function with an upper limit
-     * param receiver address for checking the max asset amount for deposit
-     * @return max asset amount that can be deposited
+     * @notice Unpause the contract.
+     * @dev onlyOwner
      */
-    function maxDeposit(address) public view virtual returns (uint256) {
-        return type(uint256).max;
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     /**
@@ -100,6 +103,41 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
         emit DepositWithReferral(_msgSender(), receiver, amount, shares, referral);
 
         return shares;
+    }
+
+    /**
+     * @notice Redeem assets with vault shares and referral
+     * @dev whenNotPaused
+     * @dev nonReentrant
+     * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
+     * @param shares amount of shares to burn and redeem assets
+     * @param receiver address to receive the assets
+     * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
+     * @param referral address of the partner referral
+     * @return amount of assets received
+     */
+    function redeemWithReferral(uint256 shares, address receiver, address sharesOwner, address referral) public virtual whenNotPaused nonReentrant returns (uint256) {
+        require(shares > 0, "ZERO_SHARES");
+        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
+        require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
+        require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVault: insufficient shares by referral");
+
+        //remove the shares from the user record first to avoid reentrancy attack
+        _trackSharesInReferralRemoved(sharesOwner, referral, shares);
+
+        uint256 assets = _redeemFromYieldSourceVault(shares);
+        _redeem(_msgSender(), receiver, sharesOwner, assets, shares);
+        emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
+        return assets;
+    }
+
+    /**
+     * @notice For guarding the deposit function with an upper limit
+     * param receiver address for checking the max asset amount for deposit
+     * @return max asset amount that can be deposited
+     */
+    function maxDeposit(address) public view virtual returns (uint256) {
+        return type(uint256).max;
     }
 
     /**
@@ -134,52 +172,6 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
         IERC20(asset).safeTransfer(receiver, assets);
 
         emit Redeem(caller, receiver, sharesOwner, assets, shares);
-    }
-
-    /**
-     * @notice Redeem assets with vault shares and referral
-     * @dev whenNotPaused
-     * @dev nonReentrant
-     * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
-     * @param shares amount of shares to burn and redeem assets
-     * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * @param referral address of the partner referral
-     * @return amount of assets received
-     */
-    function redeemWithReferral(uint256 shares, address receiver, address sharesOwner, address referral) public virtual whenNotPaused nonReentrant returns (uint256) {
-        require(shares > 0, "ZERO_SHARES");
-        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
-        require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
-        require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVault: insufficient shares by referral");
-
-        //remove the shares from the user record first to avoid reentrancy attack
-        _trackSharesInReferralRemoved(sharesOwner, referral, shares);
-
-        uint256 assets = _redeemFromYieldSourceVault(shares);
-        _redeem(_msgSender(), receiver, sharesOwner, assets, shares);
-        emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
-        return assets;
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                            HELPER FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @notice Pause the contract.
-     * @dev onlyOwner
-     */
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    /**
-     * @notice Unpause the contract.
-     * @dev onlyOwner
-     */
-    function unpause() external onlyOwner {
-        _unpause();
     }
 
     /**
