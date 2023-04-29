@@ -27,7 +27,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     event RevenueShareWithdrawn(address indexed asset, uint256 amount, address referral, address receiver);
     /// @dev Emitted when cinchPerformanceFeePercentage is updated
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
-    /// @dev Emitted upon setTotalSharesInReferral
+    /// @dev Emitted upon setTotalSharesInReferralAccordingToYieldSource
     event TotalSharesInReferralUpdated(uint256 shares_);
 
     /// @dev Address set of all referrals
@@ -117,16 +117,6 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     }
 
     /**
-     * @dev In case the integration does not have full control over the yield source withdrawal process, contract owner will be able to fix any discrepancy according to the off-chain tracking.
-     * @dev onlyOwner
-     * @param shares_ The amount of shares decreased
-     */
-    function setTotalSharesInReferral(uint256 shares_) external virtual onlyOwner {
-        totalSharesInReferral = shares_;
-        emit TotalSharesInReferralUpdated(shares_);
-    }
-
-    /**
      * @notice Deposit asset as revenue share into this vault
      * @dev The amount will be split among referrals according to their shares ratio
      * @dev whenNotPaused nonReentrant
@@ -191,6 +181,8 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     }
 
     /**
+     * @notice Set the cinch performance fee percentage
+     * @dev onlyOwner
      * @param feePercentage_ Cinch performance fee percentage with 2 decimals
      */
     function setCinchPerformanceFeePercentage(uint256 feePercentage_) external virtual onlyOwner {

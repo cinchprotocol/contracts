@@ -85,6 +85,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
         }
     }
 
+    //TODO: ?
     /**
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral
      * @dev onlyOwner
