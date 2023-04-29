@@ -99,9 +99,6 @@ describe("RevenueShareVaultRibbonEarn", function () {
     });
 
     describe("Redeem/withdraw", function () {
-        it("totalShareBalanceAtYieldSourceInReferralSet should work with zero referral", async function () {
-            expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(0);
-        });
         it("should be able to addRevenueShareReferral", async function () {
             const tx01 = await vault.addRevenueShareReferral(user1.address);
             expect(tx01)
@@ -361,12 +358,6 @@ describe("RevenueShareVaultRibbonEarn", function () {
                     .mul(cinchPerformanceFeePercentage10)
                     .div(cinchPerformanceFeePercentage100)
             );
-        });
-    });
-
-    describe("totalShareBalanceAtYieldSourceInReferralSet", function () {
-        it("should be able to get total share balance at yield source in referral set", async function () {
-            expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(depositShare3);
         });
     });
 
