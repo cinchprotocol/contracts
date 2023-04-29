@@ -37,20 +37,24 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
     uint256 public totalAssetDepositProcessed;
 
     /**
-     * @notice vault initializer
+     * @notice RevenueShareVault initializer
      * @param asset_ underneath asset, which should match the asset of the yield source vault
      * @param name_ ERC20 name of the vault shares token
      * @param symbol_ ERC20 symbol of the vault shares token
      * @param yieldSourceVault_ vault address of yield source
-     * @param yieldSourceSwapper_ swapper address of yield source
      * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
      */
-    function initialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, address yieldSourceSwapper_, uint256 cinchPerformanceFeePercentage_) public initializer {
+    function __RevenueShareVault_init(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) internal onlyInitializing {
+        __RevenueShareVault_init_unchained(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
+    }
+
+    function __RevenueShareVault_init_unchained(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) internal onlyInitializing {
+        require(asset_ != address(0) && yieldSourceVault_ != address(0), "ZERO_ADDRESS");
         __Ownable_init();
         __Pausable_init();
         __DepositPausable_init();
         __ERC20_init(name_, symbol_);
-        __GeneralYieldSourceAdapter_init(yieldSourceVault_, yieldSourceSwapper_);
+        __GeneralYieldSourceAdapter_init(yieldSourceVault_);
         __GeneralRevenueShareLogic_init(cinchPerformanceFeePercentage_);
         asset = asset_;
     }

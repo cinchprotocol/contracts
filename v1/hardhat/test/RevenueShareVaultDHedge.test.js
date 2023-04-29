@@ -59,8 +59,8 @@ describe("RevenueShareVaultDHedge", function () {
                 "CinchRevenueShare",
                 "CRS",
                 mockProtocol.address,
-                mockSwapper.address,
                 initCinchPerformanceFeePercentage,
+                mockSwapper.address,
             ]);
             expect(vault.address).to.not.be.undefined;
             console.log("vault", vault.address);

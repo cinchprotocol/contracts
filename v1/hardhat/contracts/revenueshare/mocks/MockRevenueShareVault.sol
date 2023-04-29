@@ -10,6 +10,18 @@ contract MockRevenueShareVault is RevenueShareVault {
     using SafeERC20 for IERC20;
 
     /**
+     * @notice vault initializer
+     * @param asset_ underneath asset, which should match the asset of the yield source vault
+     * @param name_ ERC20 name of the vault shares token
+     * @param symbol_ ERC20 symbol of the vault shares token
+     * @param yieldSourceVault_ vault address of yield source
+     * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
+     */
+    function initialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) public initializer {
+        __RevenueShareVault_init(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
+    }
+
+    /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The address of the ERC20 asset contract

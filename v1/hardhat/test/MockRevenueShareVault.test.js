@@ -18,7 +18,6 @@ const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
 const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
 const cinchPerformanceFeePercentage100 = ethers.utils.parseUnits("100", 2);
 const ZERO_ADDRESS = ethers.constants.AddressZero;
-const mockSwapperAddress = ZERO_ADDRESS;
 
 before(async function () {
     // get accounts from hardhat
@@ -32,7 +31,7 @@ before(async function () {
     referral3 = user3.address;
 });
 
-describe("RevenueShareVault", function () {
+describe("MockRevenueShareVault", function () {
     describe("Deployment", function () {
         it("Should deploy MockERC20", async function () {
             const MockERC20 = await ethers.getContractFactory("MockERC20");
@@ -55,7 +54,6 @@ describe("RevenueShareVault", function () {
                 "CinchRevenueShare",
                 "CRS",
                 mockProtocol.address,
-                mockSwapperAddress,
                 initCinchPerformanceFeePercentage,
             ]);
             expect(vault.address).to.not.be.undefined;
@@ -66,7 +64,6 @@ describe("RevenueShareVault", function () {
                 "CinchRevenueShare",
                 "CRS",
                 mockProtocol.address,
-                mockSwapperAddress,
                 initCinchPerformanceFeePercentage);
             await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
         });
@@ -638,7 +635,6 @@ describe("RevenueShareVault", function () {
                 "MockAttackerCinchRevenueShare",
                 "ACRS",
                 mockProtocol.address,
-                mockSwapperAddress,
                 initCinchPerformanceFeePercentage,
             ]);
             expect(mockAttacker.address).to.not.be.undefined;

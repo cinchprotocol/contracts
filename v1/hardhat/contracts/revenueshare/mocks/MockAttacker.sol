@@ -14,11 +14,11 @@ contract MockAttacker is MockRevenueShareVault {
     }
 
     function reInitGeneralYieldSourceAdapter() external {
-        __GeneralYieldSourceAdapter_init(yieldSourceVault, yieldSourceSwapper);
+        __GeneralYieldSourceAdapter_init(yieldSourceVault);
     }
 
     function reInitGeneralYieldSourceAdapterUnChained() external {
-        __GeneralYieldSourceAdapter_init_unchained(yieldSourceVault, yieldSourceSwapper);
+        __GeneralYieldSourceAdapter_init_unchained(yieldSourceVault);
     }
 
     function reInitDepositPausable() external {

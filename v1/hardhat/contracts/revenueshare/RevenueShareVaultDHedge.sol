@@ -11,6 +11,24 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     using MathUpgradeable for uint256;
     using SafeERC20 for IERC20;
 
+    /// @dev Yield source swapper address
+    address public yieldSourceSwapper;
+
+    /**
+     * @notice vault initializer
+     * @param asset_ underneath asset, which should match the asset of the yield source vault
+     * @param name_ ERC20 name of the vault shares token
+     * @param symbol_ ERC20 symbol of the vault shares token
+     * @param yieldSourceVault_ vault address of yield source
+     * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
+     * @param yieldSourceSwapper_ swapper address of yield source
+     */
+    function initialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_, address yieldSourceSwapper_) public initializer {
+        require(asset_ != address(0) && yieldSourceVault_ != address(0) && yieldSourceSwapper_ != address(0), "ZERO_ADDRESS");
+        __RevenueShareVault_init(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
+        yieldSourceSwapper = yieldSourceSwapper_;
+    }
+
     /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
@@ -111,5 +129,5 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[20] private __gap;
+    uint256[19] private __gap;
 }
