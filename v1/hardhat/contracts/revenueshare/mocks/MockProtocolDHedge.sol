@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -17,8 +17,9 @@ contract MockProtocolDHedge is ERC4626 {
     /// @param amount_ Amount of tokens to deposit
     /// @return liquidityMinted Amount of liquidity minted
     function depositFor(address recipient_, address, uint256 amount_) external returns (uint256 liquidityMinted) {
-        _deposit(_msgSender(), recipient_, amount_, amount_);
-        liquidityMinted = amount_;
+        uint256 shares_ = _convertToShares(amount_, Math.Rounding.Down);
+        _deposit(_msgSender(), recipient_, amount_, shares_);
+        liquidityMinted = shares_;
     }
 
     /// @notice Withdraw assets based on the fund token amount
@@ -26,7 +27,8 @@ contract MockProtocolDHedge is ERC4626 {
     /// @param recipient_ the receipient
     /// @param fundTokenAmount_ the fund token amount
     function withdrawTo(address recipient_, uint256 fundTokenAmount_) external {
-        _withdraw(_msgSender(), recipient_, _msgSender(), fundTokenAmount_, fundTokenAmount_);
+        uint256 assets_ = _convertToAssets(fundTokenAmount_, Math.Rounding.Down);
+        _withdraw(_msgSender(), recipient_, _msgSender(), assets_, fundTokenAmount_);
     }
 
     /**
