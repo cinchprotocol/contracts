@@ -62,63 +62,6 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     }
 
     /**
-     * @notice Add a referral to the referral set
-     * @dev onlyOwner
-     * @param referral_ The address of the referral to add
-     */
-    function addRevenueShareReferral(address referral_) external virtual onlyOwner {
-        require(referral_ != address(0), "ZERO_ADDRESS");
-        require(!_referralSet.contains(referral_), "GeneralRevenueShare: referral already exists");
-        _referralSet.add(referral_);
-        emit RevenueShareReferralAdded(referral_);
-    }
-
-    /**
-     * @notice Remove a referral from the referral set
-     * @dev onlyOwner
-     * @param referral_ The address of the referral to remove
-     */
-    function removeRevenueShareReferral(address referral_) external virtual onlyOwner {
-        require(referral_ != address(0), "ZERO_ADDRESS");
-        require(_referralSet.contains(referral_), "GeneralRevenueShare: referral does not exist");
-        _referralSet.remove(referral_);
-        emit RevenueShareReferralRemoved(referral_);
-    }
-
-    /**
-     * @notice Getter for the cinchPxPayeeSet
-     * @return referrals The array of referrals
-     */
-    function getRevenueShareReferralSet() external view returns (address[] memory referrals) {
-        referrals = _referralSet.values();
-    }
-
-    /**
-     * @notice For tracking the amount of shares added in referral
-     * @param sharesOwner The address of the shares owner
-     * @param referral The address of the referral
-     * @param shares The amount of shares added
-     */
-    function _trackSharesInReferralAdded(address sharesOwner, address referral, uint256 shares) internal virtual {
-        totalSharesByReferral[referral] += shares;
-        totalSharesByUserReferral[sharesOwner][referral] += shares;
-        totalSharesInReferral += shares;
-        _userSetByReferral[referral].add(sharesOwner);
-    }
-
-    /**
-     * @notice For tracking the amount of shares decreased in referral
-     * @param sharesOwner The address of the shares owner
-     * @param referral The address of the referral
-     * @param shares The amount of shares decreased
-     */
-    function _trackSharesInReferralRemoved(address sharesOwner, address referral, uint256 shares) internal virtual {
-        totalSharesByUserReferral[sharesOwner][referral] -= shares;
-        totalSharesByReferral[referral] -= shares;
-        totalSharesInReferral -= shares;
-    }
-
-    /**
      * @notice Deposit asset as revenue share into this vault
      * @dev The amount will be split among referrals according to their shares ratio
      * @dev whenNotPaused nonReentrant
@@ -183,6 +126,30 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     }
 
     /**
+     * @notice Add a referral to the referral set
+     * @dev onlyOwner
+     * @param referral_ The address of the referral to add
+     */
+    function addRevenueShareReferral(address referral_) external virtual onlyOwner {
+        require(referral_ != address(0), "ZERO_ADDRESS");
+        require(!_referralSet.contains(referral_), "GeneralRevenueShare: referral already exists");
+        _referralSet.add(referral_);
+        emit RevenueShareReferralAdded(referral_);
+    }
+
+    /**
+     * @notice Remove a referral from the referral set
+     * @dev onlyOwner
+     * @param referral_ The address of the referral to remove
+     */
+    function removeRevenueShareReferral(address referral_) external virtual onlyOwner {
+        require(referral_ != address(0), "ZERO_ADDRESS");
+        require(_referralSet.contains(referral_), "GeneralRevenueShare: referral does not exist");
+        _referralSet.remove(referral_);
+        emit RevenueShareReferralRemoved(referral_);
+    }
+
+    /**
      * @notice Set the cinch performance fee percentage
      * @dev onlyOwner
      * @param feePercentage_ Cinch performance fee percentage with 2 decimals
@@ -191,6 +158,39 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         require(feePercentage_ <= 10000, "GeneralRevenueShare: invalid fee percentage");
         cinchPerformanceFeePercentage = feePercentage_;
         emit CinchPerformanceFeePercentageUpdated(feePercentage_);
+    }
+
+    /**
+     * @notice Getter for the cinchPxPayeeSet
+     * @return referrals The array of referrals
+     */
+    function getRevenueShareReferralSet() external view returns (address[] memory referrals) {
+        referrals = _referralSet.values();
+    }
+
+    /**
+     * @notice For tracking the amount of shares added in referral
+     * @param sharesOwner The address of the shares owner
+     * @param referral The address of the referral
+     * @param shares The amount of shares added
+     */
+    function _trackSharesInReferralAdded(address sharesOwner, address referral, uint256 shares) internal virtual {
+        totalSharesByReferral[referral] += shares;
+        totalSharesByUserReferral[sharesOwner][referral] += shares;
+        totalSharesInReferral += shares;
+        _userSetByReferral[referral].add(sharesOwner);
+    }
+
+    /**
+     * @notice For tracking the amount of shares decreased in referral
+     * @param sharesOwner The address of the shares owner
+     * @param referral The address of the referral
+     * @param shares The amount of shares decreased
+     */
+    function _trackSharesInReferralRemoved(address sharesOwner, address referral, uint256 shares) internal virtual {
+        totalSharesByUserReferral[sharesOwner][referral] -= shares;
+        totalSharesByReferral[referral] -= shares;
+        totalSharesInReferral -= shares;
     }
 
     /**
