@@ -25,7 +25,17 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
 
     /**
      * @dev Redeem assets with vault shares from yield source vault
-     * @dev virtual, expected to be overridden with specific yield source vault
+     * @dev _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) is used instead
+     * @dev not supported
+     * param shares amount of shares to burn and redeem assets
+     * @return assets amount of assets received
+     */
+    function _redeemFromYieldSourceVault(uint256) internal pure override returns (uint256) {
+        require(false, "RevenueShareVaultDHedge: not supported");
+    }
+
+    /**
+     * @dev Redeem assets with vault shares from yield source vault
      * @param shares amount of shares to burn and redeem assets
      * @param expectedAmountOut expected amount of assets to be received (slippage protection)
      * @return assets amount of assets received

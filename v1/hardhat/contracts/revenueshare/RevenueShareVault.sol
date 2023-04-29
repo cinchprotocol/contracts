@@ -20,7 +20,7 @@ import "./security/DepositPausableUpgradeable.sol";
  * @dev Should be deployed per yield source pool/vault
  * @dev This contract does not intend to confront to the ERC4626 standard
  */
-contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgradeable, DepositPausableUpgradeable, ReentrancyGuardUpgradeable, GeneralYieldSourceAdapter, GeneralRevenueShareLogic {
+abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgradeable, DepositPausableUpgradeable, ReentrancyGuardUpgradeable, GeneralYieldSourceAdapter, GeneralRevenueShareLogic {
     using MathUpgradeable for uint256;
 
     /// @dev Emitted when user deposit with referral

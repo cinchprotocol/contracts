@@ -47,7 +47,22 @@ contract MockAttacker is RevenueShareVault {
     function _redeemFromYieldSourceVault(uint256 shares) internal override returns (uint256) {
         redeemWithReferral(shares, address(0), address(0), address(0));
     }
+
+    /**
+     * @param account target account address
+     * @return shares yield source share balance of this vault
+     */
+    function shareBalanceAtYieldSourceOf(address account) public view override returns (uint256) {
+        return IYieldSourceContract(yieldSourceVault).balanceOf(account);
+    }
+
+    /**
+     * @dev to be used for calculating the revenue share ratio
+     * @return yieldSourceTotalShares total yield source shares supply
+     */
+    function getYieldSourceVaultTotalShares() external view override returns (uint256) {
+        return IYieldSourceContract(yieldSourceVault).totalSupply();
+    }
 }
 
-contract MockAttackerERC20 is MockERC20 {
-}
+contract MockAttackerERC20 is MockERC20 {}
