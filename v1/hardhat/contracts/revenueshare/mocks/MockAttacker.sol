@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
-import "../RevenueShareVault.sol";
+import "./MockRevenueShareVault.sol";
 import "./MockERC20.sol";
 
-contract MockAttacker is RevenueShareVault {
+contract MockAttacker is MockRevenueShareVault {
     function reInitGeneralRevenueShareLogic() external {
         __GeneralRevenueShareLogic_init(0);
     }
@@ -46,22 +46,6 @@ contract MockAttacker is RevenueShareVault {
      */
     function _redeemFromYieldSourceVault(uint256 shares) internal override returns (uint256) {
         redeemWithReferral(shares, address(0), address(0), address(0));
-    }
-
-    /**
-     * @param account target account address
-     * @return shares yield source share balance of this vault
-     */
-    function shareBalanceAtYieldSourceOf(address account) public view override returns (uint256) {
-        return IYieldSourceContract(yieldSourceVault).balanceOf(account);
-    }
-
-    /**
-     * @dev to be used for calculating the revenue share ratio
-     * @return yieldSourceTotalShares total yield source shares supply
-     */
-    function getYieldSourceVaultTotalShares() external view override returns (uint256) {
-        return IYieldSourceContract(yieldSourceVault).totalSupply();
     }
 }
 
