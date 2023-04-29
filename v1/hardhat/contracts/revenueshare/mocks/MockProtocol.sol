@@ -12,6 +12,10 @@ contract MockProtocol is ERC4626 {
 
     constructor(address asset_) ERC4626(ERC20(asset_)) ERC20("MockProtocol", "MOCKPROTOCOL") {}
 
+    function sharePrice() public view returns (uint256) {
+        return convertToAssets(10 ** IERC20Extended(asset()).decimals());
+    }
+
     /**
      * @dev Internal conversion function (from assets to shares) with support for rounding direction.
      * @dev To mock non 1:1 share price
@@ -26,9 +30,5 @@ contract MockProtocol is ERC4626 {
      */
     function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {
         return shares.mulDiv(1000, 1100, rounding);
-    }
-
-    function sharePrice() public view returns (uint256) {
-        return convertToAssets(10 ** IERC20Extended(asset()).decimals());
     }
 }

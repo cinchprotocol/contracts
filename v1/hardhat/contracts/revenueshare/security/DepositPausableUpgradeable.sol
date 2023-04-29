@@ -65,27 +65,6 @@ abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeabl
     }
 
     /**
-     * @dev Returns true if the contract is paused, and false otherwise.
-     */
-    function depositPaused() public view virtual returns (bool) {
-        return _depositPaused;
-    }
-
-    /**
-     * @dev Throws if the contract is paused.
-     */
-    function _requireDepositNotPaused() internal view virtual {
-        require(!depositPaused(), "DepositPausable: paused");
-    }
-
-    /**
-     * @dev Throws if the contract is not paused.
-     */
-    function _requireDepositPaused() internal view virtual {
-        require(depositPaused(), "DepositPausable: unpaused");
-    }
-
-    /**
      * @dev Triggers stopped state.
      *
      * Requirements:
@@ -107,5 +86,26 @@ abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeabl
     function unpauseDeposit() external virtual whenDepositPaused onlyOwner {
         _depositPaused = false;
         emit DepositUnpaused(_msgSender());
+    }
+
+    /**
+     * @dev Returns true if the contract is paused, and false otherwise.
+     */
+    function depositPaused() public view virtual returns (bool) {
+        return _depositPaused;
+    }
+
+    /**
+     * @dev Throws if the contract is paused.
+     */
+    function _requireDepositNotPaused() internal view virtual {
+        require(!depositPaused(), "DepositPausable: paused");
+    }
+
+    /**
+     * @dev Throws if the contract is not paused.
+     */
+    function _requireDepositPaused() internal view virtual {
+        require(depositPaused(), "DepositPausable: unpaused");
     }
 }

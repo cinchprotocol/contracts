@@ -22,6 +22,22 @@ contract MockRevenueShareVault is RevenueShareVault {
     }
 
     /**
+     * @dev to be used for calculating the revenue share ratio
+     * @return yieldSourceTotalShares total yield source shares supply
+     */
+    function getYieldSourceVaultTotalShares() external view virtual override returns (uint256) {
+        return IYieldSourceContract(yieldSourceVault).totalSupply();
+    }
+
+    /**
+     * @param account target account address
+     * @return shares yield source share balance of this vault
+     */
+    function shareBalanceAtYieldSourceOf(address account) public view virtual override returns (uint256) {
+        return IYieldSourceContract(yieldSourceVault).balanceOf(account);
+    }
+
+    /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The address of the ERC20 asset contract
@@ -41,21 +57,5 @@ contract MockRevenueShareVault is RevenueShareVault {
      */
     function _redeemFromYieldSourceVault(uint256 shares) internal virtual override returns (uint256) {
         return IYieldSourceContract(yieldSourceVault).redeem(shares, address(this), address(this));
-    }
-
-    /**
-     * @param account target account address
-     * @return shares yield source share balance of this vault
-     */
-    function shareBalanceAtYieldSourceOf(address account) public view virtual override returns (uint256) {
-        return IYieldSourceContract(yieldSourceVault).balanceOf(account);
-    }
-
-    /**
-     * @dev to be used for calculating the revenue share ratio
-     * @return yieldSourceTotalShares total yield source shares supply
-     */
-    function getYieldSourceVaultTotalShares() external view virtual override returns (uint256) {
-        return IYieldSourceContract(yieldSourceVault).totalSupply();
     }
 }

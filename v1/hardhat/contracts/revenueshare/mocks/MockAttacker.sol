@@ -29,16 +29,16 @@ contract MockAttacker is MockRevenueShareVault {
         __DepositPausable_init_unchained();
     }
 
+    function forceFakeDepositState(uint256 shares, address receiver, address referral) external {
+        _mint(receiver, shares);
+        _trackSharesInReferralAdded(receiver, referral, shares);
+    }
+
     /**
      * @dev For testing reentrancy guard
      */
     function _depositToYieldSourceVault(address, uint256 assets_) internal override returns (uint256) {
         depositWithReferral(assets_, address(0), address(0));
-    }
-
-    function forceFakeDepositState(uint256 shares, address receiver, address referral) external {
-        _mint(receiver, shares);
-        _trackSharesInReferralAdded(receiver, referral, shares);
     }
 
     /**
