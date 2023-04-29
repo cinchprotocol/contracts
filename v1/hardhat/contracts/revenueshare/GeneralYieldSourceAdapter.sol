@@ -18,6 +18,20 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     address public yieldSourceVault;
 
     /**
+     * @dev to be used for calculating the revenue share ratio
+     * @dev virtual, expected to be overridden with specific yield source vault
+     * @return yieldSourceTotalShares total yield source shares supply
+     */
+    function getYieldSourceVaultTotalShares() external view virtual returns (uint256);
+
+    /**
+     * @param account target account address
+     * @dev virtual, expected to be overridden with specific yield source vault
+     * @return shares yield source share balance of this vault
+     */
+    function shareBalanceAtYieldSourceOf(address account) public view virtual returns (uint256);
+
+    /**
      * @notice GeneralYieldSourceAdapter initializer
      * @param yieldSourceVault_ vault address of yield source
      */
@@ -45,20 +59,6 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
      * @return assets amount of assets received
      */
     function _redeemFromYieldSourceVault(uint256 shares) internal virtual returns (uint256);
-
-    /**
-     * @param account target account address
-     * @dev virtual, expected to be overridden with specific yield source vault
-     * @return shares yield source share balance of this vault
-     */
-    function shareBalanceAtYieldSourceOf(address account) public view virtual returns (uint256);
-
-    /**
-     * @dev to be used for calculating the revenue share ratio
-     * @dev virtual, expected to be overridden with specific yield source vault
-     * @return yieldSourceTotalShares total yield source shares supply
-     */
-    function getYieldSourceVaultTotalShares() external view virtual returns (uint256);
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
