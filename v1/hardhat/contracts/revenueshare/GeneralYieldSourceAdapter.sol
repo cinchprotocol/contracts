@@ -11,11 +11,11 @@ import "./interfaces/IYieldSourceContract.sol";
  * @dev sub-contract of Revenue Share Vault, serving as the Yield Source Adapter template
  */
 abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
-    /// @dev Emitted when the yieldSourceVault address is updated.
-    event YieldSourceVaultUpdated(address yieldSourceVault_);
-
     /// @dev Yield source vault address
     address public yieldSourceVault;
+
+    /// @dev Emitted when the yieldSourceVault address is updated.
+    event YieldSourceVaultUpdated(address yieldSourceVault_);
 
     /**
      * @dev to be used for calculating the revenue share ratio

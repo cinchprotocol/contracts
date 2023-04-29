@@ -17,6 +17,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  * simply including this module, only once the modifiers are put in place.
  */
 abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeable, OwnableUpgradeable {
+    bool private _depositPaused;
+
     /**
      * @dev Emitted when the pause is triggered by `account`.
      */
@@ -26,19 +28,6 @@ abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeabl
      * @dev Emitted when the pause is lifted by `account`.
      */
     event DepositUnpaused(address account);
-
-    bool private _depositPaused;
-
-    /**
-     * @dev Initializes the contract in unpaused state.
-     */
-    function __DepositPausable_init() internal onlyInitializing {
-        __DepositPausable_init_unchained();
-    }
-
-    function __DepositPausable_init_unchained() internal onlyInitializing {
-        _depositPaused = false;
-    }
 
     /**
      * @dev Modifier to make a function callable only when the contract is not paused.
@@ -62,6 +51,17 @@ abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeabl
     modifier whenDepositPaused() {
         _requireDepositPaused();
         _;
+    }
+
+    /**
+     * @dev Initializes the contract in unpaused state.
+     */
+    function __DepositPausable_init() internal onlyInitializing {
+        __DepositPausable_init_unchained();
+    }
+
+    function __DepositPausable_init_unchained() internal onlyInitializing {
+        _depositPaused = false;
     }
 
     /**

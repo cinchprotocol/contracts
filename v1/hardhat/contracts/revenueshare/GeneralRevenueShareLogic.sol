@@ -19,21 +19,6 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     using MathUpgradeable for uint256;
     using SafeERC20 for IERC20;
 
-    /// @dev Emitted when a referral is added
-    event RevenueShareReferralAdded(address referral);
-    /// @dev Emitted when a referral is removed
-    event RevenueShareReferralRemoved(address referral);
-    /// @dev Emitted when revenue share is deposited, i.e. by a yield source
-    event RevenueShareDeposited(address indexed assetsFrom, address asset, uint256 amount);
-    /// @dev Emitted when revenue share is withdrawn by a referral
-    event RevenueShareWithdrawn(address indexed asset, uint256 amount, address referral, address receiver);
-    /// @dev Emitted when cinchPerformanceFeePercentage is updated
-    event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
-    /// @dev Emitted upon setTotalSharesInReferralAccordingToYieldSource
-    event TotalSharesByUserReferralUpdated(address user, address referral, uint256 shares_);
-
-    /// @dev Address set of all referrals
-    EnumerableSetUpgradeable.AddressSet internal _referralSet;
     /// @dev Tracking total shares in all referrals, for calculating the share of each referral
     uint256 public totalSharesInReferral;
     /// @dev Partner referral address -> Total shares
@@ -46,8 +31,23 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     mapping(address => uint256) public totalRevenueShareProcessedByAsset;
     /// @dev Cinch performance fee percentage with 2 decimals
     uint256 public cinchPerformanceFeePercentage;
+    /// @dev Address set of all referrals
+    EnumerableSetUpgradeable.AddressSet internal _referralSet;
     /// @dev Address set of all users by referral
     mapping(address => EnumerableSetUpgradeable.AddressSet) internal _userSetByReferral;
+
+    /// @dev Emitted when a referral is added
+    event RevenueShareReferralAdded(address referral);
+    /// @dev Emitted when a referral is removed
+    event RevenueShareReferralRemoved(address referral);
+    /// @dev Emitted when revenue share is deposited, i.e. by a yield source
+    event RevenueShareDeposited(address indexed assetsFrom, address asset, uint256 amount);
+    /// @dev Emitted when revenue share is withdrawn by a referral
+    event RevenueShareWithdrawn(address indexed asset, uint256 amount, address referral, address receiver);
+    /// @dev Emitted when cinchPerformanceFeePercentage is updated
+    event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
+    /// @dev Emitted upon setTotalSharesInReferralAccordingToYieldSource
+    event TotalSharesByUserReferralUpdated(address user, address referral, uint256 shares_);
 
     /**
      * @notice GeneralRevenueShareLogic initializer
