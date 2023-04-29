@@ -11,10 +11,6 @@ contract MockProtocolDHedge is ERC4626 {
 
     constructor(address asset_) ERC4626(ERC20(asset_)) ERC20("MockProtocolDHedge", "MOCKPROTOCOLDHEDGE") {}
 
-    function tokenPrice() public pure returns (uint256) {
-        return 1;
-    }
-
     /// @notice Deposit funds into the pool
     /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L275
     /// asset_ Address of the token

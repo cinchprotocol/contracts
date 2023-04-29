@@ -16,12 +16,6 @@ interface IYieldSourceDHedge {
     /// @param _fundTokenAmount the fund token amount
     function withdrawTo(address _recipient, uint256 _fundTokenAmount) external;
 
-    /// @notice Get price of the asset adjusted for any unminted manager fees
-    /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L584
-    /// @dev price is in unit of USD with 18 decimals
-    /// @param price A price of the asset i.e. 1289033757439016251 => 1.28 USD
-    function tokenPrice() external view returns (uint256 price);
-
     /// @return total shares supply with 18 decimals i.e. 7454095482755680176243 => 7454.1 shares
     function totalSupply() external view returns (uint256);
 
