@@ -5,10 +5,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/MathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./GeneralYieldSourceAdapter.sol";
 import "./GeneralRevenueShareLogic.sol";
@@ -22,6 +22,7 @@ import "./security/DepositPausableUpgradeable.sol";
  */
 abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, PausableUpgradeable, DepositPausableUpgradeable, ReentrancyGuardUpgradeable, GeneralYieldSourceAdapter, GeneralRevenueShareLogic {
     using MathUpgradeable for uint256;
+    using SafeERC20 for IERC20;
 
     /// @dev Emitted when user deposit with referral
     event DepositWithReferral(address caller, address receiver, uint256 assets, uint256 shares, address indexed referral);
@@ -83,7 +84,7 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
         require(amount <= maxDeposit(receiver), "RevenueShareVault: max deposit exceeded");
 
         // Transfer assets to this vault first, assuming it was approved by the sender
-        SafeERC20Upgradeable.safeTransferFrom(IERC20Upgradeable(asset), _msgSender(), address(this), amount);
+        IERC20(asset).safeTransferFrom(_msgSender(), address(this), amount);
 
         // Deposit assets to yield source vault
         uint256 shares = _depositToYieldSourceVault(asset, amount);
@@ -126,7 +127,7 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
         // Conclusion: we need to do the transfer after the burn so that any reentrancy would happen after the
         // shares are burned and after the assets are transferred, which is a valid state.
         _burn(sharesOwner, shares);
-        SafeERC20Upgradeable.safeTransfer(IERC20Upgradeable(asset), receiver, assets);
+        IERC20(asset).safeTransfer(receiver, assets);
 
         emit Redeem(caller, receiver, sharesOwner, assets, shares);
     }
