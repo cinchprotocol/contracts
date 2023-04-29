@@ -43,13 +43,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @return price share price of yield source vault
-     */
-    function sharePriceOfYieldSource() public view override returns (uint256) {
-        return IYieldSourceRibbonEarn(yieldSourceVault).pricePerShare();
-    }
-
-    /**
      * @param account target account address
      * @return shares yield source share balance of this vault
      */

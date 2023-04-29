@@ -330,9 +330,6 @@ describe("RevenueShareVault", function () {
         it("getYieldSourceVaultTotalShares should return the correct value", async function () {
             expect(await vault.getYieldSourceVaultTotalShares()).equal(depositShare3);
         });
-        it("sharePriceOfYieldSource should return the correct value", async function () {
-            expect(await vault.sharePriceOfYieldSource()).equal(909090);
-        });
     });
 
     describe("Pause/unpause", function () {

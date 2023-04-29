@@ -62,13 +62,6 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
     }
 
     /**
-     * @return price share price of yield source vault
-     */
-    function sharePriceOfYieldSource() public view virtual returns (uint256) {
-        return IYieldSourceContract(yieldSourceVault).sharePrice();
-    }
-
-    /**
      * @param account target account address
      * @return shares yield source share balance of this vault
      */

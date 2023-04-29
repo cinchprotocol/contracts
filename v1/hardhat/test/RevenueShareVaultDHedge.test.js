@@ -308,11 +308,6 @@ describe("RevenueShareVaultDHedge", function () {
                 depositAmount3
             );
         });
-        it("sharePriceOfYieldSource should return the correct value", async function () {
-            expect(await vault.sharePriceOfYieldSource()).equal(
-                1
-            );
-        });
     });
 
     describe("Pause/unpause", function () {
