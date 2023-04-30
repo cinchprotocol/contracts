@@ -41,6 +41,7 @@ abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable
 
     function __GeneralYieldSourceAdapter_init_unchained(address yieldSourceVault_) internal onlyInitializing {
         yieldSourceVault = yieldSourceVault_;
+        emit YieldSourceVaultUpdated(yieldSourceVault_);
     }
 
     /**
