@@ -169,9 +169,8 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
         // Conclusion: we need to do the transfer after the burn so that any reentrancy would happen after the
         // shares are burned and after the assets are transferred, which is a valid state.
         _burn(sharesOwner, shares);
-        IERC20(asset).safeTransfer(receiver, assets);
-
         emit Redeem(caller, receiver, sharesOwner, assets, shares);
+        IERC20(asset).safeTransfer(receiver, assets);
     }
 
     /**

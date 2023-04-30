@@ -48,6 +48,8 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     event CinchPerformanceFeePercentageUpdated(uint256 feePercentage);
     /// @dev Emitted upon setTotalSharesInReferralAccordingToYieldSource
     event TotalSharesByUserReferralUpdated(address user, address referral, uint256 shares_);
+    /// @dev Emitted upon depositToRevenueShare
+    event RevenueShareBalanceByAssetReferralUpdated(address asset_, address referral, uint256 shares_);
 
     /**
      * @notice GeneralRevenueShareLogic initializer
@@ -75,6 +77,8 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         uint256 totalSharesInReferral_ = totalSharesInReferral;
         require(totalSharesInReferral_ > 0, "GeneralRevenueShareLogic: totalSharesInReferral is zero");
 
+        emit RevenueShareDeposited(assetsFrom_, asset_, amount_);
+
         // Transfer assets to this vault first, assuming it was approved by the sender
         IERC20(asset_).safeTransferFrom(assetsFrom_, address(this), amount_);
         totalRevenueShareProcessedByAsset[asset_] += amount_;
@@ -90,17 +94,18 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
             uint256 revenueShareForReferral = amountAfterFee.mulDiv(totalSharesByReferral[referral], totalSharesInReferral_, MathUpgradeable.Rounding.Down);
             revenueShareBalanceByAssetReferral[asset_][referral] += revenueShareForReferral;
             distributedAmount += revenueShareForReferral;
+            emit RevenueShareBalanceByAssetReferralUpdated(asset_, referral, revenueShareBalanceByAssetReferral[asset_][referral]);
         }
 
         // If cinchPerformanceFeePercentage > 0,
         // Or there are unregistered-referrals are using this vault to deposit into the yield source
         // In both case, allocate undistributed amount to contract owner
         if (amount_ > distributedAmount) {
+            address owner_ = owner();
             uint256 undistributedAmount = amount_ - distributedAmount;
-            revenueShareBalanceByAssetReferral[asset_][owner()] += undistributedAmount;
+            revenueShareBalanceByAssetReferral[asset_][owner_] += undistributedAmount;
+            emit RevenueShareBalanceByAssetReferralUpdated(asset_, owner_, revenueShareBalanceByAssetReferral[asset_][owner_]);
         }
-
-        emit RevenueShareDeposited(assetsFrom_, asset_, amount_);
     }
 
     /**

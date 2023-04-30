@@ -34,22 +34,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalShareBalanceAtYieldSourceInReferralSet
-     * @return shares_ total share balance at yield source in referral set
-     */
-    function totalShareBalanceAtYieldSourceInReferralSet() external view returns (uint256 shares_) {
-        address[] memory referrals = _referralSet.values();
-        for (uint256 i = 0; i < referrals.length; i++) {
-            address referral = referrals[i];
-            address[] memory users = _userSetByReferral[referral].values();
-            for (uint256 j = 0; j < users.length; j++) {
-                address user = users[j];
-                shares_ += shareBalanceAtYieldSourceOf(user);
-            }
-        }
-    }
-
-    /**
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral if needed
      * @dev This is fesiable as this vault is targeted for institutional users, and the number of users is expected to be small
      * @dev onlyOwner
