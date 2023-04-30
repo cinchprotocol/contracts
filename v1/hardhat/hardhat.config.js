@@ -18,7 +18,7 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.8.19",
+        version: "0.8.18",
         settings: {
           optimizer: {
             enabled: true,
@@ -35,7 +35,7 @@ module.exports = {
     optimismGoerli: {
       url: optimismGoerliUrl,
       accounts: [optimismGoerliDeployerPriKey],
-      ovm:true,
+      ovm: true,
     },
     goerli: {
       url: goerliUrl,
