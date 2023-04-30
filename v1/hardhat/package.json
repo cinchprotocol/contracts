@@ -8,7 +8,8 @@
     "chain": "hardhat node --network hardhat --no-deploy",
     "deploy": "hardhat deploy --export-all ./hardhat_contracts.json",
     "copycontract": "cp ./hardhat_contracts.json ../../../cinch-dapp/packages/react-app/contracts/hardhat_contracts.json",
-    "docgen": "hardhat docgen"
+    "docgen": "hardhat docgen",
+    "flatten": "hardhat flatten > ./flattened.sol"
   },
   "license": "MIT",
   "devDependencies": {
