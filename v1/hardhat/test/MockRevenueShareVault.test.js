@@ -101,6 +101,7 @@ describe("MockRevenueShareVault", function () {
             expect(await vault.totalSharesByReferral(user1.address)).to.equal(
                 depositShare1
             );
+            expect(await vault.shareBalanceAtYieldSourceOf(vault.address)).to.equal(depositShare1);
 
             expect(await vault.totalSharesByReferral(referral2)).equal(0);
             await mockERC20.faucet(user2.address, depositAmount2);

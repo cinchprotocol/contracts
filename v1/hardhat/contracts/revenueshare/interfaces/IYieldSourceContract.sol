@@ -6,8 +6,6 @@ interface IYieldSourceContract {
 
     function redeem(uint256 shares, address receiver, address owner) external returns (uint256); //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/740ce2d440766e5013640f0e47640fae57f5d1d5/contracts/token/ERC20/extensions/ERC4626.sol#L166
 
-    function sharePrice() external view returns (uint256);
-
     function totalSupply() external view returns (uint256);
 
     function balanceOf(address account) external view returns (uint256);

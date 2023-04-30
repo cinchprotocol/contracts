@@ -56,22 +56,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @notice Redeem assets with vault shares and referral
-     * @dev For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
-     * @dev not supported
-     * shares amount of shares to burn and redeem assets
-     * receiver address to receive the assets
-     * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * referral address of the partner referral
-     * @return assets_ amount of assets received
-     */
-    /*
-    function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
-        require(false, "RevenueShareVaultRibbonEarn: not supported");
-    }
-    */
-
-    /**
      * @param account target account address
      * @return shares yield source share balance of this vault
      */
