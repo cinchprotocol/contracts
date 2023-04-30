@@ -17,6 +17,7 @@ const revenueShareAmount3 = ethers.utils.parseUnits("100", mockERC20Decimals);
 const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
 const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
 const cinchPerformanceFeePercentage100 = ethers.utils.parseUnits("100", 2);
+const ZERO_ADDRESS = ethers.constants.AddressZero;
 
 before(async function () {
     // get accounts from hardhat
@@ -52,6 +53,18 @@ describe("RevenueShareVaultDHedge", function () {
             expect(mockSwapper.address).to.not.be.undefined;
             console.log("mockSwapper", mockSwapper.address);
         });
+        it("Should not deploy RevenueShareVaultDHedge with ZERO_ADDRESS mockSwapper", async function () {
+            const Vault = await ethers.getContractFactory("RevenueShareVaultDHedge", owner);
+            const tx = upgrades.deployProxy(Vault, [
+                mockERC20.address,
+                "CinchRevenueShare",
+                "CRS",
+                mockProtocol.address,
+                initCinchPerformanceFeePercentage,
+                ZERO_ADDRESS,
+            ]);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
         it("Should deploy and Initialize RevenueShareVaultDHedge", async function () {
             const Vault = await ethers.getContractFactory("RevenueShareVaultDHedge", owner);
             vault = await upgrades.deployProxy(Vault, [
@@ -64,6 +77,10 @@ describe("RevenueShareVaultDHedge", function () {
             ]);
             expect(vault.address).to.not.be.undefined;
             console.log("vault", vault.address);
+        });
+        it("Should not be able to re-initialize RevenueShareVaultDHedge", async function () {
+            const tx = vault.initialize(mockERC20.address, "CinchRevenueShare", "CRS", mockProtocol.address, initCinchPerformanceFeePercentage, mockSwapper.address);
+            await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
         });
     });
 
@@ -110,6 +127,12 @@ describe("RevenueShareVaultDHedge", function () {
                 .redeemWithReferralAndExpectedAmountOut(depositAmount1.div(2), user1.address, user1.address, referral1, depositAmount1.div(2));
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
+        it("should not support function redeemWithReferral", async function () {
+            const tx = vault
+                .connect(user1)
+                .redeemWithReferral(depositShare1.div(2), user1.address, user1.address, referral1);
+            await expect(tx).to.be.revertedWith("RevenueShareVaultDHedge: not supported");
+        });
         it("should be able to redeem partial with referral", async function () {
             await vault
                 .connect(user1)
@@ -137,10 +160,6 @@ describe("RevenueShareVaultDHedge", function () {
                 0
             );
             expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
-        });
-        it("should not be able to call redeemWithReferral", async function () {
-            const tx = vault.connect(user1).redeemWithReferral(depositShare1, user1.address, user1.address, referral1);
-            await expect(tx).to.be.revertedWith("RevenueShareVaultDHedge: not supported");
         });
     });
 

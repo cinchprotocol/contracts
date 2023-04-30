@@ -74,9 +74,11 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * referral address of the partner referral
      * @return assets_ amount of assets received
      */
+    /*
     function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
         require(false, "RevenueShareVaultDHedge: not supported");
     }
+    */
 
     /**
      * @param account target account address
