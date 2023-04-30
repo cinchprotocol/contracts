@@ -661,7 +661,7 @@ describe("MockRevenueShareVault", function () {
             expect(mockAttackerERC20.address).to.not.be.undefined;
         });
         it("Should deploy MockAttacker", async function () {
-            const MockAttacker = await ethers.getContractFactory("MockAttacker", owner);
+            const MockAttacker = await ethers.getContractFactory("MockRevenueShareVaultAttacker", owner);
             mockAttacker = await upgrades.deployProxy(MockAttacker, [
                 mockAttackerERC20.address,
                 "MockAttackerCinchRevenueShare",

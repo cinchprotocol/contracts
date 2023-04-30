@@ -2,9 +2,8 @@
 pragma solidity 0.8.19;
 
 import "./MockRevenueShareVault.sol";
-import "./MockERC20.sol";
 
-contract MockAttacker is MockRevenueShareVault {
+contract MockRevenueShareVaultAttacker is MockRevenueShareVault {
     function reInitGeneralRevenueShareLogic() external {
         __GeneralRevenueShareLogic_init(0);
     }
@@ -48,5 +47,3 @@ contract MockAttacker is MockRevenueShareVault {
         redeemWithReferral(shares, address(0), address(0), address(0));
     }
 }
-
-contract MockAttackerERC20 is MockERC20 {}
