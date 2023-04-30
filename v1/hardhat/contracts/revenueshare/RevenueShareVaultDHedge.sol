@@ -24,7 +24,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * @param yieldSourceSwapper_ swapper address of yield source
      */
     function initialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_, address yieldSourceSwapper_) public initializer {
-        require(asset_ != address(0) && yieldSourceVault_ != address(0) && yieldSourceSwapper_ != address(0), "ZERO_ADDRESS");
+        require(yieldSourceSwapper_ != address(0), "ZERO_ADDRESS"); // the rest of the parameters are checked in __RevenueShareVault_init
         __RevenueShareVault_init(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
         yieldSourceSwapper = yieldSourceSwapper_;
     }
@@ -42,8 +42,8 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * @return amount of assets received
      */
     function redeemWithReferralAndExpectedAmountOut(uint256 shares, address receiver, address sharesOwner, address referral, uint256 expectedAmountOut) external virtual whenNotPaused nonReentrant returns (uint256) {
-        require(shares > 0, "ZERO_SHARES");
-        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
+        require(shares > 0 && expectedAmountOut > 0, "ZERO_AMOUNT");
+        require(receiver != address(0) && sharesOwner != address(0) && referral != address(0), "ZERO_ADDRESS");
         require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
         require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVault: insufficient shares by referral");
 

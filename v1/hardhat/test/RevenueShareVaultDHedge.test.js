@@ -161,6 +161,25 @@ describe("RevenueShareVaultDHedge", function () {
             );
             expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
         });
+
+        it("should be pausable", async function () {
+            await vault.pause();
+            const tx01 = vault.connect(user2).redeemWithReferralAndExpectedAmountOut(depositShare2, user2.address, user2.address, referral2, depositAmount2);
+            await expect(tx01).to.be.revertedWith("Pausable: paused");
+            await vault.unpause();
+        });
+        it("should not work with zero shares", async function () {
+            const tx = vault.connect(user1).redeemWithReferralAndExpectedAmountOut(0, user1.address, user1.address, referral1, depositAmount1);
+            await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
+        });
+        it("should not work with zero address", async function () {
+            const tx = vault.connect(user1).redeemWithReferralAndExpectedAmountOut(depositShare1, ZERO_ADDRESS, user1.address, referral1, depositAmount1);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
+        it("should not work with insufficient shares", async function () {
+            const tx = vault.connect(user1).redeemWithReferralAndExpectedAmountOut(depositShare1.mul(10), user1.address, user1.address, referral1, depositAmount1);
+            await expect(tx).to.be.revertedWith("RevenueShareVault: max redeem exceeded");
+        });
     });
 
     describe("GeneralRevenueShare", function () {

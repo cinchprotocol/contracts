@@ -22,6 +22,20 @@ contract MockRevenueShareVault is RevenueShareVault {
     }
 
     /**
+     * @dev for testing the onlyInitializing modifier of __RevenueShareVault_init
+     */
+    function nonInitialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) external {
+        __RevenueShareVault_init(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
+    }
+
+    /**
+     * @dev for testing the onlyInitializing modifier of __RevenueShareVault_init_unchained
+     */
+    function nonInitializeUnchained(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) external {
+        __RevenueShareVault_init_unchained(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
+    }
+
+    /**
      * @dev to be used for calculating the revenue share ratio
      * @return yieldSourceTotalShares total yield source shares supply
      */

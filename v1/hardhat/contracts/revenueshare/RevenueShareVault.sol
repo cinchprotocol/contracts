@@ -88,7 +88,7 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
     function depositWithReferral(uint256 amount, address receiver, address referral) public virtual whenNotPaused whenDepositNotPaused nonReentrant returns (uint256) {
         require(amount > 0, "ZERO_AMOUNT");
         require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
-        require(amount <= maxDeposit(receiver), "RevenueShareVault: max deposit exceeded");
+        require(amount < maxDeposit(receiver), "RevenueShareVault: max deposit exceeded");
 
         // Transfer assets to this vault first, assuming it was approved by the sender
         IERC20(asset).safeTransferFrom(_msgSender(), address(this), amount);
@@ -117,8 +117,8 @@ abstract contract RevenueShareVault is ERC20Upgradeable, OwnableUpgradeable, Pau
      * @return amount of assets received
      */
     function redeemWithReferral(uint256 shares, address receiver, address sharesOwner, address referral) public virtual whenNotPaused nonReentrant returns (uint256) {
-        require(shares > 0, "ZERO_SHARES");
-        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
+        require(shares > 0, "ZERO_SHARE");
+        require(receiver != address(0) && sharesOwner != address(0) && referral != address(0), "ZERO_ADDRESS");
         require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
         require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVault: insufficient shares by referral");
 

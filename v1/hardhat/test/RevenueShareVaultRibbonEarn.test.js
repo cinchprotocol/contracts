@@ -60,6 +60,10 @@ describe("RevenueShareVaultRibbonEarn", function () {
             expect(vault.address).to.not.be.undefined;
             console.log("vault", vault.address);
         });
+        it("Should not be able to re-initialize RevenueShareVaultRibbonEarn", async function () {
+            const tx = vault.initialize(mockERC20.address, "CinchRevenueShare", "CRS", mockProtocol.address, initCinchPerformanceFeePercentage);
+            await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
+        });
     });
 
     describe("Deposit", function () {
@@ -367,7 +371,11 @@ describe("RevenueShareVaultRibbonEarn", function () {
             await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
         });
         it("should not work with zero address", async function () {
-            const tx = vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(ZERO_ADDRESS, ZERO_ADDRESS);
+            const tx = vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(referral1, ZERO_ADDRESS);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
+        it("should not work with zero address", async function () {
+            const tx = vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(ZERO_ADDRESS, user1.address);
             await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
         });
         it("setTotalSharesInReferralAccordingToYieldSource should work", async function () {
