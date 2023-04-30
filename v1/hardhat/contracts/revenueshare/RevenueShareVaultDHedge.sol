@@ -25,47 +25,69 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
 
     /**
      * @dev Redeem assets with vault shares from yield source vault
-     * @dev virtual, expected to be overridden with specific yield source vault
-     * @param shares amount of shares to burn and redeem assets
+     * @dev _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) is used instead
+     * @dev not supported
+     * param shares amount of shares to burn and redeem assets
      * @return assets amount of assets received
      */
-    function _redeemFromYieldSourceVault(uint256 shares) internal override returns (uint256) {
-        uint256 expectedAmountOut = _convertYieldSourceSharesToAssets(shares, MathUpgradeable.Rounding.Down);
-        uint256 assetBalance0 = IERC20Upgradeable(asset()).balanceOf(address(this));
-         IERC20(yieldSourceVault).safeIncreaseAllowance(yieldSourceSwapper, shares);
+    function _redeemFromYieldSourceVault(uint256) internal pure override returns (uint256) {
+        require(false, "RevenueShareVaultDHedge: not supported");
+    }
+
+    /**
+     * @dev Redeem assets with vault shares from yield source vault
+     * @param shares amount of shares to burn and redeem assets
+     * @param expectedAmountOut expected amount of assets to be received (slippage protection)
+     * @return assets amount of assets received
+     */
+    function _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) internal returns (uint256) {
+        uint256 assetBalance0 = IERC20Upgradeable(asset).balanceOf(address(this));
+        IERC20(yieldSourceVault).safeIncreaseAllowance(yieldSourceSwapper, shares);
         // redeem the assets into this contract first
-        IYieldSourceDHedgeSwapper(yieldSourceSwapper).withdraw(yieldSourceVault, shares, IERC20(asset()), expectedAmountOut);
-        uint256 assetBalance1 = IERC20Upgradeable(asset()).balanceOf(address(this));
+        IYieldSourceDHedgeSwapper(yieldSourceSwapper).withdraw(yieldSourceVault, shares, IERC20(asset), expectedAmountOut);
+        uint256 assetBalance1 = IERC20Upgradeable(asset).balanceOf(address(this));
         return assetBalance1 - assetBalance0;
     }
 
     /**
-     * @return price share price of yield source vault
+     * @notice Redeem assets with vault shares and referral
+     * @dev whenNotPaused
+     * @dev nonReentrant
+     * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
+     * @param shares amount of shares to burn and redeem assets
+     * @param receiver address to receive the assets
+     * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
+     * @param referral address of the partner referral
+     * @param expectedAmountOut expected amount of assets to be received (slippage protection)
+     * @return amount of assets received
      */
-    function sharePriceOfYieldSource() public view override returns (uint256) {
-        return IYieldSourceDHedge(yieldSourceVault).tokenPrice();
+    function redeemWithReferralAndExpectedAmountOut(uint256 shares, address receiver, address sharesOwner, address referral, uint256 expectedAmountOut) public virtual whenNotPaused nonReentrant returns (uint256) {
+        require(shares > 0, "ZERO_SHARES");
+        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
+        require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
+        require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVault: insufficient shares by referral");
+
+        //remove the shares from the user record first to avoid reentrancy attack
+        _trackSharesInReferralRemoved(sharesOwner, referral, shares);
+
+        uint256 assets = _redeemFromYieldSourceVault(shares, expectedAmountOut);
+        _redeem(_msgSender(), receiver, sharesOwner, assets, shares);
+        emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
+        return assets;
     }
 
     /**
-     * @notice Returns the amount of shares that the yield source vault would exchange for the amount of assets provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param assets amount of assets to be converted to shares
-     * @param rounding rounding mode
-     * @return shares amount of shares that would be converted from assets
+     * @notice Redeem assets with vault shares and referral
+     * @dev For this integration, redeemWithReferralAndExpectedAmountOut is supported instead of redeemWithReferral
+     * @dev not supported
+     * shares amount of shares to burn and redeem assets
+     * receiver address to receive the assets
+     * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
+     * referral address of the partner referral
+     * @return assets_ amount of assets received
      */
-    function _convertAssetsToYieldSourceShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
-        return assets.mulDiv(1, sharePriceOfYieldSource(), rounding);
-    }
-
-    /**
-     * @notice Returns the amount of assets that the yield source vault would exchange for the amount of shares provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param shares amount of shares to be converted to assets
-     * @param rounding rounding mode
-     * @return assets amount of assets that would be converted from shares
-     */
-    function _convertYieldSourceSharesToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
-        return shares.mulDiv(sharePriceOfYieldSource(), 1, rounding);
+    function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
+        require(false, "RevenueShareVaultDHedge: not supported");
     }
 
     /**

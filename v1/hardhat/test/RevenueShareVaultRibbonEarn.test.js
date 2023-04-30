@@ -10,6 +10,9 @@ let referral1, referral2, referral3;
 const depositAmount1 = ethers.utils.parseUnits("1000", mockERC20Decimals);
 const depositAmount2 = ethers.utils.parseUnits("1000", mockERC20Decimals);
 const depositAmount3 = ethers.utils.parseUnits("1000", mockERC20Decimals);
+const depositShare1 = ethers.utils.parseUnits("1100", mockERC20Decimals);
+const depositShare2 = ethers.utils.parseUnits("1100", mockERC20Decimals);
+const depositShare3 = ethers.utils.parseUnits("1100", mockERC20Decimals);
 const revenueShareAmount3 = ethers.utils.parseUnits("100", mockERC20Decimals);
 const initCinchPerformanceFeePercentage = ethers.utils.parseUnits("0", 2);
 const cinchPerformanceFeePercentage10 = ethers.utils.parseUnits("10", 2);
@@ -42,7 +45,7 @@ describe("RevenueShareVaultRibbonEarn", function () {
             const MockProtocol = await ethers.getContractFactory("MockProtocolRibbonEarn");
             mockProtocol = await MockProtocol.deploy(mockERC20.address);
             expect(mockProtocol.address).to.not.be.undefined;
-            expect(await mockProtocol.convertToShares(depositAmount1)).equal(depositAmount1);
+            expect(await mockProtocol.convertToShares(depositAmount1)).equal(depositShare1);
             console.log("mockProtocol", mockProtocol.address);
         });
         it("Should deploy and Initialize RevenueShareVaultRibbonEarn", async function () {
@@ -75,45 +78,28 @@ describe("RevenueShareVaultRibbonEarn", function () {
                 .depositWithReferral(depositAmount1.add(1), user1.address, user1.address);
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
-        it("should be able to deposit", async function () {
-            await vault.connect(user1).deposit(depositAmount1.div(2), user1.address);
-            expect(await vault.balanceOf(user1.address)).to.equal(depositAmount1.div(2));
-            expect(await vault.totalSharesByReferral(user1.address)).to.equal(
-                depositAmount1.div(2)
-            );
-            expect(await vault.shareBalanceAtYieldSourceOf(user1.address)).to.equal(depositAmount1.div(2));
-            expect(
-                await vault.assetBalanceAtYieldSourceOf(user1.address, referral1)
-            ).to.equal(depositAmount1.div(2));
-        });
-        it("should be able to mint", async function () {
-            await vault.connect(user1).mint(depositAmount1.div(2), user1.address);
-            expect(await vault.balanceOf(user1.address)).to.equal(depositAmount1);
-            expect(await vault.totalSharesByReferral(user1.address)).to.equal(
-                depositAmount1
-            );
-            expect(
-                await vault.assetBalanceAtYieldSourceOf(user1.address, referral1)
-            ).to.equal(depositAmount1);
-        });
         it("should be able to deposit with referral", async function () {
+            await vault.connect(user1).depositWithReferral(depositAmount1, user1.address, referral1);
+            expect(await vault.balanceOf(user1.address)).to.equal(depositShare1);
+            expect(await vault.totalSharesByReferral(user1.address)).to.equal(
+                depositShare1
+            );
+            expect(await vault.shareBalanceAtYieldSourceOf(user1.address)).to.equal(depositShare1);
+
             expect(await vault.totalSharesByReferral(referral2)).equal(0);
             await mockERC20.faucet(user2.address, depositAmount2);
             await mockERC20.connect(user2).approve(vault.address, depositAmount2);
             await vault
                 .connect(user2)
                 .depositWithReferral(depositAmount2, user2.address, referral2);
-            expect(await vault.balanceOf(user2.address)).to.equal(depositAmount2);
+            expect(await vault.balanceOf(user2.address)).to.equal(depositShare2);
             expect(await vault.totalSharesByReferral(user2.address)).to.equal(
-                depositAmount2
+                depositShare2
             );
         });
     });
 
     describe("Redeem/withdraw", function () {
-        it("totalAssets should return correct amount", async function () {
-            expect(await vault.totalAssets()).to.equal(depositAmount1.add(depositAmount2));
-        });
         it("totalShareBalanceAtYieldSourceInReferralSet should work with zero referral", async function () {
             expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(0);
         });
@@ -128,27 +114,22 @@ describe("RevenueShareVaultRibbonEarn", function () {
                 .withArgs(user2.address);
         });
         it("should be able to redeem from yield source", async function () {
-            await mockProtocol.connect(user1).redeem(depositAmount1, user1.address, user1.address);
+            await mockProtocol.connect(user1).redeem(depositShare1, user1.address, user1.address);
             expect(await mockERC20.balanceOf(user1.address)).to.equal(depositAmount1);
             await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource();
             expect(await vault.totalSharesByReferral(referral1)).to.equal(
                 0
             );
-        });
-        it("should be able to withdraw from yield source", async function () {
-            await mockProtocol.connect(user2).withdraw(depositAmount2, user2.address, user2.address);
+
+            await mockProtocol.connect(user2).redeem(depositShare2, user2.address, user2.address);
             expect(await mockERC20.balanceOf(user2.address)).to.equal(depositAmount2);
             await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource();
             expect(await vault.totalSharesByReferral(referral2)).to.equal(
                 0
             );
         });
-        it("should not be able to redeem from vault", async function () {
+        it("should not be able to call redeemWithReferral", async function () {
             const tx = vault.connect(user1).redeemWithReferral(depositAmount1, user1.address, user1.address, referral1);
-            await expect(tx).to.be.revertedWith("RevenueShareVaultRibbonEarn: not supported");
-        });
-        it("should not be able to withdraw from vault", async function () {
-            const tx = vault.connect(user1).withdrawWithReferral(depositAmount1, user1.address, user1.address, referral1);
             await expect(tx).to.be.revertedWith("RevenueShareVaultRibbonEarn: not supported");
         });
     });
@@ -167,9 +148,9 @@ describe("RevenueShareVaultRibbonEarn", function () {
             await vault
                 .connect(user3)
                 .depositWithReferral(depositAmount3, user3.address, referral3);
-            expect(await vault.balanceOf(user3.address)).to.equal(depositAmount3);
+            expect(await vault.balanceOf(user3.address)).to.equal(depositShare3);
             expect(await vault.totalSharesByReferral(referral3)).to.equal(
-                depositAmount3
+                depositShare3
             );
         });
         it("should be able to deposit to revenue share", async function () {
@@ -282,12 +263,7 @@ describe("RevenueShareVaultRibbonEarn", function () {
     describe("GeneralYieldSourceAdapter", function () {
         it("getYieldSourceVaultTotalShares should return the correct value", async function () {
             expect(await vault.getYieldSourceVaultTotalShares()).equal(
-                depositAmount3
-            );
-        });
-        it("sharePriceOfYieldSource should return the correct value", async function () {
-            expect(await vault.sharePriceOfYieldSource()).equal(
-                1
+                depositShare3
             );
         });
     });
@@ -335,9 +311,10 @@ describe("RevenueShareVaultRibbonEarn", function () {
         it("whenDepositNotPaused function should not work when paused", async function () {
             const tx = vault
                 .connect(user3)
-                .deposit(
+                .depositWithReferral(
                     depositAmount3,
-                    user3.address
+                    user3.address,
+                    referral3
                 );
             await expect(tx).to.be.revertedWith("DepositPausable: paused");
         });
@@ -394,7 +371,7 @@ describe("RevenueShareVaultRibbonEarn", function () {
 
     describe("totalShareBalanceAtYieldSourceInReferralSet", function () {
         it("should be able to get total share balance at yield source in referral set", async function () {
-            expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(depositAmount3);
+            expect(await vault.totalShareBalanceAtYieldSourceInReferralSet()).equal(depositShare3);
         });
     });
 

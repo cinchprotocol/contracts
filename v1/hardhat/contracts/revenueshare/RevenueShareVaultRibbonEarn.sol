@@ -29,10 +29,20 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @notice Redeem assets with vault shares and referral
-     * @dev See {IERC4626-redeem}
+     * @dev Redeem assets with vault shares from yield source vault
      * @dev For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
-     * @dev when _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
+     * @dev not supported
+     * param shares amount of shares to burn and redeem assets
+     * @return assets amount of assets received
+     */
+    function _redeemFromYieldSourceVault(uint256) internal pure override returns (uint256) {
+        require(false, "RevenueShareVaultRibbonEarn: not supported");
+    }
+
+    /**
+     * @notice Redeem assets with vault shares and referral
+     * @dev For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
+     * @dev not supported
      * shares amount of shares to burn and redeem assets
      * receiver address to receive the assets
      * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
@@ -41,35 +51,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      */
     function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
         require(false, "RevenueShareVaultRibbonEarn: not supported");
-    }
-
-    /**
-     * @return price share price of yield source vault
-     */
-    function sharePriceOfYieldSource() public view override returns (uint256) {
-        return IYieldSourceRibbonEarn(yieldSourceVault).pricePerShare();
-    }
-
-    /**
-     * @notice Returns the amount of shares that the yield source vault would exchange for the amount of assets provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param assets amount of assets to be converted to shares
-     * @param rounding rounding mode
-     * @return shares amount of shares that would be converted from assets
-     */
-    function _convertAssetsToYieldSourceShares(uint256 assets, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
-        return assets.mulDiv(1, sharePriceOfYieldSource(), rounding);
-    }
-
-    /**
-     * @notice Returns the amount of assets that the yield source vault would exchange for the amount of shares provided, in an ideal scenario where all the conditions are met
-     * @dev See {@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC4626Upgradeable.sol}
-     * @param shares amount of shares to be converted to assets
-     * @param rounding rounding mode
-     * @return assets amount of assets that would be converted from shares
-     */
-    function _convertYieldSourceSharesToAssets(uint256 shares, MathUpgradeable.Rounding rounding) internal view override returns (uint256) {
-        return shares.mulDiv(sharePriceOfYieldSource(), 1, rounding);
     }
 
     /**
@@ -89,14 +70,6 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
-     * @dev See {IERC4626-totalAssets}
-     * @return assets total amount of the underlying asset managed by this vault
-     */
-    function totalAssets() public view override returns (uint256) {
-        return _convertYieldSourceSharesToAssets(totalSharesInReferral, MathUpgradeable.Rounding.Down);
-    }
-
-    /**
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalShareBalanceAtYieldSourceInReferralSet
      * @return shares_ total share balance at yield source in referral set
      */
@@ -112,6 +85,7 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
         }
     }
 
+    //TODO: ?
     /**
      * @dev Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral
      * @dev onlyOwner
