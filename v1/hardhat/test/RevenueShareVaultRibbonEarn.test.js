@@ -370,5 +370,12 @@ describe("RevenueShareVaultRibbonEarn", function () {
             const tx = vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(ZERO_ADDRESS, ZERO_ADDRESS);
             await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
         });
+        it("setTotalSharesInReferralAccordingToYieldSource should work", async function () {
+            await mockERC20.faucet(user1.address, depositAmount1);
+            await mockERC20.connect(user1).approve(mockProtocol.address, depositAmount1);
+            await mockProtocol.connect(user1).depositFor(depositAmount1, user1.address);
+            await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(referral1, user1.address);
+            expect(await vault.connect(owner).totalSharesByUserReferral(referral1, user1.address)).equal(depositShare1);
+        });
     });
 });
