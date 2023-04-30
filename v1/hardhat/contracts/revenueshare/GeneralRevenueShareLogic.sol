@@ -60,7 +60,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     }
 
     function __GeneralRevenueShareLogic_init_unchained(uint256 cinchPerformanceFeePercentage_) internal onlyInitializing {
-        cinchPerformanceFeePercentage = cinchPerformanceFeePercentage_;
+        setCinchPerformanceFeePercentage(cinchPerformanceFeePercentage_);
     }
 
     /**
@@ -159,7 +159,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
      * @dev onlyOwner
      * @param feePercentage_ Cinch performance fee percentage with 2 decimals
      */
-    function setCinchPerformanceFeePercentage(uint256 feePercentage_) external virtual onlyOwner {
+    function setCinchPerformanceFeePercentage(uint256 feePercentage_) public virtual onlyOwner {
         require(feePercentage_ <= 10000, "GeneralRevenueShare: invalid fee percentage");
         cinchPerformanceFeePercentage = feePercentage_;
         emit CinchPerformanceFeePercentageUpdated(feePercentage_);
