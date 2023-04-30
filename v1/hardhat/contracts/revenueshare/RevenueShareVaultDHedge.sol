@@ -14,6 +14,9 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     /// @dev Yield source swapper address
     address public yieldSourceSwapper;
 
+    /// @dev Emitted when the yieldSourceSwapper address is updated.
+    event YieldSourceSwapperUpdated(address yieldSourceSwapper_);
+
     /**
      * @notice vault initializer
      * @param asset_ underneath asset, which should match the asset of the yield source vault
@@ -27,6 +30,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
         require(yieldSourceSwapper_ != address(0), "ZERO_ADDRESS"); // the rest of the parameters are checked in __RevenueShareVault_init
         __RevenueShareVault_init(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
         yieldSourceSwapper = yieldSourceSwapper_;
+        emit YieldSourceSwapperUpdated(yieldSourceSwapper_);
     }
 
     /**

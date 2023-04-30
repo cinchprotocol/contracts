@@ -328,6 +328,10 @@ describe("MockRevenueShareVault", function () {
                 .to.emit(vault, "RevenueShareReferralRemoved")
                 .withArgs(user3.address);
         });
+        it("should not be able to removeRevenueShareReferral with ZERO_ADDRESS", async function () {
+            const tx = vault.removeRevenueShareReferral(ZERO_ADDRESS);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
         it("should not be able to removeRevenueShareReferral with non-existing referral", async function () {
             const tx = vault.removeRevenueShareReferral(user3.address);
             await expect(tx).to.be.revertedWith("GeneralRevenueShare: referral does not exist");
@@ -363,6 +367,10 @@ describe("MockRevenueShareVault", function () {
                 .to.emit(vault, "RevenueShareReferralAdded")
                 .withArgs(user3.address);
             expect((await vault.getRevenueShareReferralSet()).length).equal(3);
+        });
+        it("should not be able to addRevenueShareReferral with ZERO_ADDRESS", async function () {
+            const tx = vault.addRevenueShareReferral(ZERO_ADDRESS);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
         });
         it("should not be able to addRevenueShareReferral with existing referral", async function () {
             const tx = vault.addRevenueShareReferral(user3.address);
