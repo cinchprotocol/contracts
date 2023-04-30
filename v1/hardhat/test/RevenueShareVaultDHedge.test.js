@@ -3,7 +3,7 @@ const { upgrades } = require("hardhat");
 
 let accounts;
 let owner, user1, user2, user3;
-let mockERC20, mockProtocol, mockSwapper, vault;
+let mockERC20, mockProtocol, mockSwapper, vault, mockAttackerERC20, mockAttacker;
 let mockERC20Decimals = 6;
 let referral1, referral2, referral3;
 
@@ -425,4 +425,30 @@ describe("RevenueShareVaultDHedge", function () {
         });
     });
 
+    describe("Mock Attacker", function () {
+        it("Should deploy MockAttackerERC20", async function () {
+            const MockAttackerERC20 = await ethers.getContractFactory("MockAttackerERC20");
+            mockAttackerERC20 = await MockAttackerERC20.deploy();
+            expect(mockAttackerERC20.address).to.not.be.undefined;
+        });
+        it("Should deploy MockAttacker", async function () {
+            const MockAttacker = await ethers.getContractFactory("MockRevenueShareVaultDHedgeAttacker", owner);
+            mockAttacker = await upgrades.deployProxy(MockAttacker, [
+                mockAttackerERC20.address,
+                "MockAttackerCinchRevenueShare",
+                "ACRS",
+                mockProtocol.address,
+                initCinchPerformanceFeePercentage,
+                mockSwapper.address,
+            ]);
+            expect(mockAttacker.address).to.not.be.undefined;
+        });
+        it("should not be able to reentrant", async function () {
+            await mockAttacker.forceFakeDepositState(depositShare3, user3.address, referral3);
+            const tx01 = mockAttacker
+                .connect(user3)
+                .redeemWithReferralAndExpectedAmountOut(depositShare3, user3.address, user3.address, referral3, depositAmount3);
+            await expect(tx01).to.be.revertedWith("ReentrancyGuard: reentrant call");
+        });
+    });
 });

@@ -34,6 +34,14 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     }
 
     /**
+     * @dev to be used for calculating the revenue share ratio
+     * @return yieldSourceTotalShares total yield source shares supply
+     */
+    function getYieldSourceVaultTotalShares() external view override returns (uint256) {
+        return IYieldSourceDHedge(yieldSourceVault).totalSupply();
+    }
+
+    /**
      * @notice Redeem assets with vault shares and referral
      * @dev whenNotPaused
      * @dev nonReentrant
@@ -45,7 +53,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * @param expectedAmountOut expected amount of assets to be received (slippage protection)
      * @return amount of assets received
      */
-    function redeemWithReferralAndExpectedAmountOut(uint256 shares, address receiver, address sharesOwner, address referral, uint256 expectedAmountOut) external virtual whenNotPaused nonReentrant returns (uint256) {
+    function redeemWithReferralAndExpectedAmountOut(uint256 shares, address receiver, address sharesOwner, address referral, uint256 expectedAmountOut) public virtual whenNotPaused nonReentrant returns (uint256) {
         require(shares > 0 && expectedAmountOut > 0, "ZERO_AMOUNT");
         require(receiver != address(0) && sharesOwner != address(0) && referral != address(0), "ZERO_ADDRESS");
         require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
@@ -58,14 +66,6 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
         _redeem(_msgSender(), receiver, sharesOwner, assets, shares);
         emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
         return assets;
-    }
-
-    /**
-     * @dev to be used for calculating the revenue share ratio
-     * @return yieldSourceTotalShares total yield source shares supply
-     */
-    function getYieldSourceVaultTotalShares() external view override returns (uint256) {
-        return IYieldSourceDHedge(yieldSourceVault).totalSupply();
     }
 
     /**
@@ -121,7 +121,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * @param expectedAmountOut expected amount of assets to be received (slippage protection)
      * @return assets amount of assets received
      */
-    function _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) internal returns (uint256) {
+    function _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) internal virtual returns (uint256) {
         uint256 assetBalance0 = IERC20(asset).balanceOf(address(this));
         IERC20(yieldSourceVault).safeIncreaseAllowance(yieldSourceSwapper, shares);
         // redeem the assets into this contract first
