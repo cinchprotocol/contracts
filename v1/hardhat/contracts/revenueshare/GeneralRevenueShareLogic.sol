@@ -166,11 +166,12 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     }
 
     /**
-     * @notice Getter for the cinchPxPayeeSet
-     * @return referrals The array of referrals
+     * @notice Check if the input referral is registered with this contract
+     * @param referral_ The address of the referral to check
+     * @return isReferralRegistered True if the referral is registered
      */
-    function getRevenueShareReferralSet() external view returns (address[] memory referrals) {
-        referrals = _referralSet.values();
+    function isReferralRegistered(address referral_) external view returns (bool) {
+        return _referralSet.contains(referral_);
     }
 
     /**

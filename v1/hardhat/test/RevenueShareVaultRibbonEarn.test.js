@@ -108,14 +108,16 @@ describe("RevenueShareVaultRibbonEarn", function () {
             await expect(tx).to.be.revertedWith("RevenueShareVaultRibbonEarn: not supported");
         });
         it("should be able to addRevenueShareReferral", async function () {
-            const tx01 = await vault.addRevenueShareReferral(user1.address);
+            const tx01 = await vault.addRevenueShareReferral(referral1);
             expect(tx01)
                 .to.emit(vault, "RevenueShareReferralAdded")
-                .withArgs(user1.address);
-            const tx02 = await vault.addRevenueShareReferral(user2.address);
+                .withArgs(referral1);
+            const tx02 = await vault.addRevenueShareReferral(referral2);
             expect(tx02)
                 .to.emit(vault, "RevenueShareReferralAdded")
-                .withArgs(user2.address);
+                .withArgs(referral2);
+            expect(await vault.isReferralRegistered(referral1)).to.equal(true);
+            expect(await vault.isReferralRegistered(referral2)).to.equal(true);
         });
         it("should be able to redeem from yield source directly", async function () {
             await mockProtocol.connect(user1).redeem(depositShare1, user1.address, user1.address);
@@ -132,11 +134,11 @@ describe("RevenueShareVaultRibbonEarn", function () {
 
     describe("GeneralRevenueShare", function () {
         it("should be able to addRevenueShareReferral", async function () {
-            const tx03 = await vault.addRevenueShareReferral(user3.address);
+            const tx03 = await vault.addRevenueShareReferral(referral3);
             expect(tx03)
                 .to.emit(vault, "RevenueShareReferralAdded")
-                .withArgs(user3.address);
-            expect((await vault.getRevenueShareReferralSet()).length).equal(3);
+                .withArgs(referral3);
+            expect(await vault.isReferralRegistered(referral3)).to.equal(true);
         });
         it("should be able to deposit with referral", async function () {
             await mockERC20.faucet(user3.address, depositAmount3);
@@ -217,10 +219,11 @@ describe("RevenueShareVaultRibbonEarn", function () {
             ).equal(revenueShareAmount3);
         });
         it("should be able to removeRevenueShareReferral", async function () {
-            const tx01 = await vault.removeRevenueShareReferral(user3.address);
+            const tx01 = await vault.removeRevenueShareReferral(referral3);
             expect(tx01)
                 .to.emit(vault, "RevenueShareReferralRemoved")
-                .withArgs(user3.address);
+                .withArgs(referral3);
+            expect(await vault.isReferralRegistered(referral3)).to.equal(false);
         });
         it("undistributed revenue share should be allocated to contract owner", async function () {
             await mockERC20.faucet(user3.address, revenueShareAmount3);
@@ -248,11 +251,11 @@ describe("RevenueShareVaultRibbonEarn", function () {
             );
         });
         it("should be able to addRevenueShareReferral again", async function () {
-            const tx03 = await vault.addRevenueShareReferral(user3.address);
+            const tx03 = await vault.addRevenueShareReferral(referral3);
             expect(tx03)
                 .to.emit(vault, "RevenueShareReferralAdded")
-                .withArgs(user3.address);
-            expect((await vault.getRevenueShareReferralSet()).length).equal(3);
+                .withArgs(referral3);
+            expect(await vault.isReferralRegistered(referral3)).to.equal(true);
         });
     });
 

@@ -230,19 +230,25 @@ _onlyOwner_
 | ---- | ---- | ----------- |
 | feePercentage_ | uint256 | Cinch performance fee percentage with 2 decimals |
 
-### getRevenueShareReferralSet
+### isReferralRegistered
 
 ```solidity
-function getRevenueShareReferralSet() external view returns (address[] referrals)
+function isReferralRegistered(address referral_) external view returns (bool)
 ```
 
-Getter for the cinchPxPayeeSet
+Check if the input referral is registered with this contract
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| referral_ | address | The address of the referral to check |
 
 #### Return Values
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| referrals | address[] | The array of referrals |
+| [0] | bool | isReferralRegistered True if the referral is registered |
 
 ### _trackSharesInReferralAdded
 
