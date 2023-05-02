@@ -19,7 +19,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   });
 
   const cinchPerformanceFeePercentage = ethers.utils.parseUnits("10", 2);
-  const mockSwapperAddress = ethers.constants.AddressZero;
 
   const vault = await deploy('RevenueShareVaultRibbonEarn', {
     from: deployer,
@@ -34,7 +33,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             "CinchRevenueShare",
             "CRS",
             mockProtocol.address,
-            mockSwapperAddress,
             cinchPerformanceFeePercentage,
           ],
         }

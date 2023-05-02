@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -26,9 +26,5 @@ contract MockProtocol is ERC4626 {
      */
     function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {
         return shares.mulDiv(1000, 1100, rounding);
-    }
-
-    function sharePrice() public view returns (uint256) {
-        return convertToAssets(10 ** IERC20Extended(asset()).decimals());
     }
 }

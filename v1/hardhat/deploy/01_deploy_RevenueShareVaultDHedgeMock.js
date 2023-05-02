@@ -37,8 +37,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
             "CinchRevenueShare",
             "CRS",
             mockProtocol.address,
-            mockSwapper.address,
             cinchPerformanceFeePercentage,
+            mockSwapper.address,
           ],
         }
       },

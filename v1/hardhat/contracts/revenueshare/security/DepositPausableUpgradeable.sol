@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts (last updated v4.7.0) (security/Pausable.sol)
 
-pragma solidity 0.8.19;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -17,6 +17,8 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  * simply including this module, only once the modifiers are put in place.
  */
 abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeable, OwnableUpgradeable {
+    bool private _depositPaused;
+
     /**
      * @dev Emitted when the pause is triggered by `account`.
      */
@@ -26,19 +28,6 @@ abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeabl
      * @dev Emitted when the pause is lifted by `account`.
      */
     event DepositUnpaused(address account);
-
-    bool private _depositPaused;
-
-    /**
-     * @dev Initializes the contract in unpaused state.
-     */
-    function __DepositPausable_init() internal onlyInitializing {
-        __DepositPausable_init_unchained();
-    }
-
-    function __DepositPausable_init_unchained() internal onlyInitializing {
-        _depositPaused = false;
-    }
 
     /**
      * @dev Modifier to make a function callable only when the contract is not paused.
@@ -65,24 +54,14 @@ abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeabl
     }
 
     /**
-     * @dev Returns true if the contract is paused, and false otherwise.
+     * @dev Initializes the contract in unpaused state.
      */
-    function depositPaused() public view virtual returns (bool) {
-        return _depositPaused;
+    function __DepositPausable_init() internal onlyInitializing {
+        __DepositPausable_init_unchained();
     }
 
-    /**
-     * @dev Throws if the contract is paused.
-     */
-    function _requireDepositNotPaused() internal view virtual {
-        require(!depositPaused(), "DepositPausable: paused");
-    }
-
-    /**
-     * @dev Throws if the contract is not paused.
-     */
-    function _requireDepositPaused() internal view virtual {
-        require(depositPaused(), "DepositPausable: unpaused");
+    function __DepositPausable_init_unchained() internal onlyInitializing {
+        _depositPaused = false;
     }
 
     /**
@@ -107,5 +86,26 @@ abstract contract DepositPausableUpgradeable is Initializable, ContextUpgradeabl
     function unpauseDeposit() external virtual whenDepositPaused onlyOwner {
         _depositPaused = false;
         emit DepositUnpaused(_msgSender());
+    }
+
+    /**
+     * @dev Returns true if the contract is paused, and false otherwise.
+     */
+    function depositPaused() public view virtual returns (bool) {
+        return _depositPaused;
+    }
+
+    /**
+     * @dev Throws if the contract is paused.
+     */
+    function _requireDepositNotPaused() internal view virtual {
+        require(!depositPaused(), "DepositPausable: paused");
+    }
+
+    /**
+     * @dev Throws if the contract is not paused.
+     */
+    function _requireDepositPaused() internal view virtual {
+        require(depositPaused(), "DepositPausable: unpaused");
     }
 }

@@ -3,6 +3,7 @@
 ## Development
 ```
 yarn install
+yarn compile
 yarn test
 ```
 

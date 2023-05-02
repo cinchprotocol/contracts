@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.18;
 
 import "./MockRevenueShareVault.sol";
-import "./MockERC20.sol";
 
-contract MockAttacker is MockRevenueShareVault {
+contract MockRevenueShareVaultAttacker is MockRevenueShareVault {
     function reInitGeneralRevenueShareLogic() external {
         __GeneralRevenueShareLogic_init(0);
     }
@@ -14,11 +13,11 @@ contract MockAttacker is MockRevenueShareVault {
     }
 
     function reInitGeneralYieldSourceAdapter() external {
-        __GeneralYieldSourceAdapter_init(yieldSourceVault, yieldSourceSwapper);
+        __GeneralYieldSourceAdapter_init(yieldSourceVault);
     }
 
     function reInitGeneralYieldSourceAdapterUnChained() external {
-        __GeneralYieldSourceAdapter_init_unchained(yieldSourceVault, yieldSourceSwapper);
+        __GeneralYieldSourceAdapter_init_unchained(yieldSourceVault);
     }
 
     function reInitDepositPausable() external {
@@ -29,16 +28,16 @@ contract MockAttacker is MockRevenueShareVault {
         __DepositPausable_init_unchained();
     }
 
+    function forceFakeDepositState(uint256 shares, address receiver, address referral) external {
+        _mint(receiver, shares);
+        _trackSharesInReferralAdded(receiver, referral, shares);
+    }
+
     /**
      * @dev For testing reentrancy guard
      */
     function _depositToYieldSourceVault(address, uint256 assets_) internal override returns (uint256) {
         depositWithReferral(assets_, address(0), address(0));
-    }
-
-    function forceFakeDepositState(uint256 shares, address receiver, address referral) external {
-        _mint(receiver, shares);
-        _trackSharesInReferralAdded(receiver, referral, shares);
     }
 
     /**
@@ -48,5 +47,3 @@ contract MockAttacker is MockRevenueShareVault {
         redeemWithReferral(shares, address(0), address(0), address(0));
     }
 }
-
-contract MockAttackerERC20 is MockERC20 {}
