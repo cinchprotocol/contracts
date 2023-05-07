@@ -15,7 +15,7 @@ const goerliDeployerPriKey = process.env.GOERLI_DEPLOYER_PRIVATE_KEY || dummyPri
 
 const mainnetUrl = process.env.MAINNET_URL || "https://eth-mainnet.g.alchemy.com/v2/ABC";
 const mainnetDeployerPriKey = process.env.MAINNET_DEPLOYER_PRIVATE_KEY || dummyPriKey;
-const mainnetGwei = 6000;
+const mainnetGwei = 30;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
