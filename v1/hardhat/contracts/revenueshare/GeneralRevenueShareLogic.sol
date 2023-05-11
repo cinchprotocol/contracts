@@ -36,7 +36,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
     /// @dev Address set of all users by referral
     mapping(address => EnumerableSetUpgradeable.AddressSet) internal _userSetByReferral;
     /// @dev Represent 100% with 2 decimal places
-    uint256 public constant CINCH_PERFORMANCE_FEE_100_PERCENT = 10000;
+    uint256 public constant PERFORMANCE_FEE_100_PERCENT = 10000;
 
     /// @dev Emitted when a referral is added
     event RevenueShareReferralAdded(address referral);
@@ -85,7 +85,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
         totalRevenueShareProcessedByAsset[asset_] += amount_;
 
         // Take Cinch performance fee from the amount
-        uint256 amountAfterFee = amount_.mulDiv(CINCH_PERFORMANCE_FEE_100_PERCENT - cinchPerformanceFeePercentage, CINCH_PERFORMANCE_FEE_100_PERCENT, MathUpgradeable.Rounding.Up);
+        uint256 amountAfterFee = amount_.mulDiv(PERFORMANCE_FEE_100_PERCENT - cinchPerformanceFeePercentage, PERFORMANCE_FEE_100_PERCENT, MathUpgradeable.Rounding.Up);
 
         uint256 distributedAmount = 0;
         // Make the amount claimable among referrals according to their shares ratio
@@ -161,7 +161,7 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
      * @param feePercentage_ Cinch performance fee percentage with 2 decimals
      */
     function setCinchPerformanceFeePercentage(uint256 feePercentage_) public virtual onlyOwner {
-        require(feePercentage_ <= CINCH_PERFORMANCE_FEE_100_PERCENT, "GeneralRevenueShare: invalid fee percentage");
+        require(feePercentage_ <= PERFORMANCE_FEE_100_PERCENT, "GeneralRevenueShare: invalid fee percentage");
         cinchPerformanceFeePercentage = feePercentage_;
         emit CinchPerformanceFeePercentageUpdated(feePercentage_);
     }
