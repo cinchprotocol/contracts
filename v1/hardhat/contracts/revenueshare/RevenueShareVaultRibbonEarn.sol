@@ -67,13 +67,13 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The address of the ERC20 asset contract
-     * @param assets_ The amount of assets to deposit
+     * @param amount_ The amount of assets to deposit
      * @return shares amount of shares received
      */
-    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
-        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
+    function _depositToYieldSourceVault(address asset_, uint256 amount_) internal override returns (uint256) {
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, amount_);
         uint256 sharesBalanceBefore = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
-        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(assets_, _msgSender());
+        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(amount_, _msgSender());
         uint256 sharesBalanceAfter = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
         return sharesBalanceAfter - sharesBalanceBefore;
     }

@@ -76,7 +76,7 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * receiver address to receive the assets
      * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
      * referral address of the partner referral
-     * @return assets_ amount of assets received
+     * @return assetAmount_ amount of assets received
      */
     /*
     function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
