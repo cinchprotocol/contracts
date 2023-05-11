@@ -8,7 +8,6 @@ import "./RevenueShareVault.sol";
 import "./interfaces/IYieldSourceDHedge.sol";
 
 contract RevenueShareVaultDHedge is RevenueShareVault {
-    using MathUpgradeable for uint256;
     using SafeERC20 for IERC20;
 
     /// @dev Yield source swapper address
