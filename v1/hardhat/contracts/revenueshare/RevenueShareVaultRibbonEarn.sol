@@ -3,14 +3,11 @@ pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 
 import "./RevenueShareVault.sol";
 import "./interfaces/IYieldSourceRibbonEarn.sol";
 
 contract RevenueShareVaultRibbonEarn is RevenueShareVault {
-    using MathUpgradeable for uint256;
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
     using SafeERC20 for IERC20;
 
     /**
@@ -67,13 +64,13 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The address of the ERC20 asset contract
-     * @param assets_ The amount of assets to deposit
+     * @param amount_ The amount of assets to deposit
      * @return shares amount of shares received
      */
-    function _depositToYieldSourceVault(address asset_, uint256 assets_) internal override returns (uint256) {
-        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, assets_);
+    function _depositToYieldSourceVault(address asset_, uint256 amount_) internal override returns (uint256) {
+        IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, amount_);
         uint256 sharesBalanceBefore = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
-        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(assets_, _msgSender());
+        IYieldSourceRibbonEarn(yieldSourceVault).depositFor(amount_, _msgSender());
         uint256 sharesBalanceAfter = IYieldSourceRibbonEarn(yieldSourceVault).shares(_msgSender());
         return sharesBalanceAfter - sharesBalanceBefore;
     }

@@ -68,6 +68,14 @@ mapping(address => struct EnumerableSetUpgradeable.AddressSet) _userSetByReferra
 
 _Address set of all users by referral_
 
+### CINCH_PERFORMANCE_FEE_100_PERCENT
+
+```solidity
+uint256 CINCH_PERFORMANCE_FEE_100_PERCENT
+```
+
+_Represent 100% with 2 decimal places_
+
 ### RevenueShareReferralAdded
 
 ```solidity
@@ -147,7 +155,7 @@ function __GeneralRevenueShareLogic_init_unchained(uint256 cinchPerformanceFeePe
 ### depositToRevenueShare
 
 ```solidity
-function depositToRevenueShare(address assetsFrom_, address asset_, uint256 amount_) external virtual
+function depositToRevenueShare(address asset_, uint256 amount_) external virtual
 ```
 
 Deposit asset as revenue share into this vault
@@ -159,7 +167,6 @@ whenNotPaused nonReentrant_
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| assetsFrom_ | address | The address of the asset owner that the deposit will be taken from |
 | asset_ | address | The address of the asset to be deposited |
 | amount_ | uint256 | The amount of asset to be deposited |
 
@@ -597,301 +604,6 @@ _redeem internal common workflow._
 | assets | uint256 | amount of assets redeemed |
 | shares | uint256 | amount of shares to burn and redeem assets |
 
-## RevenueShareVaultRibbonEarn
-
-### initialize
-
-```solidity
-function initialize(address asset_, string name_, string symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) public
-```
-
-vault initializer
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| asset_ | address | underneath asset, which should match the asset of the yield source vault |
-| name_ | string | ERC20 name of the vault shares token |
-| symbol_ | string | ERC20 symbol of the vault shares token |
-| yieldSourceVault_ | address | vault address of yield source |
-| cinchPerformanceFeePercentage_ | uint256 | Cinch performance fee percentage with 2 decimals |
-
-### getYieldSourceVaultTotalShares
-
-```solidity
-function getYieldSourceVaultTotalShares() external view returns (uint256)
-```
-
-_to be used for calculating the revenue share ratio_
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | yieldSourceTotalShares total yield source shares supply |
-
-### setTotalSharesInReferralAccordingToYieldSource
-
-```solidity
-function setTotalSharesInReferralAccordingToYieldSource(address referral, address user) external
-```
-
-_Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral if needed
-This is fesiable as this vault is targeted for institutional users, and the number of users is expected to be small
-onlyOwner_
-
-### shareBalanceAtYieldSourceOf
-
-```solidity
-function shareBalanceAtYieldSourceOf(address account) public view returns (uint256)
-```
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| account | address | target account address |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | shares yield source share balance of this vault |
-
-### _depositToYieldSourceVault
-
-```solidity
-function _depositToYieldSourceVault(address asset_, uint256 assets_) internal returns (uint256)
-```
-
-_Deposit assets to yield source vault
-virtual, expected to be overridden with specific yield source vault_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| asset_ | address | The address of the ERC20 asset contract |
-| assets_ | uint256 | The amount of assets to deposit |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | shares amount of shares received |
-
-### _redeemFromYieldSourceVault
-
-```solidity
-function _redeemFromYieldSourceVault(uint256) internal pure returns (uint256)
-```
-
-_Redeem assets with vault shares from yield source vault
-For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
-not supported
-param shares amount of shares to burn and redeem assets_
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | assets amount of assets received |
-
-## IYieldSourceContract
-
-### deposit
-
-```solidity
-function deposit(uint256 assets, address receiver) external returns (uint256)
-```
-
-### redeem
-
-```solidity
-function redeem(uint256 shares, address receiver, address owner) external returns (uint256)
-```
-
-### totalSupply
-
-```solidity
-function totalSupply() external view returns (uint256)
-```
-
-### balanceOf
-
-```solidity
-function balanceOf(address account) external view returns (uint256)
-```
-
-## IYieldSourceRibbonEarn
-
-### depositFor
-
-```solidity
-function depositFor(uint256 amount, address creditor) external
-```
-
-Deposits the `asset` from msg.sender added to `creditor`'s deposit.
-Used for vault -> vault deposits on the user's behalf
-
-_https://github.com/ribbon-finance/ribbon-v2/blob/7d8deadf8dd63273aeee105beebcb99564ad4711/contracts/vaults/RETHVault/base/RibbonVault.sol#L348_
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| amount | uint256 | is the amount of `asset` to deposit |
-| creditor | address | is the address that can claim/withdraw deposited amount |
-
-### shares
-
-```solidity
-function shares(address account) external view returns (uint256)
-```
-
-Getter for returning the account's share balance including unredeemed shares
-
-#### Parameters
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| account | address | is the account to lookup share balance for |
-
-#### Return Values
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | the share balance |
-
-### pricePerShare
-
-```solidity
-function pricePerShare() external view returns (uint256)
-```
-
-The price of a unit of share denominated in the `asset`
-
-### totalSupply
-
-```solidity
-function totalSupply() external view returns (uint256)
-```
-
-Total supply of shares
-
-## DepositPausableUpgradeable
-
-_Contract module which allows children to implement an emergency stop
-mechanism that can be triggered by an authorized account.
-
-This module is used through inheritance. It will make available the
-modifiers `whenNotPaused` and `whenPaused`, which can be applied to
-the functions of your contract. Note that they will not be pausable by
-simply including this module, only once the modifiers are put in place._
-
-### DepositPaused
-
-```solidity
-event DepositPaused(address account)
-```
-
-_Emitted when the pause is triggered by `account`._
-
-### DepositUnpaused
-
-```solidity
-event DepositUnpaused(address account)
-```
-
-_Emitted when the pause is lifted by `account`._
-
-### whenDepositNotPaused
-
-```solidity
-modifier whenDepositNotPaused()
-```
-
-_Modifier to make a function callable only when the contract is not paused.
-
-Requirements:
-
-- The contract must not be paused._
-
-### whenDepositPaused
-
-```solidity
-modifier whenDepositPaused()
-```
-
-_Modifier to make a function callable only when the contract is paused.
-
-Requirements:
-
-- The contract must be paused._
-
-### __DepositPausable_init
-
-```solidity
-function __DepositPausable_init() internal
-```
-
-_Initializes the contract in unpaused state._
-
-### __DepositPausable_init_unchained
-
-```solidity
-function __DepositPausable_init_unchained() internal
-```
-
-### pauseDeposit
-
-```solidity
-function pauseDeposit() external virtual
-```
-
-_Triggers stopped state.
-
-Requirements:
-
-- The contract must not be paused._
-
-### unpauseDeposit
-
-```solidity
-function unpauseDeposit() external virtual
-```
-
-_Returns to normal state.
-
-Requirements:
-
-- The contract must be paused._
-
-### depositPaused
-
-```solidity
-function depositPaused() public view virtual returns (bool)
-```
-
-_Returns true if the contract is paused, and false otherwise._
-
-### _requireDepositNotPaused
-
-```solidity
-function _requireDepositNotPaused() internal view virtual
-```
-
-_Throws if the contract is paused._
-
-### _requireDepositPaused
-
-```solidity
-function _requireDepositPaused() internal view virtual
-```
-
-_Throws if the contract is not paused._
-
 ## RevenueShareVaultDHedge
 
 ### yieldSourceSwapper
@@ -1049,6 +761,133 @@ _Redeem assets with vault shares from yield source vault_
 | ---- | ---- | ----------- |
 | [0] | uint256 | assets amount of assets received |
 
+## RevenueShareVaultRibbonEarn
+
+### initialize
+
+```solidity
+function initialize(address asset_, string name_, string symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) public
+```
+
+vault initializer
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| asset_ | address | underneath asset, which should match the asset of the yield source vault |
+| name_ | string | ERC20 name of the vault shares token |
+| symbol_ | string | ERC20 symbol of the vault shares token |
+| yieldSourceVault_ | address | vault address of yield source |
+| cinchPerformanceFeePercentage_ | uint256 | Cinch performance fee percentage with 2 decimals |
+
+### getYieldSourceVaultTotalShares
+
+```solidity
+function getYieldSourceVaultTotalShares() external view returns (uint256)
+```
+
+_to be used for calculating the revenue share ratio_
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | uint256 | yieldSourceTotalShares total yield source shares supply |
+
+### setTotalSharesInReferralAccordingToYieldSource
+
+```solidity
+function setTotalSharesInReferralAccordingToYieldSource(address referral, address user) external
+```
+
+_Since this vault does not have direct control over the Ribbon Earn vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral if needed
+This is fesiable as this vault is targeted for institutional users, and the number of users is expected to be small
+onlyOwner_
+
+### shareBalanceAtYieldSourceOf
+
+```solidity
+function shareBalanceAtYieldSourceOf(address account) public view returns (uint256)
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| account | address | target account address |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | uint256 | shares yield source share balance of this vault |
+
+### _depositToYieldSourceVault
+
+```solidity
+function _depositToYieldSourceVault(address asset_, uint256 amount_) internal returns (uint256)
+```
+
+_Deposit assets to yield source vault
+virtual, expected to be overridden with specific yield source vault_
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| asset_ | address | The address of the ERC20 asset contract |
+| amount_ | uint256 | The amount of assets to deposit |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | uint256 | shares amount of shares received |
+
+### _redeemFromYieldSourceVault
+
+```solidity
+function _redeemFromYieldSourceVault(uint256) internal pure returns (uint256)
+```
+
+_Redeem assets with vault shares from yield source vault
+For this integration, because of Ribbon Earn's multiple steps withdrawal (with time delay) mechanism, this contract will not be processing the yield source's withdrawal directly, but only for burning the intenal shares for tracking the revenue share.
+not supported
+param shares amount of shares to burn and redeem assets_
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | uint256 | assets amount of assets received |
+
+## IYieldSourceContract
+
+### deposit
+
+```solidity
+function deposit(uint256 assets, address receiver) external returns (uint256)
+```
+
+### redeem
+
+```solidity
+function redeem(uint256 shares, address receiver, address owner) external returns (uint256)
+```
+
+### totalSupply
+
+```solidity
+function totalSupply() external view returns (uint256)
+```
+
+### balanceOf
+
+```solidity
+function balanceOf(address account) external view returns (uint256)
+```
+
 ## IYieldSourceDHedge
 
 ### depositFor
@@ -1137,6 +976,62 @@ https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c71
 | fundTokenAmount | uint256 | the amount to withdraw |
 | withdrawalAsset | contract IERC20 | must have direct pair to all pool.supportedAssets on swapRouter |
 | expectedAmountOut | uint256 | the amount of value in the withdrawalAsset expected (slippage protection) |
+
+## IYieldSourceRibbonEarn
+
+### depositFor
+
+```solidity
+function depositFor(uint256 amount, address creditor) external
+```
+
+Deposits the `asset` from msg.sender added to `creditor`'s deposit.
+Used for vault -> vault deposits on the user's behalf
+
+_https://github.com/ribbon-finance/ribbon-v2/blob/7d8deadf8dd63273aeee105beebcb99564ad4711/contracts/vaults/RETHVault/base/RibbonVault.sol#L348_
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| amount | uint256 | is the amount of `asset` to deposit |
+| creditor | address | is the address that can claim/withdraw deposited amount |
+
+### shares
+
+```solidity
+function shares(address account) external view returns (uint256)
+```
+
+Getter for returning the account's share balance including unredeemed shares
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| account | address | is the account to lookup share balance for |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| [0] | uint256 | the share balance |
+
+### pricePerShare
+
+```solidity
+function pricePerShare() external view returns (uint256)
+```
+
+The price of a unit of share denominated in the `asset`
+
+### totalSupply
+
+```solidity
+function totalSupply() external view returns (uint256)
+```
+
+Total supply of shares
 
 ## IERC20Extended
 
@@ -1506,7 +1401,7 @@ function forceFakeDepositState(uint256 shares, address receiver, address referra
 ### _depositToYieldSourceVault
 
 ```solidity
-function _depositToYieldSourceVault(address, uint256 assets_) internal returns (uint256)
+function _depositToYieldSourceVault(address, uint256 assetAmount_) internal returns (uint256)
 ```
 
 _For testing reentrancy guard_
@@ -1534,4 +1429,116 @@ function _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) 
 ```
 
 _For testing reentrancy guard_
+
+## DepositPausableUpgradeable
+
+_Contract module which allows children to implement an emergency stop
+mechanism that can be triggered by an authorized account.
+
+This module is used through inheritance. It will make available the
+modifiers `whenNotPaused` and `whenPaused`, which can be applied to
+the functions of your contract. Note that they will not be pausable by
+simply including this module, only once the modifiers are put in place._
+
+### DepositPaused
+
+```solidity
+event DepositPaused(address account)
+```
+
+_Emitted when the pause is triggered by `account`._
+
+### DepositUnpaused
+
+```solidity
+event DepositUnpaused(address account)
+```
+
+_Emitted when the pause is lifted by `account`._
+
+### whenDepositNotPaused
+
+```solidity
+modifier whenDepositNotPaused()
+```
+
+_Modifier to make a function callable only when the contract is not paused.
+
+Requirements:
+
+- The contract must not be paused._
+
+### whenDepositPaused
+
+```solidity
+modifier whenDepositPaused()
+```
+
+_Modifier to make a function callable only when the contract is paused.
+
+Requirements:
+
+- The contract must be paused._
+
+### __DepositPausable_init
+
+```solidity
+function __DepositPausable_init() internal
+```
+
+_Initializes the contract in unpaused state._
+
+### __DepositPausable_init_unchained
+
+```solidity
+function __DepositPausable_init_unchained() internal
+```
+
+### pauseDeposit
+
+```solidity
+function pauseDeposit() external virtual
+```
+
+_Triggers stopped state.
+
+Requirements:
+
+- The contract must not be paused._
+
+### unpauseDeposit
+
+```solidity
+function unpauseDeposit() external virtual
+```
+
+_Returns to normal state.
+
+Requirements:
+
+- The contract must be paused._
+
+### depositPaused
+
+```solidity
+function depositPaused() public view virtual returns (bool)
+```
+
+_Returns true if the contract is paused, and false otherwise._
+
+### _requireDepositNotPaused
+
+```solidity
+function _requireDepositNotPaused() internal view virtual
+```
+
+_Throws if the contract is paused._
+
+### _requireDepositPaused
+
+```solidity
+function _requireDepositPaused() internal view virtual
+```
+
+_Throws if the contract is not paused._
 

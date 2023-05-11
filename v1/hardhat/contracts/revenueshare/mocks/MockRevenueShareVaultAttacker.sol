@@ -36,8 +36,8 @@ contract MockRevenueShareVaultAttacker is MockRevenueShareVault {
     /**
      * @dev For testing reentrancy guard
      */
-    function _depositToYieldSourceVault(address, uint256 assets_) internal override returns (uint256) {
-        depositWithReferral(assets_, address(0), address(0));
+    function _depositToYieldSourceVault(address, uint256 assetAmount_) internal override returns (uint256) {
+        depositWithReferral(assetAmount_, address(0), address(0));
     }
 
     /**
