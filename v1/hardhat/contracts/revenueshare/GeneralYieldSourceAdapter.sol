@@ -2,7 +2,6 @@
 pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 import "./interfaces/IYieldSourceContract.sol";
 
@@ -10,7 +9,7 @@ import "./interfaces/IYieldSourceContract.sol";
  * @title GeneralYieldSourceAdapter
  * @dev sub-contract of Revenue Share Vault, serving as the Yield Source Adapter template
  */
-abstract contract GeneralYieldSourceAdapter is Initializable, OwnableUpgradeable {
+abstract contract GeneralYieldSourceAdapter is Initializable {
     /// @dev Yield source vault address
     address public yieldSourceVault;
 
