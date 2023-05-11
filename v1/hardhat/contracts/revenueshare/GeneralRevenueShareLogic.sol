@@ -67,20 +67,19 @@ abstract contract GeneralRevenueShareLogic is Initializable, OwnableUpgradeable,
      * @notice Deposit asset as revenue share into this vault
      * @dev The amount will be split among referrals according to their shares ratio
      * @dev whenNotPaused nonReentrant
-     * @param assetsFrom_ The address of the asset owner that the deposit will be taken from
      * @param asset_ The address of the asset to be deposited
      * @param amount_ The amount of asset to be deposited
      */
-    function depositToRevenueShare(address assetsFrom_, address asset_, uint256 amount_) external virtual whenNotPaused nonReentrant {
-        require(assetsFrom_ != address(0) && asset_ != address(0), "ZERO_ADDRESS");
+    function depositToRevenueShare(address asset_, uint256 amount_) external virtual whenNotPaused nonReentrant {
+        require(asset_ != address(0), "ZERO_ADDRESS");
         require(amount_ > 0, "ZERO_AMOUNT");
         uint256 totalSharesInReferral_ = totalSharesInReferral;
         require(totalSharesInReferral_ > 0, "GeneralRevenueShareLogic: totalSharesInReferral is zero");
 
-        emit RevenueShareDeposited(assetsFrom_, asset_, amount_);
+        emit RevenueShareDeposited(_msgSender(), asset_, amount_);
 
         // Transfer assets to this vault first, assuming it was approved by the sender
-        IERC20(asset_).safeTransferFrom(assetsFrom_, address(this), amount_);
+        IERC20(asset_).safeTransferFrom(_msgSender(), address(this), amount_);
         totalRevenueShareProcessedByAsset[asset_] += amount_;
 
         // Take Cinch performance fee from the amount

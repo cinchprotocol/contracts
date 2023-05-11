@@ -219,7 +219,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -293,7 +292,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -342,7 +340,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx = vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -407,7 +404,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );

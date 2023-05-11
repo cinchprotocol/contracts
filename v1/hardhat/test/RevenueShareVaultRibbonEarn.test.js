@@ -159,7 +159,6 @@ describe("RevenueShareVaultRibbonEarn", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -233,7 +232,6 @@ describe("RevenueShareVaultRibbonEarn", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -282,7 +280,6 @@ describe("RevenueShareVaultRibbonEarn", function () {
             const tx = vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -347,7 +344,6 @@ describe("RevenueShareVaultRibbonEarn", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
