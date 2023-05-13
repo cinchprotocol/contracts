@@ -11,7 +11,12 @@ yarn test
 * Set the corresponding env variables as in .envrc.example
 * Then run yarn deploy with specific tags of deploy script, i.e.
 ```
-yarn deploy --tags RevenueShareVaultRibbonEarnMock
+yarn deploy --tags RevenueShareVaultRibbonEarnMock --gasprice 30000000000
+```
+
+## Etherscan verify
+```
+hardhat --network goerli etherscan-verify [--api-key <apikey>] [--apiurl <https://api-goerli.etherscan.io>] [--sleep]
 ```
 
 ## Docs
