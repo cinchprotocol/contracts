@@ -27,8 +27,8 @@ contract MockProtocolDHedge is ERC4626 {
     /// @param recipient_ the receipient
     /// @param fundTokenAmount_ the fund token amount
     function withdrawTo(address recipient_, uint256 fundTokenAmount_) external {
-        uint256 assets_ = _convertToAssets(fundTokenAmount_, Math.Rounding.Down);
-        _withdraw(_msgSender(), recipient_, _msgSender(), assets_, fundTokenAmount_);
+        uint256 assetAmount_ = _convertToAssets(fundTokenAmount_, Math.Rounding.Down);
+        _withdraw(_msgSender(), recipient_, _msgSender(), assetAmount_, fundTokenAmount_);
     }
 
     /**

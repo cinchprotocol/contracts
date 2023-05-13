@@ -127,6 +127,10 @@ describe("RevenueShareVaultDHedge", function () {
                 .redeemWithReferralAndExpectedAmountOut(depositAmount1.div(2), user1.address, user1.address, referral1, depositAmount1.div(2));
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
+        it("should not work with insufficient referral", async function () {
+            const tx = vault.connect(user1).redeemWithReferralAndExpectedAmountOut(depositAmount1, user1.address, user1.address, referral2, depositAmount1);
+            await expect(tx).to.be.revertedWith("RevenueShareVaultDHedge: insufficient shares by referral");
+        });
         it("should not support function redeemWithReferral", async function () {
             const tx = vault
                 .connect(user1)
@@ -178,7 +182,7 @@ describe("RevenueShareVaultDHedge", function () {
         });
         it("should not work with insufficient shares", async function () {
             const tx = vault.connect(user1).redeemWithReferralAndExpectedAmountOut(depositShare1.mul(10), user1.address, user1.address, referral1, depositAmount1);
-            await expect(tx).to.be.revertedWith("RevenueShareVault: max redeem exceeded");
+            await expect(tx).to.be.revertedWith("RevenueShareVaultDHedge: max redeem exceeded");
         });
     });
 
@@ -219,7 +223,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -293,7 +296,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -342,7 +344,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx = vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -407,7 +408,6 @@ describe("RevenueShareVaultDHedge", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );

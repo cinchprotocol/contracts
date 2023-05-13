@@ -109,9 +109,8 @@ describe("MockRevenueShareVault", function () {
 
     describe("depositToRevenueShare", function () {
         it("should be reverted with zero totalSharesInReferral", async function () {
-            const tx = vault.depositToRevenueShare(
-                user3.address,
-                user3.address,
+            const tx = vault.connect(user3).depositToRevenueShare(
+                mockERC20.address,
                 revenueShareAmount3
             );
             await expect(tx).to.be.revertedWith("GeneralRevenueShareLogic: totalSharesInReferral is zero");
@@ -265,7 +264,6 @@ describe("MockRevenueShareVault", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -347,7 +345,6 @@ describe("MockRevenueShareVault", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -402,7 +399,6 @@ describe("MockRevenueShareVault", function () {
             const tx01 = vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -502,7 +498,6 @@ describe("MockRevenueShareVault", function () {
             const tx01 = await vault
                 .connect(user3)
                 .depositToRevenueShare(
-                    user3.address,
                     mockERC20.address,
                     revenueShareAmount3
                 );
@@ -554,18 +549,16 @@ describe("MockRevenueShareVault", function () {
         });
         describe("depositToRevenueShare", function () {
             it("should be reverted with zero address assetsFrom_", async function () {
-                const tx = vault.depositToRevenueShare(
+                const tx = vault.connect(user3).depositToRevenueShare(
                     ZERO_ADDRESS,
-                    user3.address,
                     revenueShareAmount3
                 );
                 await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
             });
             it("should be reverted with zero amount_", async function () {
-                const tx = vault.depositToRevenueShare(
-                    user3.address,
-                    user3.address,
-                    ZERO_ADDRESS
+                const tx = vault.connect(user3).depositToRevenueShare(
+                    mockERC20.address,
+                    0
                 );
                 await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
             });
@@ -574,7 +567,6 @@ describe("MockRevenueShareVault", function () {
                 const tx02 = vault
                     .connect(user3)
                     .depositToRevenueShare(
-                        user3.address,
                         mockERC20.address,
                         revenueShareAmount3
                     );

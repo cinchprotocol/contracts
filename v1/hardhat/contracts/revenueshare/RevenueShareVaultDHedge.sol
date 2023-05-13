@@ -8,7 +8,6 @@ import "./RevenueShareVault.sol";
 import "./interfaces/IYieldSourceDHedge.sol";
 
 contract RevenueShareVaultDHedge is RevenueShareVault {
-    using MathUpgradeable for uint256;
     using SafeERC20 for IERC20;
 
     /// @dev Yield source swapper address
@@ -56,8 +55,8 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     function redeemWithReferralAndExpectedAmountOut(uint256 shares, address receiver, address sharesOwner, address referral, uint256 expectedAmountOut) public virtual whenNotPaused nonReentrant returns (uint256) {
         require(shares > 0 && expectedAmountOut > 0, "ZERO_AMOUNT");
         require(receiver != address(0) && sharesOwner != address(0) && referral != address(0), "ZERO_ADDRESS");
-        require(shares <= maxRedeem(sharesOwner), "RevenueShareVault: max redeem exceeded");
-        require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVault: insufficient shares by referral");
+        require(shares <= maxRedeem(sharesOwner), "RevenueShareVaultDHedge: max redeem exceeded");
+        require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVaultDHedge: insufficient shares by referral");
 
         //remove the shares from the user record first to avoid reentrancy attack
         _trackSharesInReferralRemoved(sharesOwner, referral, shares);
@@ -67,22 +66,6 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
         emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
         return assets;
     }
-
-    /**
-     * @notice Redeem assets with vault shares and referral
-     * @dev For this integration, redeemWithReferralAndExpectedAmountOut is supported instead of redeemWithReferral
-     * @dev not supported
-     * shares amount of shares to burn and redeem assets
-     * receiver address to receive the assets
-     * sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * referral address of the partner referral
-     * @return assets_ amount of assets received
-     */
-    /*
-    function redeemWithReferral(uint256, address, address, address) public pure override returns (uint256) {
-        require(false, "RevenueShareVaultDHedge: not supported");
-    }
-    */
 
     /**
      * @param account target account address
