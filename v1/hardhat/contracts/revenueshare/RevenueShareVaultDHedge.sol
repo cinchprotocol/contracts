@@ -10,12 +10,6 @@ import "./interfaces/IYieldSourceDHedge.sol";
 contract RevenueShareVaultDHedge is RevenueShareVault {
     using SafeERC20 for IERC20;
 
-    /// @dev Yield source swapper address
-    address public yieldSourceSwapper;
-
-    /// @dev Emitted when the yieldSourceSwapper address is updated.
-    event YieldSourceSwapperUpdated(address yieldSourceSwapper_);
-
     /**
      * @notice vault initializer
      * @param asset_ underneath asset, which should match the asset of the yield source vault
@@ -23,13 +17,9 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      * @param symbol_ ERC20 symbol of the vault shares token
      * @param yieldSourceVault_ vault address of yield source
      * @param cinchPerformanceFeePercentage_ Cinch performance fee percentage with 2 decimals
-     * @param yieldSourceSwapper_ swapper address of yield source
      */
-    function initialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_, address yieldSourceSwapper_) public initializer {
-        require(yieldSourceSwapper_ != address(0), "ZERO_ADDRESS"); // the rest of the parameters are checked in __RevenueShareVault_init
+    function initialize(address asset_, string calldata name_, string calldata symbol_, address yieldSourceVault_, uint256 cinchPerformanceFeePercentage_) public initializer {
         __RevenueShareVault_init(asset_, name_, symbol_, yieldSourceVault_, cinchPerformanceFeePercentage_);
-        yieldSourceSwapper = yieldSourceSwapper_;
-        emit YieldSourceSwapperUpdated(yieldSourceSwapper_);
     }
 
     /**
