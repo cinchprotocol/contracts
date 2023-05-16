@@ -3,7 +3,7 @@ const { upgrades } = require("hardhat");
 
 let accounts;
 let owner, user1, user2, user3;
-let mockERC20, mockProtocol, mockSwapper, vault;
+let mockERC20, mockProtocol, vault;
 let mockERC20Decimals = 6;
 let referral1, referral2, referral3;
 
@@ -47,24 +47,6 @@ describe("RevenueShareVaultDHedge", function () {
             expect(mockProtocol.address).to.not.be.undefined;
             console.log("mockProtocol", mockProtocol.address);
         });
-        it("Should deploy Swapper", async function () {
-            const MockSwapper = await ethers.getContractFactory("MockProtocolDHedgeSwapper");
-            mockSwapper = await MockSwapper.deploy();
-            expect(mockSwapper.address).to.not.be.undefined;
-            console.log("mockSwapper", mockSwapper.address);
-        });
-        it("Should not deploy RevenueShareVaultDHedge with ZERO_ADDRESS mockSwapper", async function () {
-            const Vault = await ethers.getContractFactory("RevenueShareVaultDHedge", owner);
-            const tx = upgrades.deployProxy(Vault, [
-                mockERC20.address,
-                "CinchRevenueShare",
-                "CRS",
-                mockProtocol.address,
-                initCinchPerformanceFeePercentage,
-                ZERO_ADDRESS,
-            ]);
-            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
-        });
         it("Should deploy and Initialize RevenueShareVaultDHedge", async function () {
             const Vault = await ethers.getContractFactory("RevenueShareVaultDHedge", owner);
             vault = await upgrades.deployProxy(Vault, [
@@ -73,13 +55,12 @@ describe("RevenueShareVaultDHedge", function () {
                 "CRS",
                 mockProtocol.address,
                 initCinchPerformanceFeePercentage,
-                mockSwapper.address,
             ]);
             expect(vault.address).to.not.be.undefined;
             console.log("vault", vault.address);
         });
         it("Should not be able to re-initialize RevenueShareVaultDHedge", async function () {
-            const tx = vault.initialize(mockERC20.address, "CinchRevenueShare", "CRS", mockProtocol.address, initCinchPerformanceFeePercentage, mockSwapper.address);
+            const tx = vault.initialize(mockERC20.address, "CinchRevenueShare", "CRS", mockProtocol.address, initCinchPerformanceFeePercentage);
             await expect(tx).to.be.revertedWith("Initializable: contract is already initialized");
         });
     });
@@ -379,6 +360,28 @@ describe("RevenueShareVaultDHedge", function () {
                     .mul(cinchPerformanceFeePercentage10)
                     .div(cinchPerformanceFeePercentage100)
             );
+        });
+    });
+
+    describe("setTotalSharesInReferralAccordingToYieldSource", function () {
+        it("onlyOwner", async function () {
+            const tx = vault.connect(user1).setTotalSharesInReferralAccordingToYieldSource(referral1, user1.address);
+            await expect(tx).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+        it("should not work with zero address", async function () {
+            const tx = vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(referral1, ZERO_ADDRESS);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
+        it("should not work with zero address", async function () {
+            const tx = vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(ZERO_ADDRESS, user1.address);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
+        it("setTotalSharesInReferralAccordingToYieldSource should work", async function () {
+            await mockERC20.faucet(user1.address, depositAmount1);
+            await mockERC20.connect(user1).approve(mockProtocol.address, depositAmount1);
+            await mockProtocol.connect(user1).depositFor(user1.address, ZERO_ADDRESS, depositAmount1);
+            await vault.connect(owner).setTotalSharesInReferralAccordingToYieldSource(referral1, user1.address);
+            expect(await vault.connect(owner).totalSharesByUserReferral(referral1, user1.address)).equal(depositShare1);
         });
     });
 });
