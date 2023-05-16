@@ -41,30 +41,25 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
     }
 
     /**
-     * @notice Redeem assets with vault shares and referral
-     * @dev whenNotPaused
-     * @dev nonReentrant
-     * @dev if _msgSender() != sharesOwner, then the sharesOwner must have approved this contract to spend the shares (checked inside the _withdraw call)
-     * @param shares amount of shares to burn and redeem assets
-     * @param receiver address to receive the assets
-     * @param sharesOwner address of the owner of the shares to be consumed, require to be _msgSender() for better security
-     * @param referral address of the partner referral
-     * @param expectedAmountOut expected amount of assets to be received (slippage protection)
-     * @return amount of assets received
+     * @dev Since this vault does not have direct control over the dHedge vault's withdrawal, using this function to provide an accurate calculation of totalSharesInReferral if needed
+     * @dev This is fesiable as this vault is targeted for institutional users, and the number of users is expected to be small
+     * @dev onlyOwner
      */
-    function redeemWithReferralAndExpectedAmountOut(uint256 shares, address receiver, address sharesOwner, address referral, uint256 expectedAmountOut) public virtual whenNotPaused nonReentrant returns (uint256) {
-        require(shares > 0 && expectedAmountOut > 0, "ZERO_AMOUNT");
-        require(receiver != address(0) && sharesOwner != address(0) && referral != address(0), "ZERO_ADDRESS");
-        require(shares <= maxRedeem(sharesOwner), "RevenueShareVaultDHedge: max redeem exceeded");
-        require(shares <= totalSharesByUserReferral[sharesOwner][referral], "RevenueShareVaultDHedge: insufficient shares by referral");
+    function setTotalSharesInReferralAccordingToYieldSource(address referral, address user) external onlyOwner {
+        require(referral != address(0) && user != address(0), "ZERO_ADDRESS");
 
-        //remove the shares from the user record first to avoid reentrancy attack
-        _trackSharesInReferralRemoved(sharesOwner, referral, shares);
+        uint256 recordedUserShares_ = totalSharesByUserReferral[user][referral];
+        uint256 updatedUserShares_ = shareBalanceAtYieldSourceOf(user);
 
-        uint256 assets = _redeemFromYieldSourceVault(shares, expectedAmountOut);
-        _redeem(_msgSender(), receiver, sharesOwner, assets, shares);
-        emit RedeemWithReferral(_msgSender(), receiver, sharesOwner, assets, shares, referral);
-        return assets;
+        if (recordedUserShares_ > updatedUserShares_) {
+            uint256 deltaShares_ = recordedUserShares_ - updatedUserShares_;
+            _trackSharesInReferralRemoved(referral, user, deltaShares_);
+            emit TotalSharesByUserReferralUpdated(user, referral, updatedUserShares_);
+        } else if (recordedUserShares_ < updatedUserShares_) {
+            uint256 deltaShares_ = updatedUserShares_ - recordedUserShares_;
+            _trackSharesInReferralAdded(referral, user, deltaShares_);
+            emit TotalSharesByUserReferralUpdated(user, referral, updatedUserShares_);
+        }
     }
 
     /**
@@ -84,33 +79,18 @@ contract RevenueShareVaultDHedge is RevenueShareVault {
      */
     function _depositToYieldSourceVault(address asset_, uint256 amount_) internal override returns (uint256) {
         IERC20(asset_).safeIncreaseAllowance(yieldSourceVault, amount_);
-        return IYieldSourceDHedge(yieldSourceVault).depositFor(address(this), asset_, amount_);
+        return IYieldSourceDHedge(yieldSourceVault).depositFor(_msgSender(), asset_, amount_);
     }
 
     /**
      * @dev Redeem assets with vault shares from yield source vault
-     * @dev _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) is used instead
+     * @dev For this integration, because there is a locking period on the dHedge side for the user upon each deposit, this RevenueShareVault is not holding the shares, so users will be withdrawing directly from the dHedge protocol.
      * @dev not supported
      * param shares amount of shares to burn and redeem assets
      * @return assets amount of assets received
      */
     function _redeemFromYieldSourceVault(uint256) internal pure override returns (uint256) {
         require(false, "RevenueShareVaultDHedge: not supported");
-    }
-
-    /**
-     * @dev Redeem assets with vault shares from yield source vault
-     * @param shares amount of shares to burn and redeem assets
-     * @param expectedAmountOut expected amount of assets to be received (slippage protection)
-     * @return assets amount of assets received
-     */
-    function _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) internal virtual returns (uint256) {
-        uint256 assetBalance0 = IERC20(asset).balanceOf(address(this));
-        IERC20(yieldSourceVault).safeIncreaseAllowance(yieldSourceSwapper, shares);
-        // redeem the assets into this contract first
-        IYieldSourceDHedgeSwapper(yieldSourceSwapper).withdraw(yieldSourceVault, shares, IERC20(asset), expectedAmountOut);
-        uint256 assetBalance1 = IERC20(asset).balanceOf(address(this));
-        return assetBalance1 - assetBalance0;
     }
 
     /**

@@ -8,11 +8,4 @@ contract MockRevenueShareVaultDHedgeAttacker is RevenueShareVaultDHedge {
         _mint(receiver, shares);
         _trackSharesInReferralAdded(receiver, referral, shares);
     }
-
-    /**
-     * @dev For testing reentrancy guard
-     */
-    function _redeemFromYieldSourceVault(uint256 shares, uint256 expectedAmountOut) internal override returns (uint256) {
-        redeemWithReferralAndExpectedAmountOut(shares, address(0), address(0), address(0), expectedAmountOut);
-    }
 }
