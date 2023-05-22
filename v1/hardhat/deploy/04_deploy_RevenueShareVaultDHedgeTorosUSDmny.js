@@ -11,6 +11,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const usdcAddress = "0x7F5c764cBc14f9669B88837ca1490cCa17c31607";
     //https://optimistic.etherscan.io/address/0x49bf093277bf4dde49c48c6aa55a3bda3eedef68
     //https://app.dhedge.org/vault/0x49bf093277bf4dde49c48c6aa55a3bda3eedef68
+    //https://toros.finance/pool/0x49bf093277bf4dde49c48c6aa55a3bda3eedef68
     const torosUSDmnyAddress = "0x49bF093277Bf4dDe49c48c6AA55A3bDA3eeDEF68";
     const cinchPerformanceFeePercentage = ethers.utils.parseUnits("10", 2);
 
