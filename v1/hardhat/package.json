@@ -7,6 +7,7 @@
     "test": "hardhat coverage --network hardhat",
     "chain": "hardhat node --network hardhat --no-deploy",
     "deploy": "hardhat deploy --export-all ./hardhat_contracts.json",
+    "deploy_ribbon_earn": "hardhat run deploy/02_deploy_RevenueShareVaultRibbonEarnMock.js --network goerli",
     "copycontract": "cp ./hardhat_contracts.json ../../../cinch-dapp/packages/react-app/contracts/hardhat_contracts.json",
     "docgen": "hardhat docgen",
     "flatten": "hardhat flatten > ./flattened.sol"
