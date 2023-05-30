@@ -61,6 +61,37 @@ contract RevenueShareVaultRibbonEarn is RevenueShareVault {
     }
 
     /**
+     * @notice Deposit assets to the vault with referral
+     * @dev Transfer assets to this contract, then deposit into yield source vault, and mint shares to receiver
+     * @dev whenNotPaused whenDepositNotPaused nonReentrant
+     * @dev emit DepositWithReferral
+     * @param amount amount of assets to deposit
+     * @param receiver address to receive the shares
+     * @param referral address of the partner referral
+     * @return amount of shares received
+     */
+    function depositWithReferral(uint256 amount, address receiver, address referral) public override whenNotPaused whenDepositNotPaused nonReentrant returns (uint256) {
+        require(amount > 0, "ZERO_AMOUNT");
+        require(receiver != address(0) && referral != address(0), "ZERO_ADDRESS");
+        require(receiver == _msgSender(), "RevenueShareVaultRibbonEarn: sender must be receiver");
+        require(amount < maxDeposit(receiver), "RevenueShareVault: max deposit exceeded");
+
+        // Transfer assets to this vault first, assuming it was approved by the sender
+        IERC20(asset).safeTransferFrom(_msgSender(), address(this), amount);
+
+        // Deposit assets to yield source vault
+        uint256 shares = _depositToYieldSourceVault(asset, amount);
+
+        // Mint the shares from this vault according to the number of shares received from yield source vault
+        _mint(receiver, shares);
+        _trackSharesInReferralAdded(receiver, referral, shares);
+        totalAssetDepositProcessed += amount;
+        emit DepositWithReferral(_msgSender(), receiver, amount, shares, referral);
+
+        return shares;
+    }
+
+    /**
      * @dev Deposit assets to yield source vault
      * @dev virtual, expected to be overridden with specific yield source vault
      * @param asset_ The address of the ERC20 asset contract

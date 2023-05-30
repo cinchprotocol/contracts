@@ -81,6 +81,12 @@ describe("RevenueShareVaultRibbonEarn", function () {
                 .depositWithReferral(depositAmount1.add(1), user1.address, user1.address);
             await expect(tx).to.be.revertedWith("ERC20: insufficient allowance");
         });
+        it("should fail if receiver is not sender", async function () {
+            const tx = vault
+                .connect(user1)
+                .depositWithReferral(depositAmount1, user2.address, referral2);
+            await expect(tx).to.be.revertedWith("RevenueShareVaultRibbonEarn: sender must be receiver");
+        });
         it("should be able to deposit with referral", async function () {
             await vault.connect(user1).depositWithReferral(depositAmount1, user1.address, referral1);
             expect(await vault.balanceOf(user1.address)).to.equal(depositShare1);
@@ -99,6 +105,26 @@ describe("RevenueShareVaultRibbonEarn", function () {
             expect(await vault.totalSharesByReferral(user2.address)).to.equal(
                 depositShare2
             );
+        });
+        it("should be pausable", async function () {
+            await vault.pause();
+            const tx01 = vault.connect(user1).depositWithReferral(depositAmount1, user1.address, referral1);
+            await expect(tx01).to.be.revertedWith("Pausable: paused");
+            const tx02 = vault.connect(user2).depositWithReferral(depositAmount2, user2.address, referral2);
+            await expect(tx02).to.be.revertedWith("Pausable: paused");
+            await vault.unpause();
+        });
+        it("should not work with zero amount", async function () {
+            const tx = vault.connect(user1).depositWithReferral(0, user1.address, referral1);
+            await expect(tx).to.be.revertedWith("ZERO_AMOUNT");
+        });
+        it("should not work with zero address", async function () {
+            const tx = vault.connect(user1).depositWithReferral(depositAmount1, ZERO_ADDRESS, referral1);
+            await expect(tx).to.be.revertedWith("ZERO_ADDRESS");
+        });
+        it("should not work with deposit higher than max", async function () {
+            const tx = vault.connect(user1).depositWithReferral(ethers.constants.MaxUint256, user1.address, referral1);
+            await expect(tx).to.be.revertedWith("RevenueShareVault: max deposit exceeded");
         });
     });
 
@@ -284,6 +310,15 @@ describe("RevenueShareVaultRibbonEarn", function () {
                     revenueShareAmount3
                 );
             await expect(tx).to.be.revertedWith("Pausable: paused");
+
+            const tx02 = vault
+                .connect(user3)
+                .depositWithReferral(
+                    depositAmount3,
+                    user3.address,
+                    referral3,
+                );
+            await expect(tx02).to.be.revertedWith("Pausable: paused");
         });
         it("should be able to unpause", async function () {
             const tx = await vault.connect(owner).unpause();
