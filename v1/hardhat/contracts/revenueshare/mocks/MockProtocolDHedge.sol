@@ -14,21 +14,13 @@ contract MockProtocolDHedge is ERC4626 {
     /// @notice Deposit funds into the pool
     /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L275
     /// asset_ Address of the token
+    /// @param recipient_ Address of the recipient
     /// @param amount_ Amount of tokens to deposit
     /// @return liquidityMinted Amount of liquidity minted
     function depositFor(address recipient_, address, uint256 amount_) external returns (uint256 liquidityMinted) {
         uint256 shares_ = _convertToShares(amount_, Math.Rounding.Down);
         _deposit(_msgSender(), recipient_, amount_, shares_);
         liquidityMinted = shares_;
-    }
-
-    /// @notice Withdraw assets based on the fund token amount
-    /// @dev https://github.com/dhedge/V2-Public/blob/ba2f06d40a87e18a150f4055def5e7a2d596c719/contracts/PoolLogic.sol#L364
-    /// @param recipient_ the receipient
-    /// @param fundTokenAmount_ the fund token amount
-    function withdrawTo(address recipient_, uint256 fundTokenAmount_) external {
-        uint256 assetAmount_ = _convertToAssets(fundTokenAmount_, Math.Rounding.Down);
-        _withdraw(_msgSender(), recipient_, _msgSender(), assetAmount_, fundTokenAmount_);
     }
 
     /**

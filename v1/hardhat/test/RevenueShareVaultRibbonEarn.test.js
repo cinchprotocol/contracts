@@ -90,7 +90,7 @@ describe("RevenueShareVaultRibbonEarn", function () {
         it("should be able to deposit with referral", async function () {
             await vault.connect(user1).depositWithReferral(depositAmount1, user1.address, referral1);
             expect(await vault.balanceOf(user1.address)).to.equal(depositShare1);
-            expect(await vault.totalSharesByReferral(user1.address)).to.equal(
+            expect(await vault.totalSharesByReferral(referral1)).to.equal(
                 depositShare1
             );
             expect(await vault.shareBalanceAtYieldSourceOf(user1.address)).to.equal(depositShare1);
@@ -102,7 +102,7 @@ describe("RevenueShareVaultRibbonEarn", function () {
                 .connect(user2)
                 .depositWithReferral(depositAmount2, user2.address, referral2);
             expect(await vault.balanceOf(user2.address)).to.equal(depositShare2);
-            expect(await vault.totalSharesByReferral(user2.address)).to.equal(
+            expect(await vault.totalSharesByReferral(referral2)).to.equal(
                 depositShare2
             );
         });
