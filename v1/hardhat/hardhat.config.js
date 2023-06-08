@@ -10,6 +10,8 @@ const defaultNetwork = process.env.DEFAULT_WEB3_PROVIDER || "localhost";
 const dummyPriKey = "ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const optimismGoerliUrl = process.env.OPTIMISM_GOERLI_URL || "https://opt-goerli.g.alchemy.com/v2/ABC";
 const optimismGoerliDeployerPriKey = process.env.OPTIMISM_GOERLI_DEPLOYER_PRIVATE_KEY || dummyPriKey;
+const optimismMainnetUrl = process.env.OPTIMISM_MAINNET_URL || "https://opt-mainnet.g.alchemy.com/v2/ABC";
+const optimismMainnetDeployerPriKey = process.env.OPTIMISM_MAINNET_DEPLOYER_PRIVATE_KEY || dummyPriKey;
 const goerliUrl = process.env.GOERLI_URL || "https://eth-goerli.g.alchemy.com/v2/ABC";
 const goerliDeployerPriKey = process.env.GOERLI_DEPLOYER_PRIVATE_KEY || dummyPriKey;
 
@@ -40,6 +42,11 @@ module.exports = {
     optimismGoerli: {
       url: optimismGoerliUrl,
       accounts: [optimismGoerliDeployerPriKey],
+      ovm: true,
+    },
+    optimismMainnet: {
+      url: optimismMainnetUrl,
+      accounts: [optimismMainnetDeployerPriKey],
       ovm: true,
     },
     goerli: {
