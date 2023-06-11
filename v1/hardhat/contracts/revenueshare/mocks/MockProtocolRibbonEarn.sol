@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC4626.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
-import "./IERC20Extended.sol";
 
 contract MockProtocolRibbonEarn is ERC4626 {
     using Math for uint256;
@@ -23,6 +22,23 @@ contract MockProtocolRibbonEarn is ERC4626 {
         uint256 shares_ = _convertToShares(amount, Math.Rounding.Down);
         _deposit(_msgSender(), creditor, amount, shares_);
     }
+
+    function initiateWithdraw(uint256 numShares) external {}
+
+    function completeWithdraw() external {}
+
+    function totalBalance() public view returns (uint256) {
+        return 10000000;
+    }
+
+    struct Withdrawal {
+        // Maximum of 65535 rounds. Assuming 1 round is 7 days, maximum is 1256 years.
+        uint16 round;
+        // Number of shares withdrawn
+        uint128 shares;
+    }
+
+    mapping(address => Withdrawal) public withdrawals;
 
     /**
      * @notice Getter for returning the account's share balance including unredeemed shares
